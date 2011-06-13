@@ -3,6 +3,8 @@
 
 import struct
 
+# Base classes.
+
 class ValueType:
     '''
     Base class for any value type.
@@ -38,6 +40,8 @@ class PrimitiveValue(Value):
     
     def push_value(self, value):
         return self.set_value(value)
+  
+# Varint.
     
 def VarintType():
     return VarintValue()
@@ -77,6 +81,8 @@ class VarintValue(PrimitiveValue):
                 raise TypeError('Should be int or long.')
             elif value < 0:
                 raise ValueError('Should be non-negative.')
+
+# Fixed32.
 
 def Fixed32ValueType():
     return Fixed32Value()
@@ -161,6 +167,8 @@ class Float32Value(Fixed32Value):
         if not isinstance(self.get_value(), float):
             raise ValueError('Must be float.')
 
+# Fixed64.
+
 def Fixed64ValueType():
     return Fixed64Value()
 
@@ -179,6 +187,66 @@ class Fixed64Value(PrimitiveValue):
         
     def load(self, fb):
         self.set_value(fp.read(8))
+
+def Int64ValueType():
+    return Int64Value()
+    
+class Int64Value(Fixed64Value):
+    
+    def __init__(self, value=0):
+        self.set_value(value)
+        
+    def dump(self, fp):
+        self.dump_value(fp, struct.pack('>q', self.get_value()))
+        
+    def load(self, fp):
+        self.set_value(struct.unpack('>q', self.load_value(fp))[0])
+        
+    def pre_validate(self):
+        value = self.get_value()
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise ValueError('Must be int or long.')
+
+def UInt64ValueType():
+    return UInt64Value()
+    
+class UInt64Value(Fixed64Value):
+    
+    def __init__(self, value=0):
+        self.set_value(value)
+        
+    def dump(self, fp):
+        self.dump_value(fp, struct.pack('>Q', self.get_value()))
+        
+    def load(self, fp):
+        self.set_value(struct.unpack('>Q', self.load_value(fp))[0])
+        
+    def pre_validate(self):
+        value = self.get_value()
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise ValueError('Must be int or long.')
+        if value < 0:
+            raise ValueError('Unsigned value must be non-negative.')
+
+def Float64ValueType():
+    return Float64Value()
+
+class Float64Value(Fixed64Value):
+    
+    def __init__(self, value=0.0):
+        self.set_value(value)
+        
+    def dump(self, fp):
+        self.dump_value(fp, struct.pack('>d', self.get_value()))
+        
+    def load(self, fp):
+        self.set_value(struct.unpack('>d', self.load_value(fp))[0])
+        
+    def pre_validate(self):
+        if not isinstance(self.get_value(), float):
+            raise ValueError('Must be float.')
+
+# Message.
 
 class MessageType(ValueType):
     '''

@@ -46,7 +46,7 @@ class TestInt32Value(unittest.TestCase):
             (0, '\x00\x00\x00\x00'),
             (3, '\x00\x00\x00\x03'),
             (0x76543210, '\x76\x54\x32\x10'),
-            (-1, '\xFF\xFF\xFF\xFF)
+            (-1, '\xFF\xFF\xFF\xFF')
         )
 
     def test_dump(self):

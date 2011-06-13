@@ -143,6 +143,24 @@ class UInt32Value(Fixed32Value):
         if value < 0:
             raise ValueError('Unsigned value must be non-negative.')
 
+def Float32ValueType():
+    return Float32Value()
+
+class Float32Value(Fixed32Value):
+    
+    def __init__(self, value=0.0):
+        self.set_value(value)
+        
+    def dump(self, fp):
+        self.dump_value(fp, struct.pack('>f', self.get_value()))
+        
+    def load(self, fp):
+        self.set_value(struct.unpack('>f', self.load_value(fp))[0])
+        
+    def pre_validate(self):
+        if not isinstance(self.get_value(), float):
+            raise ValueError('Must be float.')
+
 def Fixed64ValueType():
     return Fixed64Value()
 

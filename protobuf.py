@@ -1,63 +1,60 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import struct
+
 class ValueType:
     '''
     Base class for any value type.
     '''
     
     def __call__(self):
-        raise TypeError('Use a derived class.')
+        raise TypeError('Define in a derived class.')
    
 class Value:
     '''
     Base class for any value.
     '''
-
-    def get_value(self):
-        raise TypeError('Use a derived class.')
-        
-    def set_value(self, value):
-        raise TypeError('Use a derived class.')
-    
-    def put_value(self, value):
-        return self.set_value(value)
     
     def dump(self, fp):
-        raise TypeError('Use a derived class.')
+        raise TypeError('Define in a derived class.')
         
     def load(self, fp):
-        raise TypeError('Use a derived class.')
+        raise TypeError('Define in a derived class.')
         
-    def validate(self):
-        raise TypeError('Use a derived class.')
+    def pre_validate(self):
+        pass
+        
+    def post_validate(self):
+        pass
     
-def VarintType():
-    return VarintValue()
+class PrimitiveValue(Value):
 
-class VarintValue(Value):
-    '''
-    Represents a Varint value.
-    '''
-    
-    def __init__(self, value=0):
-        self._value = value
-    
     def get_value(self):
         return self._value
         
     def set_value(self, value):
         self._value = value
     
+    def push_value(self, value):
+        return self.set_value(value)
+    
+def VarintType():
+    return VarintValue()
+
+class VarintValue(PrimitiveValue):
+    '''
+    Represents a Varint value.
+    '''
+    
+    def __init__(self, value=0):
+        self.set_value(value)
+    
     def dump(self, fp):
-        value = self._value
+        value = self.get_value()
         if value == 0:
             fp.write('\x00')
-        elif not isinstance(value, int) and not isinstance(value, long):
-            raise TypeError('Should be int or long.')
-        elif value < 0:
-            raise ValueError('Should be non-negative.')
-        else:
+        elif not value is None:
             while value != 0:
                 new_value = value >> 7
                 fp.write(chr(value & 0x7F | (0x80 if new_value != 0 else 0x00)))
@@ -71,7 +68,78 @@ class VarintValue(Value):
             if code & 0x80 == 0:
                 break
             shift += 7
-        self._value = value
+        self.set_value(value)
+        
+    def pre_validate(self):
+        value = self.get_value()
+        if not value is None:
+            if not isinstance(value, int) and not isinstance(value, long):
+                raise TypeError('Should be int or long.')
+            elif value < 0:
+                raise ValueError('Should be non-negative.')
+
+def Fixed32ValueType():
+    return Fixed32Value()
+
+class Fixed32Value(PrimitiveValue):
+    
+    def __init__(self, value='\x00\x00\x00\x00'):
+        self.set_value(value)
+        
+    def pre_validate(self):
+        value = self.get_value()
+        if not value is None or len(value) != 4:
+            raise ValueError('Length must be 4.')
+        
+    def dump_value(self, fp, value):
+        fp.write(value)
+            
+    def dump(self, fp):
+        self.dump_value(fp, self.get_value())
+    
+    def load_value(self, fp):
+        return fp.read(4)
+    
+    def load(self, fp):
+        self.set_value(self.load_value(fp))
+
+def Int32ValueType():
+    return Int32Value()
+    
+class Int32Value(Fixed32Value):
+    
+    def __init__(self, value=0):
+        self.set_value(value)
+        
+    def dump(self, fp):
+        self.dump_value(fp, struct.pack('>i', self.get_value()))
+        
+    def load(self, fp):
+        self.set_value(struct.unpack('>i', self.load_value(fp))[0])
+        
+    def pre_validate(self):
+        value = self.get_value()
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise ValueError('Must be int or long.')
+
+def Fixed64ValueType():
+    return Fixed64Value()
+
+class Fixed64Value(PrimitiveValue):
+    
+    def __init__(self, value='\x00\x00\x00\x00\x00\x00\x00\x00'):
+        self.set_value(value)
+        
+    def pre_validate(self):
+        value = self.get_value()
+        if not value is None or len(value) != 8:
+            raise ValueError('Length must be 8.')
+            
+    def dump(self, fp):
+        fp.write(self.get_value())
+        
+    def load(self, fb):
+        self.set_value(fp.read(8))
 
 class MessageType(ValueType):
     '''
@@ -102,6 +170,7 @@ class MessageValue(Value):
         return field_value
         
     def dump(self, fp):
+        self.pre_validate()
         field_number = 1
         for field_name in self._field_names:
             key = VarintValue((field_number << 3) | _WIRE_TYPES[self._field_types[field_name]])
@@ -112,12 +181,18 @@ class MessageValue(Value):
     def load(self, fp):
         pass
         
-    def validate(self):
-        for field_name, field_value in self._values:
-            field_value.validate()
+    def pre_validate(self):
+        for field_name, field_value in self._field_values.iteritems():
+            field_value.pre_validate()
+        
+    def post_validate(self):
+        for field_name, field_value in self._field_values.iteritems():
+            field_value.post_validate()
 
 _WIRE_TYPES = {
     VarintType: 0,
-    MessageType: 2
+    Fixed64ValueType: 1,
+    MessageType: 2,
+    Fixed32ValueType: 5
 }
 

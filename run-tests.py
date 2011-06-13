@@ -63,6 +63,30 @@ class TestInt32Value(unittest.TestCase):
             value.load(s)
             self.assertEqual(value.get_value(), k)
 
+class TestSignedVarintValue(unittest.TestCase):
+
+    def setUp(self):
+        self.mappings = (
+            (0, '\x00'),
+            (-1, '\x01'),
+            (1, '\x02'),
+            (-2, '\x03')
+        )
+        
+    def test_dump(self):
+        for k, v in self.mappings:
+            s = StringIO.StringIO()
+            value = protobuf.SignedVarintValue(k)
+            value.dump(s)
+            self.assertEqual(s.getvalue(), v)
+    
+    def test_load(self):
+        for k, v in self.mappings:
+            s = StringIO.StringIO(v)
+            value = protobuf.SignedVarintValue()
+            value.load(s)
+            self.assertEqual(value.get_value(), k)
+
 if __name__ == '__main__':
     unittest.main()
 

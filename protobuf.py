@@ -122,6 +122,27 @@ class Int32Value(Fixed32Value):
         if not isinstance(value, int) and not isinstance(value, long):
             raise ValueError('Must be int or long.')
 
+def UInt32ValueType():
+    return UInt32Value()
+    
+class UInt32Value(Fixed32Value):
+    
+    def __init__(self, value=0):
+        self.set_value(value)
+        
+    def dump(self, fp):
+        self.dump_value(fp, struct.pack('>I', self.get_value()))
+        
+    def load(self, fp):
+        self.set_value(struct.unpack('>I', self.load_value(fp))[0])
+        
+    def pre_validate(self):
+        value = self.get_value()
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise ValueError('Must be int or long.')
+        if value < 0:
+            raise ValueError('Unsigned value must be non-negative.')
+
 def Fixed64ValueType():
     return Fixed64Value()
 

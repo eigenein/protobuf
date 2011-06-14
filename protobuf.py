@@ -235,7 +235,7 @@ class UInt32Value(Fixed32Value):
     Represents an unsigned int32 value.
     '''
     
-    def __init__(self, value=0):
+    def __init__(self, value=None):
         self.set_value(value)
         
     def dump(self, fp):

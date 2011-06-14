@@ -689,7 +689,7 @@ Message = EmbeddedMessageType
 
 required = RequiredFlag
 
-# Global functions.
+# Global functions. It's recommended to use them instead of direct creation.
 # ------------------------------------------------------------------------------
 
 def dump(fp, message):

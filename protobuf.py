@@ -612,7 +612,9 @@ class MessageInstance(Value):
 # Flags.
 # ------------------------------------------------------------------------------
 
-class RequiredFlag
+class RequiredFlag(Value):
+
+    pass
 
 # Shortcuts to types.
 # ------------------------------------------------------------------------------

@@ -87,6 +87,27 @@ class TestSignedVarintValue(unittest.TestCase):
             value.load(s)
             self.assertEqual(value.get_value(), k)
 
+class TestStringValue(unittest.TestCase):
+    
+    def setUp(self):
+        self.mappings = (
+            ('testing', '\x07\x74\x65\x73\x74\x69\x6e\x67'),
+        )
+        
+    def test_dump(self):
+        for k, v in self.mappings:
+            s = StringIO.StringIO()
+            value = protobuf.StringValue(k)
+            value.dump(s)
+            self.assertEqual(s.getvalue(), v)
+    
+    def test_load(self):
+        for k, v in self.mappings:
+            s = StringIO.StringIO(v)
+            value = protobuf.StringValue()
+            value.load(s)
+            self.assertEqual(value.get_value(), k)
+
 if __name__ == '__main__':
     unittest.main()
 

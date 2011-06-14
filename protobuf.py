@@ -125,11 +125,10 @@ class VarintValue(PrimitiveValue):
         
     def pre_validate(self):
         value = self.get_value()
-        if self.is_set():
-            if not isinstance(value, int) and not isinstance(value, long):
-                raise TypeError('Should be int or long.')
-            elif value < 0:
-                raise ValueError('Should be non-negative.')
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise TypeError('Should be int or long.')
+        elif value < 0:
+            raise ValueError('Should be non-negative.')
 
 # Signed Varint.
 # ------------------------------------------------------------------------------
@@ -150,9 +149,8 @@ class SignedVarintValue(VarintValue):
     
     def pre_validate(self):
         value = self.get_value()
-        if self.is_set():
-            if not isinstance(value, int) and not isinstance(value, long):
-                raise TypeError('Should be int or long.')
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise TypeError('Should be int or long.')
 
     def dump(self, fp):
         value = abs(self.get_value())
@@ -189,7 +187,7 @@ class Fixed32Value(PrimitiveValue):
         
     def pre_validate(self):
         value = self.get_value()
-        if self.is_set() and len(value) != 4:
+        if len(value) != 4:
             raise ValueError('Length must be 4.')
         
     def dump_value(self, fp, value):
@@ -223,9 +221,8 @@ class Int32Value(Fixed32Value):
         
     def pre_validate(self):
         value = self.get_value()
-        if self.is_set():
-            if not isinstance(value, int) and not isinstance(value, long):
-                raise ValueError('Must be int or long.')
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise ValueError('Must be int or long.')
 
 def UInt32Type():
     '''
@@ -249,11 +246,10 @@ class UInt32Value(Fixed32Value):
         
     def pre_validate(self):
         value = self.get_value()
-        if self.is_set():
-            if not isinstance(value, int) and not isinstance(value, long):
-                raise ValueError('Must be int or long.')
-            if value < 0:
-                raise ValueError('Unsigned value must be non-negative.')
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise ValueError('Must be int or long.')
+        if value < 0:
+            raise ValueError('Unsigned value must be non-negative.')
 
 def Float32Type():
     '''
@@ -276,9 +272,8 @@ class Float32Value(Fixed32Value):
         self.set_value(struct.unpack('>f', self.load_value(fp))[0])
         
     def pre_validate(self):
-        if self.is_set():
-            if not isinstance(self.get_value(), float):
-                raise ValueError('Must be float.')
+        if not isinstance(self.get_value(), float):
+            raise ValueError('Must be float.')
 
 # Fixed64.
 # ------------------------------------------------------------------------------
@@ -301,7 +296,7 @@ class Fixed64Value(PrimitiveValue):
         
     def pre_validate(self):
         value = self.get_value()
-        if self.is_set() and len(value) != 8:
+        if len(value) != 8:
             raise ValueError('Length must be 8.')
             
     def dump(self, fp):
@@ -332,9 +327,8 @@ class Int64Value(Fixed64Value):
         
     def pre_validate(self):
         value = self.get_value()
-        if self.is_set():
-            if not isinstance(value, int) and not isinstance(value, long):
-                raise ValueError('Must be int or long.')
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise ValueError('Must be int or long.')
 
 def UInt64Type():
     '''
@@ -347,7 +341,7 @@ class UInt64Value(Fixed64Value):
     Represents an unsigned int64 value.
     '''
     
-    def __init__(self, value=0):
+    def __init__(self, value=None):
         self.set_value(value)
         
     def dump(self, fp):
@@ -358,11 +352,10 @@ class UInt64Value(Fixed64Value):
         
     def pre_validate(self):
         value = self.get_value()
-        if self.is_set():
-            if not isinstance(value, int) and not isinstance(value, long):
-                raise ValueError('Must be int or long.')
-            if value < 0:
-                raise ValueError('Unsigned value must be non-negative.')
+        if not isinstance(value, int) and not isinstance(value, long):
+            raise ValueError('Must be int or long.')
+        if value < 0:
+            raise ValueError('Unsigned value must be non-negative.')
 
 def Float64Type():
     '''
@@ -375,7 +368,7 @@ class Float64Value(Fixed64Value):
     Represents a float64 value.
     '''
     
-    def __init__(self, value=0.0):
+    def __init__(self, value=None):
         self.set_value(value)
         
     def dump(self, fp):
@@ -385,12 +378,74 @@ class Float64Value(Fixed64Value):
         self.set_value(struct.unpack('>d', self.load_value(fp))[0])
         
     def pre_validate(self):
-        if self.is_set():
-            if not isinstance(self.get_value(), float):
-                raise ValueError('Must be float.')
+        if not isinstance(self.get_value(), float):
+            raise ValueError('Must be float.')
 
 # Bytes.
 # ------------------------------------------------------------------------------
+
+def BytesType():
+    '''
+    Creates a new instance of raw bytes type.
+    '''
+    return BytesValue()
+    
+class BytesValue(PrimitiveValue):
+    '''
+    Represents a bytes-value.
+    '''
+    
+    WIRE_TYPE = 2
+    
+    def __init__(self, value=None):
+        self.set_value(value)
+        
+    def dump(self, fp):
+        self.dump_value(fp, self.get_value())
+        
+    def load(self, fp):
+        self.set_value(self.load_value(fp))
+        
+    def pre_validate(self):
+        if not isinstance(self.get_value(), str):
+            raise TypeError('Value should be of str type.')
+        
+    def dump_value(self, fp, value):
+        length_value = VarintValue(len(value))
+        length_value.dump(fp)
+        fp.write(value)
+        
+    def load_value(self, fp):
+        length_value = VarintValue()
+        length_value.load(fp)
+        return fp.read(length_value.get_value())
+
+# Strings.
+# ------------------------------------------------------------------------------
+
+def StringType():
+    '''
+    Creates a new instance of string value.
+    '''
+    return StringValue()
+
+class StringValue(BytesValue):
+    '''
+    Represents a string value.
+    '''
+    
+    def __init__(self, value=None):
+        self.set_value(value)
+        
+    def dump(self, fp):
+        self.dump_value(fp, self.get_value().encode('utf-8'))
+        
+    def load(self, fp):
+        self.set_value(self.load_value(fp).decode('utf-8'))
+        
+    def pre_validate(self):
+        if not isinstance(self.get_value(), str):
+            raise TypeError('Value should be of str type.')
 
 # Message.
 # ------------------------------------------------------------------------------
@@ -462,11 +517,13 @@ class MessageInstance(Value):
         
     def pre_validate(self):
         for field_name, field_value in self._field_values.iteritems():
-            field_value.pre_validate()
+            if field_value.is_set():
+                field_value.pre_validate()
         
     def post_validate(self):
         for field_name, field_value in self._field_values.iteritems():
-            field_value.post_validate()
+            if field_value.is_set():
+                field_value.post_validate()
             
     def keys(self):
         return self._field_names

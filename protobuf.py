@@ -4,6 +4,7 @@
 import struct
 
 # Base classes.
+# ------------------------------------------------------------------------------
 
 class ValueType:
     '''
@@ -74,6 +75,7 @@ class PrimitiveValue(Value):
         return not self._value is None
   
 # Varint.
+# ------------------------------------------------------------------------------
     
 def VarintType():
     '''
@@ -130,6 +132,7 @@ class VarintValue(PrimitiveValue):
                 raise ValueError('Should be non-negative.')
 
 # Signed Varint.
+# ------------------------------------------------------------------------------
 
 def SignedVarintType():
     '''
@@ -166,6 +169,7 @@ class SignedVarintValue(VarintValue):
         self.set_value(value)
 
 # Fixed32.
+# ------------------------------------------------------------------------------
 
 def Fixed32Type():
     '''
@@ -277,6 +281,7 @@ class Float32Value(Fixed32Value):
                 raise ValueError('Must be float.')
 
 # Fixed64.
+# ------------------------------------------------------------------------------
 
 def Fixed64Type():
     '''
@@ -384,7 +389,11 @@ class Float64Value(Fixed64Value):
             if not isinstance(self.get_value(), float):
                 raise ValueError('Must be float.')
 
+# Bytes.
+# ------------------------------------------------------------------------------
+
 # Message.
+# ------------------------------------------------------------------------------
 
 class MessageType(ValueType):
     '''
@@ -408,6 +417,8 @@ class MessageInstance(Value):
     '''
     Represents a message instance.
     '''
+    
+    WIRE_TYPE = 2
     
     def __init__(self, *fields):
         '''

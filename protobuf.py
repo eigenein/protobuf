@@ -511,6 +511,12 @@ class MessageType(ValueType):
             del self._field_types[name]
             del self._field_defaults[name]
         
+    def has_field(self, tag):
+        '''
+        Checks whether there is a field with the specified tag.
+        '''
+        return tag in self._field_names
+        
     def __call__(self):
         '''
         Creates an instance of the message type.
@@ -541,6 +547,8 @@ class MessageInstance(Value):
         '''
         Sets the value of the field.
         '''
+        if not field_name in self._field_values:
+            raise AttributeError('There is no field `%s\'.' % field_name)
         self._field_values[field_name].set_value(field_value)
         return field_value
         
@@ -550,6 +558,13 @@ class MessageInstance(Value):
         '''
         self._field_values[field_name].set_value(None)
         
+    def has_value(self, field_name):
+        '''
+        Checks whether the specified field has a value.
+        '''    
+        return field_name in self._field_values and \
+            not self._field_values[field_name].get_value() is None
+    
     def dump(self, fp):
         self.pre_validate()
         for field_tag, field_name in self._field_names.iteritems():

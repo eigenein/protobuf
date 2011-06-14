@@ -83,6 +83,17 @@ class TestMessageInstance(unittest.TestCase):
         message_instance['a'] = 150
         self.assertEqual(message_instance.dumps(), '\x08\x96\x01')
 
+class TestMessageType(unittest.TestCase):
+
+    def test_add_field(self):
+        message_type = protobuf.MessageType()
+        message_type.add_field(1, 'a', protobuf.VarintType, 666)
+        message_type.add_field(2, 'b', protobuf.VarintType)
+        self.assertTrue(message_type.has_field(1))
+        v = message_type()
+        self.assertEqual(v['a'], 666)
+        self.assertEqual(v['b'], None)
+
 class IntegrationTests(unittest.TestCase):
 
     def test_embedded_message(self):

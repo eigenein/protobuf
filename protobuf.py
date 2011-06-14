@@ -86,6 +86,8 @@ class VarintValue(PrimitiveValue):
     Represents a Varint value.
     '''
     
+    WIRE_TYPE = 0
+    
     def __init__(self, value=None):
         self.set_value(value)
     
@@ -175,6 +177,8 @@ class Fixed32Value(PrimitiveValue):
     '''
     Represents a signed fixed32 value.
     '''
+    
+    WIRE_TYPE = 5
     
     def __init__(self, value=None):
         self.set_value(value)
@@ -284,6 +288,8 @@ class Fixed64Value(PrimitiveValue):
     '''
     Represents a fixed64 value.
     '''
+    
+    WIRE_TYPE = 1
     
     def __init__(self, value=None):
         self.set_value(value)
@@ -434,9 +440,10 @@ class MessageInstance(Value):
         self.pre_validate()
         field_number = 1
         for field_name in self._field_names:
-            key = VarintValue((field_number << 3) | _WIRE_TYPES[self._field_types[field_name]])
+            value = self._field_values[field_name]
+            key = VarintValue((field_number << 3) | value.WIRE_TYPE)
             key.dump(fp)
-            self._field_values[field_name].dump(fp)
+            value.dump(fp)
             field_number += 1
         
     def load(self, fp):
@@ -455,17 +462,4 @@ class MessageInstance(Value):
         
     def iterkeys(self):
         return iter(self._field_names)
-
-_WIRE_TYPES = {
-    VarintType: 0,
-    Fixed64Type: 1,
-    Int64Type: 1,
-    UInt64Type: 1,
-    Float64Type: 1,
-    MessageType: 2,
-    Fixed32Type: 5,
-    Int32Type: 5,
-    UInt32Type: 5,
-    Float32Type: 5
-}
 

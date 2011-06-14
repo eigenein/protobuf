@@ -75,15 +75,24 @@ class TestStringValue(unittest.TestCase):
 # Custom tests.
 # ------------------------------------------------------------------------------
 
-class TestMessageValue(unittest.TestCase):
+class TestMessageInstance(unittest.TestCase):
         
     def test_dump(self):
-        message_type = protobuf.MessageType(('a', protobuf.VarintType))
-        message_value = message_type()
-        message_value['a'] = 150
-        fp = StringIO.StringIO()
-        message_value.dump(fp)
-        self.assertEqual(fp.getvalue(), '\x08\x96\x01')
+        message_type = protobuf.MessageType({'tag': 1, 'name': 'a', 'type': protobuf.VarintType})
+        message_instance = message_type()
+        message_instance['a'] = 150
+        self.assertEqual(message_instance.dumps(), '\x08\x96\x01')
+
+class IntegrationTests(unittest.TestCase):
+
+    def test_embedded_message(self):
+        Test1 = protobuf.MessageType({'tag': 1, 'name': 'a', 'type': protobuf.VarintType})
+        c = Test1()
+        c['a'] = 150
+        Test3 = protobuf.MessageType({'tag': 3, 'name': 'c', 'type': protobuf.EmbeddedMessageType(Test1)})
+        message = Test3()
+        message['c'] = c
+        self.assertEqual(message.dumps(), '\x1a\x03\x08\x96\x01')
 
 # Run tests.
 # ------------------------------------------------------------------------------

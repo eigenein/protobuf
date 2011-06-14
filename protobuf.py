@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import struct
+import cStringIO
 
 # Base classes.
 # ------------------------------------------------------------------------------
@@ -90,9 +91,6 @@ class VarintValue(PrimitiveValue):
     
     WIRE_TYPE = 0
     
-    def __init__(self, value=None):
-        self.set_value(value)
-    
     def dump_value(self, fp, value):
         '''
         Dumps the value to .write()-like object.
@@ -144,9 +142,6 @@ class SignedVarintValue(VarintValue):
     Represents a signed Varint value.
     '''
     
-    def __init__(self, value=None):
-        self.set_value(value)
-    
     def pre_validate(self):
         value = self.get_value()
         if not isinstance(value, int) and not isinstance(value, long):
@@ -181,9 +176,6 @@ class Fixed32Value(PrimitiveValue):
     '''
     
     WIRE_TYPE = 5
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def pre_validate(self):
         value = self.get_value()
@@ -209,9 +201,9 @@ def Int32Type():
     return Int32Value()
     
 class Int32Value(Fixed32Value):
-    
-    def __init__(self, value=None):
-        self.set_value(value)
+    '''
+    Represents a signed int32 value.
+    '''
         
     def dump(self, fp):
         self.dump_value(fp, struct.pack('>i', self.get_value()))
@@ -234,9 +226,6 @@ class UInt32Value(Fixed32Value):
     '''
     Represents an unsigned int32 value.
     '''
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def dump(self, fp):
         self.dump_value(fp, struct.pack('>I', self.get_value()))
@@ -261,9 +250,6 @@ class Float32Value(Fixed32Value):
     '''
     Represents an float32 value type.
     '''
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def dump(self, fp):
         self.dump_value(fp, struct.pack('>f', self.get_value()))
@@ -290,9 +276,6 @@ class Fixed64Value(PrimitiveValue):
     '''
     
     WIRE_TYPE = 1
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def pre_validate(self):
         value = self.get_value()
@@ -315,9 +298,6 @@ class Int64Value(Fixed64Value):
     '''
     Represents a signed int64 value.
     '''
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def dump(self, fp):
         self.dump_value(fp, struct.pack('>q', self.get_value()))
@@ -340,9 +320,6 @@ class UInt64Value(Fixed64Value):
     '''
     Represents an unsigned int64 value.
     '''
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def dump(self, fp):
         self.dump_value(fp, struct.pack('>Q', self.get_value()))
@@ -367,9 +344,6 @@ class Float64Value(Fixed64Value):
     '''
     Represents a float64 value.
     '''
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def dump(self, fp):
         self.dump_value(fp, struct.pack('>d', self.get_value()))
@@ -396,9 +370,6 @@ class BytesValue(PrimitiveValue):
     '''
     
     WIRE_TYPE = 2
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def dump(self, fp):
         self.dump_value(fp, self.get_value())
@@ -433,9 +404,6 @@ class StringValue(BytesValue):
     '''
     Represents a string value.
     '''
-    
-    def __init__(self, value=None):
-        self.set_value(value)
         
     def dump(self, fp):
         self.dump_value(fp, self.get_value().encode('utf-8'))
@@ -446,6 +414,56 @@ class StringValue(BytesValue):
     def pre_validate(self):
         if not isinstance(self.get_value(), str):
             raise TypeError('Value should be of str type.')
+
+# Embedded message.
+# ------------------------------------------------------------------------------
+
+class EmbeddedMessageType():
+    '''
+    Represents an embedded message type.
+    '''
+    
+    def __init__(self, message_type):
+        '''
+        Initializes a new instance of EmbeddedMessageType class. The parameter
+        is the type of embedded message.
+        '''
+        self._message_type = message_type
+
+    def __call__(self):
+        '''
+        Creates a new instance of an embedded message value.
+        '''
+        return EmbeddedMessageValue(message_type=self._message_type)
+    
+class EmbeddedMessageValue(PrimitiveValue):
+    '''
+    Represents an embedded message value.
+    '''
+    
+    WIRE_TYPE = 2
+    
+    def __init__(self, message_type):
+        self._message_type = (message_type, )
+        
+    def dump(self, fp):
+        length_value = VarintValue()
+        s = self.get_value().dumps()
+        length_value.set_value(len(s))
+        length_value.dump(fp)
+        fp.write(s)
+        
+    def load(self, fp):
+        length_value = VarintValue()
+        length_value.load(fp)
+        s = fp.read(length_value.get_value())
+        value = self._message_type[0]()
+        value.loads(s)
+        self.set_value(value)
+        
+    def pre_validate(self):
+        if not isinstance(self.get_value(), MessageInstance):
+            raise TypeError('Value should be of MessageInstance type.')
 
 # Message.
 # ------------------------------------------------------------------------------
@@ -458,30 +476,60 @@ class MessageType(ValueType):
     def __init__(self, *fields):
         '''
         Constructs a new message type with the specified fields. The parameter
-        should be an iterable of tuples (field_name, field_type).
+        should be an iterable of dicts with fields "tag", "name", "type" and 
+        "default" ("default" is optional).
         '''
-        self._fields = fields
+        self._field_names = dict()
+        self._field_types = dict()
+        self._field_defaults = dict()
+        for entry in fields:
+            self.add_field(tag=entry['tag'], name=entry['name'], field_type=entry['type'])
+    
+    def add_field(self, tag, name, field_type, default=None):
+        '''
+        Adds the field to the message type.
+        '''
+        if tag in self._field_names:
+            raise ValueError('Tag %s is already used.' % tag)
+        if not isinstance(tag, int) or tag < 1:
+            raise ValueError('Tag should be positive int: %s' % repr(tag))
+        if name in self._field_types:
+            raise ValueError('Name `%s'' is already used.' % name)
+        if not isinstance(name, str) or len(name) == 0:
+            raise ValueError('Name should be non-empty string: %s' % repr(name))
+        self._field_names[tag] = name
+        self._field_types[name] = field_type
+        self._field_defaults[name] = default
+        
+    def remove_field(self, tag):
+        '''
+        Removes the field from the type by tag.
+        '''
+        if tag in self._field_names:
+            name = self._field_names[tag]
+            del self._field_names[tag]
+            del self._field_types[name]
+            del self._field_defaults[name]
         
     def __call__(self):
         '''
         Creates an instance of the message type.
         '''
-        return MessageInstance(*self._fields)
+        values = dict((n, t()) for n, t in self._field_types.iteritems())
+        for field_name, field_default in self._field_defaults.iteritems():
+            values[field_name].set_value(field_default)
+        return MessageInstance(self._field_names, self._field_types, values)
 
 class MessageInstance(Value):
     '''
     Represents a message instance.
     '''
     
-    WIRE_TYPE = 2
-    
-    def __init__(self, *fields):
+    def __init__(self, names, types, values):
         '''
         Initializes a new instance.
         '''
-        self._field_names = tuple(field[0] for field in fields)
-        self._field_types = dict(fields)
-        self._field_values = dict((field_name, field_type()) for field_name, field_type in fields)
+        self._field_names, self._field_types, self._field_values = names, types, values
     
     def __getitem__(self, field_name):
         '''
@@ -504,16 +552,39 @@ class MessageInstance(Value):
         
     def dump(self, fp):
         self.pre_validate()
-        field_number = 1
-        for field_name in self._field_names:
+        for field_tag, field_name in self._field_names.iteritems():
             value = self._field_values[field_name]
-            key = VarintValue((field_number << 3) | value.WIRE_TYPE)
-            key.dump(fp)
-            value.dump(fp)
-            field_number += 1
+            if not value.get_value() is None:
+                key = VarintValue()
+                key.set_value((field_tag << 3) | value.WIRE_TYPE)
+                key.dump(fp)
+                value.dump(fp)
+    
+    def dumps(self):
+        fp = cStringIO.StringIO()
+        self.dump(fp)
+        return fp.getvalue()
         
-    def load(self, fp):
-        pass
+    def load(self, fp, length):
+        start_pos = fp.tell()
+        while fp.tell() - start_pos < length:
+            key_value = VarintValue()
+            key_value.load(fp)
+            field_tag = key_value.get_value() >> 3
+            wire_type = key_value.get_value() & 0x7
+            field_value = self._field_values[self._field_names[field_tag]]
+            if field_value.WIRE_TYPE != wire_type:
+                raise ValueError('Field tag (%s) and wire type (%s) mismatch.' % (field_tag, wire_type))
+            try:
+                field_value.load(fp)
+            except Exception, e:
+                raise ValueError, 'Unable to load field with tag (%s) and wire type (%s).' % (field_tag, wire_type), e
+        self.post_validate()
+      
+    def loads(self, s):
+        fp = cStringIO.StringIO(s)
+        self.load(fp, len(s))
+        fp.close()
         
     def pre_validate(self):
         for field_name, field_value in self._field_values.iteritems():
@@ -530,4 +601,20 @@ class MessageInstance(Value):
         
     def iterkeys(self):
         return iter(self._field_names)
+
+# Global functons.
+# ------------------------------------------------------------------------------
+def dump(fp, message):
+    message.dump(fp)
+    
+def load(fp, message_type):
+    message = message_type()
+    message.load(fp)
+    
+def dumps(message):
+    return message.dumps()
+    
+def loads(s, message_type):
+    message = message_type()
+    message.loads(s)
 

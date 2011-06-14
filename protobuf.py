@@ -60,14 +60,6 @@ class PrimitiveValue(Value):
         Sets the underlying value.
         '''
         self._value = value
-    
-    def push_value(self, value):
-        '''
-        Pushes the underlying value. Primitive value cannot be pushed twice.
-        '''
-        if self.is_set():
-            raise ValueError('Primitive value cannot be pushed twice.')
-        return self.set_value(value)
         
     def is_set(self):
         '''
@@ -617,8 +609,28 @@ class MessageInstance(Value):
     def iterkeys(self):
         return iter(self._field_names)
 
-# Global functons.
+# Flags.
 # ------------------------------------------------------------------------------
+
+class RequiredFlag
+
+# Shortcuts to types.
+# ------------------------------------------------------------------------------
+UVarint = VarintType
+Varint = SignedVarintType
+Bytes = BytesType
+String = StringType
+Int32 = Int32Type
+Int64 = Int64Type
+UInt32 = UInt32Type
+UInt64 = UInt64Type
+Float32 = Float32Type
+Float64 = Float64Type
+Message = EmbeddedMessageType
+
+# Global functions.
+# ------------------------------------------------------------------------------
+
 def dump(fp, message):
     message.dump(fp)
     

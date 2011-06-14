@@ -625,6 +625,7 @@ def dump(fp, message):
 def load(fp, message_type):
     message = message_type()
     message.load(fp)
+    return message
     
 def dumps(message):
     return message.dumps()
@@ -632,4 +633,5 @@ def dumps(message):
 def loads(s, message_type):
     message = message_type()
     message.loads(s)
+    return message
 

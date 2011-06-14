@@ -104,6 +104,17 @@ class IntegrationTests(unittest.TestCase):
         message = Test3()
         message['c'] = c
         self.assertEqual(message.dumps(), '\x1a\x03\x08\x96\x01')
+        
+    def test_loads(self):
+        Test1 = protobuf.MessageType(
+            {'tag': 1, 'name': 'a', 'type': protobuf.VarintType},
+            {'tag': 2, 'name': 'b', 'type': protobuf.VarintType}
+        )
+        Test3 = protobuf.MessageType({'tag': 3, 'name': 'c', 'type': protobuf.EmbeddedMessageType(Test1)})
+        message = protobuf.loads('\x1a\x03\x08\x96\x01', Test3)
+        self.assertFalse(message['c'] is None)
+        self.assertEqual(message['c']['a'], 150)
+        self.assertEqual(message['c']['b'], None)
 
 # Run tests.
 # ------------------------------------------------------------------------------

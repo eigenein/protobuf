@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import struct
 import cStringIO
 
@@ -19,6 +20,8 @@ class Value:
     '''
     Base class for any value.
     '''
+    
+    VALIDATE_NONE = False # Tells not to validate None value by default.
     
     def dump(self, fp):
         '''
@@ -81,7 +84,8 @@ class VarintValue(PrimitiveValue):
     Represents a Varint value.
     '''
     
-    WIRE_TYPE = 0
+    def wire_type(self):
+        return 0
     
     def dump_value(self, fp, value):
         '''
@@ -167,7 +171,8 @@ class Fixed32Value(PrimitiveValue):
     Represents a signed fixed32 value.
     '''
     
-    WIRE_TYPE = 5
+    def wire_type(self):
+        return 5
         
     def pre_validate(self):
         value = self.get_value()
@@ -267,7 +272,8 @@ class Fixed64Value(PrimitiveValue):
     Represents a fixed64 value.
     '''
     
-    WIRE_TYPE = 1
+    def wire_type(self):
+        return 1
         
     def pre_validate(self):
         value = self.get_value()
@@ -361,7 +367,8 @@ class BytesValue(PrimitiveValue):
     Represents a bytes-value.
     '''
     
-    WIRE_TYPE = 2
+    def wire_type(self):
+        return 2
         
     def dump(self, fp):
         self.dump_value(fp, self.get_value())
@@ -432,11 +439,12 @@ class EmbeddedMessageValue(PrimitiveValue):
     '''
     Represents an embedded message value.
     '''
-    
-    WIRE_TYPE = 2
-    
+
     def __init__(self, message_type):
         self._message_type = (message_type, )
+        
+    def wire_type(self):
+        return 2
         
     def dump(self, fp):
         length_value = VarintValue()
@@ -563,7 +571,7 @@ class MessageInstance(Value):
             value = self._field_values[field_name]
             if not value.get_value() is None:
                 key = VarintValue()
-                key.set_value((field_tag << 3) | value.WIRE_TYPE)
+                key.set_value((field_tag << 3) | value.wire_type())
                 key.dump(fp)
                 value.dump(fp)
     
@@ -580,12 +588,13 @@ class MessageInstance(Value):
             field_tag = key_value.get_value() >> 3
             wire_type = key_value.get_value() & 0x7
             field_value = self._field_values[self._field_names[field_tag]]
-            if field_value.WIRE_TYPE != wire_type:
+            if field_value.wire_type() != wire_type:
                 raise ValueError('Field tag (%s) and wire type (%s) mismatch.' % (field_tag, wire_type))
             try:
                 field_value.load(fp)
             except Exception, e:
-                raise ValueError, 'Unable to load field with tag (%s) and wire type (%s).' % (field_tag, wire_type), e
+                raise ValueError, 'Unable to load field with tag (%s) and wire type (%s).' % \
+                    (field_tag, wire_type), sys.exc_info()[2]
         self.post_validate()
       
     def loads(self, s):
@@ -595,13 +604,21 @@ class MessageInstance(Value):
         
     def pre_validate(self):
         for field_name, field_value in self._field_values.iteritems():
-            if field_value.is_set():
-                field_value.pre_validate()
+            if field_value.VALIDATE_NONE or field_value.is_set():
+                try:
+                    field_value.pre_validate()
+                except Exception, e:
+                    raise ValueError, 'Field `%s\' pre-dump validation failed.' % \
+                        (field_name), sys.exc_info()[2]
         
     def post_validate(self):
         for field_name, field_value in self._field_values.iteritems():
-            if field_value.is_set():
-                field_value.post_validate()
+            if field_value.VALIDATE_NONE or field_value.is_set():
+                try:
+                    field_value.post_validate()
+                except Exception, e:
+                    raise ValueError, 'Field `%s\' post-load validation failed.' % \
+                        (field_name), sys.exc_info()[2]
             
     def keys(self):
         return self._field_names
@@ -612,12 +629,49 @@ class MessageInstance(Value):
 # Flags.
 # ------------------------------------------------------------------------------
 
-class RequiredFlag(Value):
+def RequiredFlag(subtype):
+    '''
+    Wraps a type to make its value required.
+    '''
+    def RequiredTypeWrapper():
+        return RequiredValueWrapper(subtype)
+        
+    RequiredTypeWrapper.__doc__ = subtype.__doc__
+    return RequiredTypeWrapper
 
-    pass
+class RequiredValueWrapper(Value):
+    '''
+    The wrapper for a value that post-validates None value with ValueError.
+    '''
+    
+    VALIDATE_NONE = True
+    
+    def __init__(self, subtype):
+        self._value = subtype()
+        self.__doc__ = self._value.__doc__
+        
+    def wire_type(self):
+        return self._value.wire_type()
+        
+    def post_validate(self):
+        if self._value.get_value() is None:
+            raise ValueError('This field is required.')
+            
+    def get_value(self):
+        return self._value.get_value()
+        
+    def set_value(self, value):
+        self._value.set_value(value)
+        
+    def load(self, fp):
+        self._value.load(fp)
+        
+    def dump(self, fp):
+        self._value.dump(fp)
 
 # Shortcuts to types.
 # ------------------------------------------------------------------------------
+
 UVarint = VarintType
 Varint = SignedVarintType
 Bytes = BytesType
@@ -629,6 +683,11 @@ UInt64 = UInt64Type
 Float32 = Float32Type
 Float64 = Float64Type
 Message = EmbeddedMessageType
+
+# Shortcuts to flags.
+# ------------------------------------------------------------------------------
+
+required = RequiredFlag
 
 # Global functions.
 # ------------------------------------------------------------------------------

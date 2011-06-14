@@ -112,9 +112,33 @@ class IntegrationTests(unittest.TestCase):
         )
         Test3 = protobuf.MessageType({'tag': 3, 'name': 'c', 'type': protobuf.EmbeddedMessageType(Test1)})
         message = protobuf.loads('\x1a\x03\x08\x96\x01', Test3)
-        self.assertFalse(message['c'] is None)
+        self.assertIsNotNone(message['c'])
         self.assertEqual(message['c']['a'], 150)
         self.assertEqual(message['c']['b'], None)
+    
+    def test_extra_field(self):
+        Test1 = protobuf.MessageType(
+            {'tag': 1, 'name': 'a', 'type': protobuf.UVarint},
+            {'tag': 2, 'name': 'b', 'type': protobuf.UVarint}
+        )
+        message = protobuf.loads('\x08\x96\x01', Test1)
+        self.assertEqual(message['a'], 150)
+        self.assertEqual(message['b'], None)
+        
+    def test_required_succeeded(self):
+        Test1 = protobuf.MessageType(
+            {'tag': 1, 'name': 'a', 'type': protobuf.required(protobuf.UVarint)}
+        )
+        message = protobuf.loads('\x08\x96\x01', Test1)
+        self.assertEqual(message['a'], 150)
+        
+    def test_required_failed(self):
+        Test1 = protobuf.MessageType(
+            {'tag': 1, 'name': 'a', 'type': protobuf.required(protobuf.UVarint)},
+            {'tag': 2, 'name': 'b', 'type': protobuf.required(protobuf.UVarint)}
+        )
+        with self.assertRaises(ValueError):
+            message = protobuf.loads('\x08\x96\x01', Test1)
 
 # Run tests.
 # ------------------------------------------------------------------------------

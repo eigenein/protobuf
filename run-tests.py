@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from protobuf import *
+from encoding import *
 
 class TestUVarint(unittest.TestCase):
 

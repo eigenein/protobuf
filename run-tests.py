@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
+Runs unit tests.
+
+eigenein (c) 2011
+'''
+
 import unittest
 from encoding import *
 

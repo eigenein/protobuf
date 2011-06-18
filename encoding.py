@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
+Implements the Google's protobuf encoding.
+
+eigenein (c) 2011
+'''
+
 import cStringIO
 import struct
 
@@ -283,7 +289,8 @@ class MessageType(Type):
 
     def remove_field(self, tag):
         '''
-        Removes a field by its tag.
+        Removes a field by its tag. Doesn't raise any exception when the tag is
+        missing.
         '''
         if tag in self.__tags_to_names:
             del self.__tags_to_names[tag]
@@ -341,7 +348,7 @@ class MessageType(Type):
                                 'The received value with the tag %s has incorrect wiretype: %s instead of %s expected.' % \
                                 (tag, wire_type, field_type.WIRE_TYPE))
                     elif wire_type != String.WIRE_TYPE:
-                        raise TypeError('Tag %s has wiretype %s while the field is packed repeated.' % tag)
+                        raise TypeError('Tag %s has wiretype %s while the field is packed repeated.' % (tag, wire_type))
                     if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):
                         # Single value.
                         message[self.__tags_to_names[tag]] = field_type.load(fp)
@@ -360,7 +367,7 @@ class MessageType(Type):
                             repeated_value = message[self.__tags_to_names[tag]] = list()
                         repeated_value.append(field_type.load(fp))
                 else:
-                    # Skip this.
+                    # Skip this field.
                     _wire_type_to_type_instance[wire_type].load(fp)
             except EOFError:
                 return message

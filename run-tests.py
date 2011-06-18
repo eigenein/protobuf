@@ -110,6 +110,16 @@ class TestEmbeddedMessage(unittest.TestCase):
         msg.c = Test1()
         msg.c.a = 150
         self.assertEqual(msg.dumps(), '\x1a\x03\x08\x96\x01')
+        
+    def test_loads_1(self):
+        Test1 = MessageType()
+        Test1.add_field(1, 'a', UVarint)
+        Test3 = MessageType()
+        Test3.add_field(3, 'c', EmbeddedMessage(Test1))
+        msg = Test3.loads('\x1a\x03\x08\x96\x01')
+        self.assertTrue('c' in msg)
+        self.assertTrue('a' in msg.c)
+        self.assertEqual(msg.c.a, 150)
 
 if __name__ == '__main__':
     unittest.main()

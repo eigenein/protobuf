@@ -4,14 +4,6 @@
 import cStringIO
 import struct
 
-# Utilities. -------------------------------------------------------------------
-
-def _pack_key(tag, wire_type):
-    return (tag << 3) | wire_type
-    
-def _unpack_key(key):
-    return key >> 3, key & 7
-
 # Types. -----------------------------------------------------------------------
 
 class Type:
@@ -32,7 +24,7 @@ class Type:
         
 class UVarintType(Type):
 
-    wire_type = 0
+    WIRE_TYPE = 0
 
     def dump(self, fp, value):
         shifted_value = True
@@ -67,7 +59,7 @@ class BoolType(UVarintType):
         
 class StringType(Type):
     
-    wire_type = 2
+    WIRE_TYPE = 2
     
     def dump(self, fp, value):
         UVarint.dump(fp, len(value))
@@ -87,14 +79,14 @@ class FixedLengthType(Type):
 
 class Fixed64Type(FixedLengthType):
     
-    wire_type = 1
+    WIRE_TYPE = 1
     
     def length(self):
         return 8
 
 class Fixed32Type(FixedLengthType):
 
-    wire_type = 5
+    WIRE_TYPE = 5
 
     def length(self):
         return 4
@@ -139,6 +131,58 @@ class Float32Type(Fixed32SubType):
 
     format = 'f'
 
+# Types instances. -------------------------------------------------------------
+
+UVarint = UVarintType()
+Varint = VarintType()
+Bool = BoolType()
+Fixed64 = Fixed64Type()
+UInt64 = UInt64Type()
+Int64 = Int64Type()
+Float64 = Float64Type()
+Fixed32 = Fixed32Type()
+UInt32 = UInt32Type()
+Int32Type = Int32Type()
+Float32 = Float32Type()
+String = StringType()
+
+# Messages. --------------------------------------------------------------------
+
+class FieldFlags:
+    '''
+    Flags for a field.
+    '''
+
+    SIMPLE = 0
+    REQUIRED, REQUIRED_MASK = 1, 1
+    REPEATED, PACKED_REPEATED, REPEATED_MASK = 2, 6, 6
+
+class _EofWrapper:
+    '''
+    Wraps a stream to raise EOFError instead of just returning of ''.
+    '''
+    def __init__(self, fp):
+        self.__fp = fp
+        
+    def read(self, size=None):
+        s = self.__fp.read(size)
+        if len(s) == 0:
+            raise EOFError()
+        return s
+
+def _pack_key(tag, wire_type):
+    return (tag << 3) | wire_type
+    
+def _unpack_key(key):
+    return key >> 3, key & 7
+
+_wire_type_to_type_instance = {
+    0: Varint,
+    1: Fixed64,
+    2: String,
+    5: Fixed32
+}
+
 class MessageType(Type):
 
     def __init__(self):
@@ -146,7 +190,7 @@ class MessageType(Type):
         self.__tags_to_names = dict()
         self.__defaults = dict()
 
-    def add_field(self, tag, name, field_type, default=None):
+    def add_field(self, tag, name, field_type, default=None, flags=FieldFlags.SIMPLE):
         if tag in self.__tags_to_names or tag in self.__tags_to_types:
             raise ValueError('The tag %s is already used.' % tag)
         self.__tags_to_names[tag] = name
@@ -167,13 +211,27 @@ class MessageType(Type):
 
     def dump(self, fp, value):
         for tag, field_type in self.__tags_to_types.iteritems():
-            UVarint.dump(fp, _pack_key(tag, field_type.wire_type))
+            UVarint.dump(fp, _pack_key(tag, field_type.WIRE_TYPE))
             field_type.dump(fp, value[self.__tags_to_names[tag]])
         
     def load(self, fp):
-        pass
-
-# Message instance. ------------------------------------------------------------
+        fp = _EofWrapper(fp)
+        message = self.__call__() # We create a new instance of this message type.
+        while True:
+            try:
+                tag, wire_type = _unpack_key(UVarint.load(fp))
+                if tag in self.__tags_to_types:
+                    field_type = self.__tags_to_types[tag]
+                    if wire_type != field_type.WIRE_TYPE:
+                        raise ValueError(
+                            'The received value with the tag %s has incorrect wiretype: %s instead of %s expected.' % \
+                            (tag, wire_type, field_type.WIRE_TYPE))
+                    message[self.__tags_to_names[tag]] = field_type.load(fp)
+                else:
+                    # Skip this.
+                    _wire_type_to_type_instance[wire_type].load(fp)
+            except EOFError:
+                return message
 
 class Message(dict):
 
@@ -205,9 +263,9 @@ def load(self, fp, message_type):
 
 # Embedded message. ------------------------------------------------------------
 
-class EmbeddedMessage():
+class EmbeddedMessage(Type):
     
-    wire_type = 2
+    WIRE_TYPE = 2
     
     def __init__(self, message_type):
         self.message_type = message_type
@@ -217,19 +275,4 @@ class EmbeddedMessage():
         
     def load(self, fp):
         return self.message_type.loads(String.load(fp))
-
-# Types instances. -------------------------------------------------------------
-
-UVarint = UVarintType()
-Varint = VarintType()
-Bool = BoolType()
-Fixed64 = Fixed64Type()
-UInt64 = UInt64Type()
-Int64 = Int64Type()
-Float64 = Float64Type()
-Fixed32 = Fixed32Type()
-UInt32 = UInt32Type()
-Int32Type = Int32Type()
-Float32 = Float32Type()
-String = StringType()
 

@@ -9,6 +9,7 @@ eigenein (c) 2011
 
 import unittest
 from encoding import *
+from remoting import *
 
 class TestUVarint(unittest.TestCase):
 

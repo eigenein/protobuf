@@ -99,9 +99,31 @@ class TestMessageType(unittest.TestCase):
         msg.b = 'testing'
         self.assertEqual(msg.dumps(), '\x12\x07\x74\x65\x73\x74\x69\x6e\x67')
 
+    def test_dumps_2(self):
+        '''
+        Tests missing optional value.
+        '''
+        Test2 = MessageType()
+        Test2.add_field(2, 'b', String)
+        msg = Test2()
+        self.assertEqual(msg.dumps(), '')
+        
+    def test_dumps_3(self):
+        '''
+        Tests missing required value.
+        '''
+        Test2 = MessageType()
+        Test2.add_field(2, 'b', String, flags=FieldFlags.REQUIRED)
+        msg = Test2()
+        with self.assertRaises(ValueError):
+            msg.dumps()
+
 class TestEmbeddedMessage(unittest.TestCase):
 
     def test_dumps_1(self):
+        '''
+        Tests general dumps.
+        '''
         Test1 = MessageType()
         Test1.add_field(1, 'a', UVarint)
         Test3 = MessageType()

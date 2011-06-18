@@ -188,6 +188,7 @@ class MessageType(Type):
     def __init__(self):
         self.__tags_to_types = dict()
         self.__tags_to_names = dict()
+        self.__flags = dict()
         self.__defaults = dict()
 
     def add_field(self, tag, name, field_type, default=None, flags=FieldFlags.SIMPLE):
@@ -195,6 +196,7 @@ class MessageType(Type):
             raise ValueError('The tag %s is already used.' % tag)
         self.__tags_to_names[tag] = name
         self.__tags_to_types[tag] = field_type
+        self.__flags[tag] = flags
         if default is not None:
             self.__defaults[tag] = default
 
@@ -211,12 +213,14 @@ class MessageType(Type):
 
     def dump(self, fp, value):
         for tag, field_type in self.__tags_to_types.iteritems():
-            UVarint.dump(fp, _pack_key(tag, field_type.WIRE_TYPE))
-            field_type.dump(fp, value[self.__tags_to_names[tag]])
+            if self.__tags_to_names[tag] in value:
+                UVarint.dump(fp, _pack_key(tag, field_type.WIRE_TYPE))
+                field_type.dump(fp, value[self.__tags_to_names[tag]])
+            elif (self.__flags[tag] & FieldFlags.REQUIRED_MASK) == FieldFlags.REQUIRED:
+                raise ValueError('The field with the tag %s is required but a value is missing.' % tag)
         
     def load(self, fp):
-        fp = _EofWrapper(fp)
-        message = self.__call__() # We create a new instance of this message type.
+        fp, message = _EofWrapper(fp), self.__call__() # Wrap fp and create a new instance.
         while True:
             try:
                 tag, wire_type = _unpack_key(UVarint.load(fp))

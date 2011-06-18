@@ -4,12 +4,13 @@
 import cStringIO
 import struct
 
-# Message instance. ------------------------------------------------------------
+# Utilities. -------------------------------------------------------------------
 
-class Message(dict):
-
-    def __init__(self, message_type):
-        self.message_type = message_type
+def _pack_key(tag, wire_type):
+    return (tag << 3) | wire_type
+    
+def _unpack_key(key):
+    return key >> 3, key & 7
 
 # Types. -----------------------------------------------------------------------
 
@@ -28,11 +29,10 @@ class Type:
     
     def loads(self, s):
         return self.load(cStringIO.StringIO(s))
-    
-    def validate(self, value):
-        pass
         
 class UVarintType(Type):
+
+    wire_type = 0
 
     def dump(self, fp, value):
         shifted_value = True
@@ -67,6 +67,8 @@ class BoolType(UVarintType):
         
 class StringType(Type):
     
+    wire_type = 2
+    
     def dump(self, fp, value):
         UVarint.dump(fp, len(value))
         fp.write(value)
@@ -85,10 +87,14 @@ class FixedLengthType(Type):
 
 class Fixed64Type(FixedLengthType):
     
+    wire_type = 1
+    
     def length(self):
         return 8
 
 class Fixed32Type(FixedLengthType):
+
+    wire_type = 5
 
     def length(self):
         return 4
@@ -96,75 +102,112 @@ class Fixed32Type(FixedLengthType):
 class Fixed64SubType(Fixed64Type):
 
     def dump(self, fp, value):
-        Fixed64Type.dump(self, fp, struct.pack(self._format(), value))
+        Fixed64Type.dump(self, fp, struct.pack(self.format, value))
         
     def load(self, fp):
-        return struct.unpack(self._format(), Fixed64Type.load(self, fp))[0]
+        return struct.unpack(self.format, Fixed64Type.load(self, fp))[0]
         
 class UInt64Type(Fixed64SubType):
     
-    def _format(self):
-        return '>Q'
+    format = '>Q'
 
 class Int64Type(Fixed64SubType):
     
-    def _format(self):
-        return '>q'
+    format = '>q'
         
 class Float64Type(Fixed64SubType):
 
-    def _format(self):
-        return 'd'
+    format = 'd'
 
 class Fixed32SubType(Fixed32Type):
 
     def dump(self, fp, value):
-        Fixed32Type.dump(self, fp, struct.pack(self._format(), value))
+        Fixed32Type.dump(self, fp, struct.pack(self.format, value))
         
     def load(self, fp):
-        return struct.unpack(self._format(), Fixed32Type.load(self, fp))[0]
+        return struct.unpack(self.format(), Fixed32Type.load(self, fp))[0]
 
 class UInt32Type(Fixed32SubType):
     
-    def _format(self):
-        return '>I'
+    format = '>I'
 
 class Int32Type(Fixed32SubType):
     
-    def _format(self):
-        return '>i'
+    format = '>i'
         
 class Float32Type(Fixed32SubType):
 
-    def _format(self):
-        return 'f'
+    format = 'f'
 
-class MessageType(Type): # TODO
+class MessageType(Type):
 
     def __init__(self):
-        pass # TODO
+        self.__tags_to_types = dict()
+        self.__tags_to_names = dict()
+        self.__defaults = dict()
+
+    def add_field(self, tag, name, field_type, default=None):
+        if tag in self.__tags_to_names or tag in self.__tags_to_types:
+            raise ValueError('The tag %s is already used.' % tag)
+        self.__tags_to_names[tag] = name
+        self.__tags_to_types[tag] = field_type
+        if default is not None:
+            self.__defaults[tag] = default
+
+    def remove_field(self, tag):
+        if tag in self.__tags_to_names:
+            del self.__tags_to_names[tag]
+        if tag in self.__tags_to_types:
+            del self.__tags_to_types[tag]
+        if tag in self.__defaults:
+            del self.__defaults[tag]
 
     def __call__(self):
-        return Message(self) # TODO Update message with defaults.
+        return Message(self, self.__defaults)
 
     def dump(self, fp, value):
-        pass
+        for tag, field_type in self.__tags_to_types.iteritems():
+            UVarint.dump(fp, _pack_key(tag, field_type.wire_type))
+            field_type.dump(fp, value[self.__tags_to_names[tag]])
         
     def load(self, fp):
-        pass # load the message
-        pass # validate?
-        return message
-    
-    def validate(self, value):
         pass
+
+# Message instance. ------------------------------------------------------------
+
+class Message(dict):
+
+    def __init__(self, message_type, defaults=dict()):
+        self.message_type = message_type
+        self.update(defaults)
         
-    def validate_fields_values(self, message):
-        pass # call validate on each field?
+    def __getattr__(self, name):
+        return self.__getitem__(name)
         
-    def validate_structure(self, message):
-        pass # check all required fields are filled?
+    def __setattr__(self, name, value):
+        (self.__dict__ if name in self.__dict__ else self).__setitem__(name, value)
+        return value
+    
+    def __delattr__(self, name):
+        (self.__dict__ if name in self.__dict__ else self).__delitem__(name, value)
+        
+    def dumps(self):
+        return self.message_type.dumps(self)
+    
+    def dump(self, fp):
+        return self.message_type.dump(self, value)   
+
+def loads(self, s, message_type):
+    return message_type.loads(s)
+    
+def load(self, fp, message_type):
+    return message_type.load(fp)
+
+# Embedded message. ------------------------------------------------------------
 
 class EmbeddedMessage():
+    
+    wire_type = 2
     
     def __init__(self, message_type):
         self.message_type = message_type
@@ -174,9 +217,6 @@ class EmbeddedMessage():
         
     def load(self, fp):
         return self.message_type.loads(String.load(fp))
-    
-    def validate(self, value):
-        self.message_type.validate(value)
 
 # Types instances. -------------------------------------------------------------
 

@@ -90,6 +90,27 @@ class TestString(unittest.TestCase):
     def test_loads_1(self):
         self.assertEqual(String.loads('\x07\x74\x65\x73\x74\x69\x6e\x67'), 'testing')
 
+class TestMessageType(unittest.TestCase):
+
+    def test_dumps_1(self):
+        Test2 = MessageType()
+        Test2.add_field(2, 'b', String)
+        msg = Test2()
+        msg.b = 'testing'
+        self.assertEqual(msg.dumps(), '\x12\x07\x74\x65\x73\x74\x69\x6e\x67')
+
+class TestEmbeddedMessage(unittest.TestCase):
+
+    def test_dumps_1(self):
+        Test1 = MessageType()
+        Test1.add_field(1, 'a', UVarint)
+        Test3 = MessageType()
+        Test3.add_field(3, 'c', EmbeddedMessage(Test1))
+        msg = Test3()
+        msg.c = Test1()
+        msg.c.a = 150
+        self.assertEqual(msg.dumps(), '\x1a\x03\x08\x96\x01')
+
 if __name__ == '__main__':
     unittest.main()
 

@@ -10,7 +10,7 @@ I've written this just4fun, thus all questions like "What's the goal?" have no a
 
 Fow now, there is full protobuf encoding implementation, so you can use the `encoding` module with full compatibility with the standard implementation.
 
-The `encoding` module is covered with unit tests, but you should understand that there are may be some unknown bugs. *Thus, use this software at your own risk.*
+The `encoding` module is covered with unit tests, but you should understand that there are may be some unknown bugs. **Thus, use this software at your own risk.**
 
 Using
 -----
@@ -44,7 +44,11 @@ You can dump this now!
     
 You also can load this message with:
 
-    msg = Test2.load(open('/tmp/message', 'rb').read(), Test2)
+    msg = Test2.load(open('/tmp/message', 'rb'))
+
+or with:
+
+    msg = load(open('/tmp/message', 'rb'), Test2)
     
 Simple enough. :)
 
@@ -83,7 +87,7 @@ Consider the following definitions:
       int32 a = 1;
     }
     
-    and
+and
     
     message Test3 {
       required Test1 c = 3;

@@ -113,10 +113,49 @@ class TestMessageType(unittest.TestCase):
         Tests missing required value.
         '''
         Test2 = MessageType()
-        Test2.add_field(2, 'b', String, flags=FieldFlags.REQUIRED)
+        Test2.add_field(2, 'b', String, flags=Flags.REQUIRED)
         msg = Test2()
         with self.assertRaises(ValueError):
             msg.dumps()
+
+    def test_dumps_4(self):
+        '''
+        Tests repeated value.
+        '''
+        Test2 = MessageType()
+        Test2.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
+        msg = Test2()
+        msg.b = (1, 2, 3)
+        self.assertEqual(msg.dumps(), '\x08\x01\x08\x02\x08\x03')
+
+    def test_loads_1(self):
+        '''
+        Tests missing optional value.
+        '''
+        Test2 = MessageType()
+        Test2.add_field(2, 'b', String)
+        msg = Test2.loads('')
+        self.assertNotIn('b', msg)
+    
+    def test_loads_2(self):
+        '''
+        Tests that the last value in the input stream is assigned to
+        a non-repeated field.
+        '''
+        Test2 = MessageType()
+        Test2.add_field(1, 'b', UVarint)
+        msg = Test2.loads('\x08\x01\x08\x02\x08\x03')
+        self.assertEquals(msg.b, 3)
+    
+    def test_loads_3(self):
+        '''
+        Tests repeated value.
+        '''
+        Test2 = MessageType()
+        Test2.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
+        msg = Test2.loads('\x08\x01\x08\x02\x08\x03')
+        self.assertIn('b', msg)
+        self.assertEquals(msg.b, [1, 2, 3])
 
 class TestEmbeddedMessage(unittest.TestCase):
 
@@ -139,8 +178,8 @@ class TestEmbeddedMessage(unittest.TestCase):
         Test3 = MessageType()
         Test3.add_field(3, 'c', EmbeddedMessage(Test1))
         msg = Test3.loads('\x1a\x03\x08\x96\x01')
-        self.assertTrue('c' in msg)
-        self.assertTrue('a' in msg.c)
+        self.assertIn('c', msg)
+        self.assertIn('a', msg.c)
         self.assertEqual(msg.c.a, 150)
 
 if __name__ == '__main__':

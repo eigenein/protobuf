@@ -148,7 +148,7 @@ String = StringType()
 
 # Messages. --------------------------------------------------------------------
 
-class FieldFlags:
+class Flags:
     '''
     Flags for a field.
     '''
@@ -191,7 +191,7 @@ class MessageType(Type):
         self.__flags = dict()
         self.__defaults = dict()
 
-    def add_field(self, tag, name, field_type, default=None, flags=FieldFlags.SIMPLE):
+    def add_field(self, tag, name, field_type, default=None, flags=Flags.SIMPLE):
         if tag in self.__tags_to_names or tag in self.__tags_to_types:
             raise ValueError('The tag %s is already used.' % tag)
         self.__tags_to_names[tag] = name
@@ -211,12 +211,27 @@ class MessageType(Type):
     def __call__(self):
         return Message(self, self.__defaults)
 
+    def __has_flag(self, tag, flag, mask):
+        return (self.__flags[tag] & mask) == flag
+
     def dump(self, fp, value):
         for tag, field_type in self.__tags_to_types.iteritems():
             if self.__tags_to_names[tag] in value:
-                UVarint.dump(fp, _pack_key(tag, field_type.WIRE_TYPE))
-                field_type.dump(fp, value[self.__tags_to_names[tag]])
-            elif (self.__flags[tag] & FieldFlags.REQUIRED_MASK) == FieldFlags.REQUIRED:
+                if not self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
+                    # Simple value.
+                    UVarint.dump(fp, _pack_key(tag, field_type.WIRE_TYPE))
+                    field_type.dump(fp, value[self.__tags_to_names[tag]])
+                elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
+                    # Repeated packed value.
+                    pass
+                elif self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
+                    # Repeated value.
+                    key = _pack_key(tag, field_type.WIRE_TYPE)
+                    # Put it together sequently.
+                    for single_value in value[self.__tags_to_names[tag]]:
+                        UVarint.dump(fp, key)
+                        field_type.dump(fp, single_value)
+            elif self.__has_flag(tag, Flags.REQUIRED, Flags.REQUIRED_MASK):
                 raise ValueError('The field with the tag %s is required but a value is missing.' % tag)
         
     def load(self, fp):
@@ -230,7 +245,16 @@ class MessageType(Type):
                         raise ValueError(
                             'The received value with the tag %s has incorrect wiretype: %s instead of %s expected.' % \
                             (tag, wire_type, field_type.WIRE_TYPE))
-                    message[self.__tags_to_names[tag]] = field_type.load(fp)
+                    if not self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
+                        message[self.__tags_to_names[tag]] = field_type.load(fp)
+                    elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
+                        # Repeated packed value.
+                        pass
+                    elif self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
+                        # Repeated value.
+                        if not self.__tags_to_names[tag] in message:
+                            repeated_value = message[self.__tags_to_names[tag]] = list()
+                        repeated_value.append(field_type.load(fp))
                 else:
                     # Skip this.
                     _wire_type_to_type_instance[wire_type].load(fp)

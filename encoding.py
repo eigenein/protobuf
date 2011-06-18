@@ -312,6 +312,8 @@ class MessageType(Type):
         return (self.__flags[tag] & mask) == flag
 
     def dump(self, fp, value):
+        if self != value.message_type:
+            raise TypeError('Attempting to dump an object with type that\'s different from mine.')
         for tag, field_type in self.__tags_to_types.iteritems():
             if self.__tags_to_names[tag] in value:
                 if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):

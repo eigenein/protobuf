@@ -155,7 +155,7 @@ class Flags:
 
     SIMPLE = 0
     REQUIRED, REQUIRED_MASK = 1, 1
-    REPEATED, PACKED_REPEATED, REPEATED_MASK = 2, 6, 6
+    SINGLE, REPEATED, PACKED_REPEATED, REPEATED_MASK = 0, 2, 6, 6
 
 class _EofWrapper:
     '''
@@ -217,13 +217,17 @@ class MessageType(Type):
     def dump(self, fp, value):
         for tag, field_type in self.__tags_to_types.iteritems():
             if self.__tags_to_names[tag] in value:
-                if not self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
+                if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):
                     # Simple value.
                     UVarint.dump(fp, _pack_key(tag, field_type.WIRE_TYPE))
                     field_type.dump(fp, value[self.__tags_to_names[tag]])
                 elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
                     # Repeated packed value.
-                    pass
+                    UVarint.dump(fp, _pack_key(tag, String.WIRE_TYPE))
+                    internal_fp = cStringIO.StringIO()
+                    for single_value in value[self.__tags_to_names[tag]]:
+                        field_type.dump(internal_fp, single_value)
+                    String.dump(fp, internal_fp.getvalue())
                 elif self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
                     # Repeated value.
                     key = _pack_key(tag, field_type.WIRE_TYPE)
@@ -241,15 +245,24 @@ class MessageType(Type):
                 tag, wire_type = _unpack_key(UVarint.load(fp))
                 if tag in self.__tags_to_types:
                     field_type = self.__tags_to_types[tag]
-                    if wire_type != field_type.WIRE_TYPE:
-                        raise ValueError(
-                            'The received value with the tag %s has incorrect wiretype: %s instead of %s expected.' % \
-                            (tag, wire_type, field_type.WIRE_TYPE))
-                    if not self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
+                    if not self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
+                        if wire_type != field_type.WIRE_TYPE:
+                            raise TypeError(
+                                'The received value with the tag %s has incorrect wiretype: %s instead of %s expected.' % \
+                                (tag, wire_type, field_type.WIRE_TYPE))
+                    elif wire_type != String.WIRE_TYPE:
+                        raise TypeError('Tag %s has wiretype %s while the field is packed repeated.' % tag)
+                    if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):
                         message[self.__tags_to_names[tag]] = field_type.load(fp)
                     elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
                         # Repeated packed value.
-                        pass
+                        repeated_value = message[self.__tags_to_names[tag]] = list()
+                        internal_fp = _EofWrapper(cStringIO.StringIO(String.load(fp)))
+                        while True:
+                            try:
+                                repeated_value.append(field_type.load(internal_fp))
+                            except EOFError:
+                                break
                     elif self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
                         # Repeated value.
                         if not self.__tags_to_names[tag] in message:

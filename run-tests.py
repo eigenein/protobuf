@@ -127,6 +127,16 @@ class TestMessageType(unittest.TestCase):
         msg = Test2()
         msg.b = (1, 2, 3)
         self.assertEqual(msg.dumps(), '\x08\x01\x08\x02\x08\x03')
+        
+    def test_dumps_5(self):
+        '''
+        Tests packed repeated value.
+        '''
+        Test4 = MessageType()
+        Test4.add_field(4, 'd', UVarint, flags=Flags.PACKED_REPEATED)
+        msg = Test4()
+        msg.d = (3, 270, 86942)
+        self.assertEqual(msg.dumps(), '\x22\x06\x03\x8E\x02\x9E\xA7\x05')
 
     def test_loads_1(self):
         '''
@@ -156,6 +166,16 @@ class TestMessageType(unittest.TestCase):
         msg = Test2.loads('\x08\x01\x08\x02\x08\x03')
         self.assertIn('b', msg)
         self.assertEquals(msg.b, [1, 2, 3])
+        
+    def test_loads_4(self):
+        '''
+        Tests packed repeated value.
+        '''
+        Test4 = MessageType()
+        Test4.add_field(4, 'd', UVarint, flags=Flags.PACKED_REPEATED)
+        msg = Test4.loads('\x22\x06\x03\x8E\x02\x9E\xA7\x05')
+        self.assertIn('d', msg)
+        self.assertEquals(msg.d, [3, 270, 86942])
 
 class TestEmbeddedMessage(unittest.TestCase):
 

@@ -119,7 +119,7 @@ There are the following data types supported for now:
     Float64
     Fixed32
     UInt32
-    Int32Type
+    Int32
     Float32
     String
     

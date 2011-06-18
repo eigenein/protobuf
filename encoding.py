@@ -210,7 +210,7 @@ Int64 = Int64Type()
 Float64 = Float64Type()
 Fixed32 = Fixed32Type()
 UInt32 = UInt32Type()
-Int32Type = Int32Type()
+Int32 = Int32Type()
 Float32 = Float32Type()
 String = StringType()
 

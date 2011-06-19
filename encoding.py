@@ -9,6 +9,7 @@ eigenein (c) 2011
 
 import cStringIO
 import struct
+import marshal
 
 # Types. -----------------------------------------------------------------------
 
@@ -82,10 +83,10 @@ class BoolType(UVarintType):
     '''
 
     def dump(self, fp, value):
-        UVarintType.dump(self, fp, int(value))
+        UVarintType.dump(self, fp, 1 if value else 0)
     
     def load(self, fp):
-        return bool(UVarintType.load(self, fp))
+        return True if (UVarintType.load(self, fp) != 0) else False
         
 class BytesType(Type):
     '''
@@ -109,6 +110,14 @@ class UnicodeType(BytesType):
         
     def load(self, fp):
         return unicode(BytesType.load(self, fp), 'utf-8')
+
+class MarshalableCodeType(BytesType):
+
+    def dump(self, fp, value):
+        BytesType.dump(self, fp, marshal.dumps(value, 2))
+            
+    def load(self, fp):
+        return marshal.loads(BytesType.load(self, fp))
 
 class FixedLengthType(Type):
     '''
@@ -222,6 +231,7 @@ Int32 = Int32Type()
 Float32 = Float32Type()
 Bytes = BytesType()
 Unicode = UnicodeType()
+MarshalableCode = MarshalableCodeType()
 
 # Messages. --------------------------------------------------------------------
 

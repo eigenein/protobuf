@@ -87,9 +87,9 @@ class BoolType(UVarintType):
     def load(self, fp):
         return bool(UVarintType.load(self, fp))
         
-class StringType(Type):
+class BytesType(Type):
     '''
-    Represents a string type.
+    Represents a raw bytes type.
     '''
     
     WIRE_TYPE = 2
@@ -101,6 +101,14 @@ class StringType(Type):
     def load(self, fp):
         length = UVarint.load(fp)
         return fp.read(length)
+
+class UnicodeType(BytesType):
+
+    def dump(self, fp, value):
+        BytesType.dump(self, fp, value.encode('utf-8'))
+        
+    def load(self, fp):
+        return unicode(BytesType.load(self, fp), 'utf-8')
 
 class FixedLengthType(Type):
     '''
@@ -212,7 +220,8 @@ Fixed32 = Fixed32Type()
 UInt32 = UInt32Type()
 Int32 = Int32Type()
 Float32 = Float32Type()
-String = StringType()
+Bytes = BytesType()
+Unicode = UnicodeType()
 
 # Messages. --------------------------------------------------------------------
 
@@ -257,7 +266,7 @@ def _unpack_key(key):
 _wire_type_to_type_instance = {
     0: Varint,
     1: Fixed64,
-    2: String,
+    2: Bytes,
     5: Fixed32
 }
 
@@ -322,11 +331,11 @@ class MessageType(Type):
                     field_type.dump(fp, value[self.__tags_to_names[tag]])
                 elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
                     # Repeated packed value.
-                    UVarint.dump(fp, _pack_key(tag, String.WIRE_TYPE))
+                    UVarint.dump(fp, _pack_key(tag, Bytes.WIRE_TYPE))
                     internal_fp = cStringIO.StringIO()
                     for single_value in value[self.__tags_to_names[tag]]:
                         field_type.dump(internal_fp, single_value)
-                    String.dump(fp, internal_fp.getvalue())
+                    Bytes.dump(fp, internal_fp.getvalue())
                 elif self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
                     # Repeated value.
                     key = _pack_key(tag, field_type.WIRE_TYPE)
@@ -349,7 +358,7 @@ class MessageType(Type):
                             raise TypeError(
                                 'The received value with the tag %s has incorrect wiretype: %s instead of %s expected.' % \
                                 (tag, wire_type, field_type.WIRE_TYPE))
-                    elif wire_type != String.WIRE_TYPE:
+                    elif wire_type != Bytes.WIRE_TYPE:
                         raise TypeError('Tag %s has wiretype %s while the field is packed repeated.' % (tag, wire_type))
                     if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):
                         # Single value.
@@ -357,7 +366,7 @@ class MessageType(Type):
                     elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
                         # Repeated packed value.
                         repeated_value = message[self.__tags_to_names[tag]] = list()
-                        internal_fp = _EofWrapper(cStringIO.StringIO(String.load(fp)))
+                        internal_fp = _EofWrapper(cStringIO.StringIO(Bytes.load(fp)))
                         while True:
                             try:
                                 repeated_value.append(field_type.load(internal_fp))
@@ -445,8 +454,8 @@ class EmbeddedMessage(Type):
         self.message_type = message_type
     
     def dump(self, fp, value):
-        String.dump(fp, self.message_type.dumps(value))
+        Bytes.dump(fp, self.message_type.dumps(value))
         
     def load(self, fp):
-        return self.message_type.loads(String.load(fp))
+        return self.message_type.loads(Bytes.load(fp))
 

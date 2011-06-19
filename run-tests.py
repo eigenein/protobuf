@@ -9,7 +9,6 @@ eigenein (c) 2011
 
 import unittest
 from encoding import *
-from remoting import *
 
 class TestUVarint(unittest.TestCase):
 
@@ -89,19 +88,27 @@ class TestInt64(unittest.TestCase):
     def test_loads_1(self):
         self.assertEqual(Int64.loads('\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE'), -2)
 
-class TestString(unittest.TestCase):
+class TestBytes(unittest.TestCase):
 
     def test_dumps_1(self):
-        self.assertEqual(String.dumps('testing'), '\x07\x74\x65\x73\x74\x69\x6e\x67')
+        self.assertEqual(Bytes.dumps('testing'), '\x07\x74\x65\x73\x74\x69\x6e\x67')
         
     def test_loads_1(self):
-        self.assertEqual(String.loads('\x07\x74\x65\x73\x74\x69\x6e\x67'), 'testing')
+        self.assertEqual(Bytes.loads('\x07\x74\x65\x73\x74\x69\x6e\x67'), 'testing')
+
+class TestUnicode(unittest.TestCase):
+
+    def test_dumps_1(self):
+        self.assertEqual(Unicode.dumps(u'Привет'), '\x0c\xd0\x9f\xd1\x80\xd0\xb8\xd0\xb2\xd0\xb5\xd1\x82')
+        
+    def test_loads_1(self):
+        self.assertEqual(Unicode.loads('\x0c\xd0\x9f\xd1\x80\xd0\xb8\xd0\xb2\xd0\xb5\xd1\x82'), u'Привет')
 
 class TestMessageType(unittest.TestCase):
 
     def test_dumps_1(self):
         Test2 = MessageType()
-        Test2.add_field(2, 'b', String)
+        Test2.add_field(2, 'b', Bytes)
         msg = Test2()
         msg.b = 'testing'
         self.assertEqual(msg.dumps(), '\x12\x07\x74\x65\x73\x74\x69\x6e\x67')
@@ -111,7 +118,7 @@ class TestMessageType(unittest.TestCase):
         Tests missing optional value.
         '''
         Test2 = MessageType()
-        Test2.add_field(2, 'b', String)
+        Test2.add_field(2, 'b', Bytes)
         msg = Test2()
         self.assertEqual(msg.dumps(), '')
         
@@ -120,7 +127,7 @@ class TestMessageType(unittest.TestCase):
         Tests missing required value.
         '''
         Test2 = MessageType()
-        Test2.add_field(2, 'b', String, flags=Flags.REQUIRED)
+        Test2.add_field(2, 'b', Bytes, flags=Flags.REQUIRED)
         msg = Test2()
         with self.assertRaises(ValueError):
             msg.dumps()
@@ -150,7 +157,7 @@ class TestMessageType(unittest.TestCase):
         Tests missing optional value.
         '''
         Test2 = MessageType()
-        Test2.add_field(2, 'b', String)
+        Test2.add_field(2, 'b', Bytes)
         msg = Test2.loads('')
         self.assertNotIn('b', msg)
     

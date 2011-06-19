@@ -113,15 +113,17 @@ There are the following data types supported for now:
     UVarint
     Varint
     Bool
-    Fixed64
+    Fixed64         # 8-byte string.
     UInt64
     Int64
     Float64
-    Fixed32
+    Fixed32         # 4-byte string.
     UInt32
     Int32
     Float32
-    String
+    Bytes           # Pure bytes string.
+    Unicode         # Unicode string.
+    MarshalableCode # Python code object. Serialized with marshal module.
     
 More info
 ---------

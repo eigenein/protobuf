@@ -481,3 +481,20 @@ class EmbeddedMessage(Type):
     def load(self, fp):
         return self.message_type.loads(Bytes.load(fp))
 
+# Describing messages themselves. ----------------------------------------------
+
+class MetaMessageType(MessageType):
+    '''
+    The type that can describe other message types.
+    '''
+    
+    def __init__(self):
+        pass # TODO Add fields.
+        
+    def __call__(self, message_type):
+        message = Message(self)
+        # Fill this.
+        return message
+        
+MetaMessage = MetaMessageType() # Use this object to construct metamessages.
+

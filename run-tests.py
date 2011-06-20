@@ -151,7 +151,7 @@ class TestMessageType(unittest.TestCase):
         msg = Test2()
         msg.b = (1, 2, 3)
         self.assertEqual(msg.dumps(), '\x08\x01\x08\x02\x08\x03')
-        
+    
     def test_dumps_5(self):
         '''
         Tests packed repeated value.
@@ -170,6 +170,15 @@ class TestMessageType(unittest.TestCase):
         Test2.add_field(2, 'b', Bytes)
         msg = Test2.loads('')
         self.assertNotIn('b', msg)
+    
+    def test_loads_1_1(self):
+        '''
+        Tests missing required value.
+        '''
+        Test2 = MessageType()
+        Test2.add_field(2, 'b', Bytes, flags=Flags.REQUIRED)
+        with self.assertRaises(ValueError):
+            Test2.loads('')
     
     def test_loads_2(self):
         '''

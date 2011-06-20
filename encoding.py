@@ -400,6 +400,10 @@ class MessageType(Type):
                     # Skip this field.
                     _wire_type_to_type_instance[wire_type].load(fp)
             except EOFError:
+                # Check if all required fields are present.
+                for tag, name in self.__tags_to_names.iteritems():
+                    if self.__has_flag(tag, Flags.REQUIRED, Flags.REQUIRED_MASK) and name not in message:
+                        raise ValueError('The field with the tag %s (\'%s\') is required but a value is missing.' % (tag, name))
                 return message
 
 class Message(dict):

@@ -144,7 +144,7 @@ Some techniques
 
 ### Streaming messages
 
-There Protocol Buffer format is not self delimiting. But you can use wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
+There Protocol Buffer format is not self delimiting. But you can wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
 
 More info
 ---------

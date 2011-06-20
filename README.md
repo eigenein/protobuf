@@ -5,7 +5,7 @@ protobuf
 
 -   README techniques added.
 -   Hashes of message types.
--   Fixed: loading of missing required field doesn't raise ValueError.
+-   Fixed: loading of missing required field doesn't raise `ValueError`.
 
 #### Changes in v0.2
 

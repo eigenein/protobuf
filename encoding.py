@@ -44,6 +44,12 @@ class Type:
         '''
         return self.load(cStringIO.StringIO(s))
         
+    def __hash__(self):
+        '''
+        Returns a hash of this type.
+        '''
+        return hash(self.__class__.__name__)
+        
 class UVarintType(Type):
     '''
     Represents an unsigned Varint type.
@@ -292,9 +298,16 @@ class MessageType(Type):
         self.__tags_to_types = dict() # Maps a tag to a type instance.
         self.__tags_to_names = dict() # Maps a tag to a given field name.
         self.__flags = dict() # Maps a tag to flags.
-        self.__defaults = dict() # Maps a tag to a default value of the field.
 
-    def add_field(self, tag, name, field_type, default=None, flags=Flags.SIMPLE):
+    def __hash__(self):
+        _hash = 17
+        for tag, field_type in self.__tags_to_types.iteritems():
+            _hash = hash(tag + _hash * 23)
+            _hash = hash(hash(field_type) + _hash * 23)
+            _hash = hash(hash(self.__flags[tag]) + _hash * 23)
+        return _hash
+
+    def add_field(self, tag, name, field_type, flags=Flags.SIMPLE):
         '''
         Adds a field to the message type.
         '''
@@ -303,8 +316,6 @@ class MessageType(Type):
         self.__tags_to_names[tag] = name
         self.__tags_to_types[tag] = field_type
         self.__flags[tag] = flags
-        if default is not None:
-            self.__defaults[tag] = default
 
     def remove_field(self, tag):
         '''
@@ -315,14 +326,12 @@ class MessageType(Type):
             del self.__tags_to_names[tag]
         if tag in self.__tags_to_types:
             del self.__tags_to_types[tag]
-        if tag in self.__defaults:
-            del self.__defaults[tag]
 
     def __call__(self):
         '''
         Creates an instance of this message type.
         '''
-        return Message(self, self.__defaults)
+        return Message(self)
 
     def __has_flag(self, tag, flag, mask):
         '''
@@ -398,12 +407,11 @@ class Message(dict):
     Represents a message instance.
     '''
 
-    def __init__(self, message_type, defaults=dict()):
+    def __init__(self, message_type):
         '''
         Initializes a new instance of the specified message type.
         '''
         self.message_type = message_type
-        self.update(defaults)
         
     def __getattr__(self, name):
         '''

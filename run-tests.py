@@ -200,6 +200,19 @@ class TestMessageType(unittest.TestCase):
         msg = Test4.loads('\x22\x06\x03\x8E\x02\x9E\xA7\x05')
         self.assertIn('d', msg)
         self.assertEquals(msg.d, [3, 270, 86942])
+    
+    def test_hash_1(self):
+        '''
+        Tests __hash__.
+        '''
+        Type1, Type2, Type3, Type4 = MessageType(), MessageType(), MessageType(), MessageType()
+        Type1.add_field(1, 'b', UVarint)
+        Type2.add_field(1, 'a', UVarint)
+        Type3.add_field(2, 'a', UVarint)
+        Type4.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
+        self.assertEquals(hash(Type1), hash(Type2))
+        self.assertNotEquals(hash(Type1), hash(Type3))
+        self.assertNotEquals(hash(Type1), hash(Type4))
 
 class TestEmbeddedMessage(unittest.TestCase):
 

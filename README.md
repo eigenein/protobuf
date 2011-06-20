@@ -1,6 +1,18 @@
 protobuf
 ========
 
+#### Changes in v0.3 (next)
+
+-   README techniques added.
+
+#### Changes in v0.2
+
+-   Fixed `Int32` type name (was `Int32Type`).
+-   Added validation of message type.
+-   Unicode type.
+-   Python code object type.
+-   Fixed casting values to bool and from bool.
+
 My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
 
 What and why
@@ -124,7 +136,14 @@ There are the following data types supported for now:
     Bytes           # Pure bytes string.
     Unicode         # Unicode string.
     MarshalableCode # Python code object. Serialized with marshal module.
-    
+
+Some techniques
+---------------
+
+### Streaming messages
+
+There Protocol Buffer format is not self delimiting. But you can use wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
+
 More info
 ---------
 

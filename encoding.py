@@ -254,16 +254,20 @@ class _EofWrapper:
     '''
     Wraps a stream to raise EOFError instead of just returning of ''.
     '''
-    def __init__(self, fp):
+    def __init__(self, fp, limit=None):
         self.__fp = fp
+        self.__limit = limit
         
     def read(self, size=None):
         '''
         Reads a string. Raises EOFError on end of stream.
         '''
+        if self.__limit is not None:
+            size = min(size, self.__limit)
+            self.__limit -= size
         s = self.__fp.read(size)
         if len(s) == 0:
-            raise EOFError('The underlying stream has read the empty string.')
+            raise EOFError()
         return s
 
 def _pack_key(tag, wire_type):
@@ -385,7 +389,8 @@ class MessageType(Type):
                     elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
                         # Repeated packed value.
                         repeated_value = message[self.__tags_to_names[tag]] = list()
-                        internal_fp = _EofWrapper(cStringIO.StringIO(Bytes.load(fp)))
+                        repeated_value_length = UVarint.load(fp)
+                        internal_fp = _EofWrapper(fp, repeated_value_length)
                         while True:
                             try:
                                 repeated_value.append(field_type.load(internal_fp))
@@ -479,7 +484,8 @@ class EmbeddedMessage(Type):
         Bytes.dump(fp, self.message_type.dumps(value))
         
     def load(self, fp):
-        return self.message_type.loads(Bytes.load(fp))
+        message_length = UVarint.load(fp)
+        return self.message_type.load(_EofWrapper(fp, message_length))
 
 # Describing messages themselves. ----------------------------------------------
 

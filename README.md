@@ -6,6 +6,7 @@ protobuf
 -   README techniques added.
 -   Hashes of message types.
 -   Fixed: loading of missing required field doesn't raise `ValueError`.
+-   Message `load` not uses `StringIO` for reading embedded messages and packed repeated fields.
 
 #### Changes in v0.2
 

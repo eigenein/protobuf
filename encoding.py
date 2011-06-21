@@ -249,6 +249,7 @@ class Flags:
     SIMPLE = 0 # Single value field.
     REQUIRED, REQUIRED_MASK = 1, 1 # Required field_type.
     SINGLE, REPEATED, PACKED_REPEATED, REPEATED_MASK = 0, 2, 6, 6 # Repeated and packed-repeated fields.
+    PRIMITIVE, EMBEDDED, EMBEDDED_MASK = 0, 8, 8 # Used by MessageMetaType to determine if a field contains embedded definition.
 
 class _EofWrapper:
     '''
@@ -489,13 +490,28 @@ class EmbeddedMessage(Type):
 
 # Describing messages themselves. ----------------------------------------------
 
-class MetaMessageType(MessageType):
+class TypeMetadataType(MessageType):
 
     def __init__(self):
-        pass
+        FieldMetadata = MessageType()
+        # A message type is described with a set of fields.
+        self.add_field(1, 'fields', EmbeddedMessage(FieldMetadata), flags=Flags.REPEATED)
+        # Each of fields has ...
+        FieldMetadata.add_field(1, 'tag', UVarint, flags=Flags.REQUIRED)
+        FieldMetadata.add_field(2, 'name', Bytes, flags=Flags.REQUIRED)
+        FieldMetadata.add_field(3, 'type', Bytes, flags=Flags.REQUIRED)
+        FieldMetadata.add_field(4, 'flags', UVarint, flags=Flags.REQUIRED)
+        FieldMetadata.add_field(5, 'embedded_metadata', EmbeddedMessage(self))
     
-    def __call__(self, message_type):
-        pass
+    def dump(self, fp, message_type):
+        message = Message()
+        pass # Fill in message type here.
+        MessageType.dump(self, fp, message)
+        
+    def load(self, fp):
+        message, message_type = MessageType.load(self, fp), MessageType()
+        pass # TODO Construct message type here.
+        return message_type
     
-MetaMessage = MetaMessageType() # Use this type to embed metamessages.
+TypeMetadata = TypeMetadataType() # Use this type to dump/load metatypes.
 

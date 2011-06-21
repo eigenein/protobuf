@@ -489,7 +489,13 @@ class EmbeddedMessage(Type):
 
 # Describing messages themselves. ----------------------------------------------
 
-# TODO Construct metamessage.
-# TODO Define metamessage message type.
-# TODO Construct message type from metamessage.
+class MetaMessageType(MessageType):
+
+    def __init__(self):
+        pass
+    
+    def __call__(self, message_type):
+        pass
+    
+MetaMessage = MetaMessageType() # Use this type to embed metamessages.
 

@@ -237,7 +237,26 @@ class TestEmbeddedMessage(unittest.TestCase):
         msg.c = Test1()
         msg.c.a = 150
         self.assertEqual(msg.dumps(), '\x1a\x03\x08\x96\x01')
-        
+    
+    def test_dumps_and_loads(self):
+        '''
+        Tests that boundaries of embedded messages are properly read.
+        '''
+        Type1, Type2 = MessageType(), MessageType()
+        Type2.add_field(1, 'a', UVarint)
+        Type1.add_field(1, 'a', UVarint)
+        Type1.add_field(2, 'b', EmbeddedMessage(Type2))
+        Type1.add_field(3, 'c', UVarint)
+        msg = Type1()
+        msg.a = 1
+        msg.c = 3
+        msg.b = Type2()
+        msg.b.a = 2
+        msg = Type1.loads(msg.dumps())
+        self.assertEqual(msg.a, 1)
+        self.assertEqual(msg.c, 3)
+        self.assertEqual(msg.b.a, 2)
+    
     def test_loads_1(self):
         Test1 = MessageType()
         Test1.add_field(1, 'a', UVarint)

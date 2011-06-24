@@ -519,9 +519,8 @@ class TypeMetadataType(Type):
         self.__field_metadata_type.add_field(4, 'flags', UVarint, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(5, 'embedded_metadata', EmbeddedMessage(self))
         # Metadata message description.
-        type_metadata_type = MessageType()
-        type_metadata_type.add_field(1, 'fields', EmbeddedMessage(self.__field_metadata_type), flags=(Flags.REPEATED | Flags.REQUIRED))
-        self.__self_type = EmbeddedMessage(type_metadata_type)
+        self.__self_type = EmbeddedMessage(MessageType())
+        self.__self_type.message_type.add_field(1, 'fields', EmbeddedMessage(self.__field_metadata_type), flags=(Flags.REPEATED | Flags.REQUIRED))
     
     def __create_message(self, message_type):
         '''

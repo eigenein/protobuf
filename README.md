@@ -7,6 +7,7 @@ protobuf
 -   Hashes of message types.
 -   Fixed: loading of missing required field doesn't raise `ValueError`.
 -   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
+-   TypeMetadata! (read below)
 
 #### Changes in v0.2
 
@@ -120,27 +121,53 @@ Data types
 
 There are the following data types supported for now:
 
-    UVarint
-    Varint
-    Bool
-    Fixed64         # 8-byte string.
-    UInt64
-    Int64
-    Float64
-    Fixed32         # 4-byte string.
-    UInt32
-    Int32
-    Float32
-    Bytes           # Pure bytes string.
-    Unicode         # Unicode string.
-    MarshalableCode # Python code object. Serialized with marshal module.
+    UVarint             # Unsigned integer.
+    Varint              # Signed integer.
+    Bool                # Boolean.
+    Fixed64             # 8-byte string.
+    UInt64              # C++'s 64-bit `unsigned long long`
+    Int64               # C++'s 64-bit `long long`
+    Float64             # C++'s `double`.
+    Fixed32             # 4-byte string.
+    UInt32              # C++'s 32-bit `unsigned int`.
+    Int32               # C++'s 32-bit `int`.
+    Float32             # C++'s `float`.
+    Bytes               # Pure bytes string.
+    Unicode             # Unicode string.
+    MarshalableCode     # Python code object. Serialized with marshal module.
+    TypeMetadata        # Type that describes another type.
 
 Some techniques
 ---------------
 
 ### Streaming messages
 
-There Protocol Buffer format is not self delimiting. But you can wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
+The Protocol Buffer format is not self delimiting. But you can wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
+
+### Self-describing messages and TypeMetadata
+
+There is no any description of the message type in a message itself. Therefore, if you want to send a self-described messages, you should send the a description of the message too.
+
+I've implemented a tool for this... Look:
+
+    A, B, C = MessageType(), MessageType(), MessageType()
+    A.add_field(1, 'a', UVarint)
+    A.add_field(2, 'b', TypeMetadata, flags=Flags.REPEATED)     # <- Look here!
+    A.add_field(3, 'c', Bytes)
+    B.add_field(4, 'ololo', Float32)
+    B.add_field(5, 'c', TypeMetadata, flags=Flags.REPEATED)     # <- And here!
+    B.add_field(6, 'd', Bool, flags=Flags.PACKED_REPEATED)
+    C.add_field(7, 'ghjhdf', UVarint)
+    msg = A()
+    msg.a = 1
+    msg.b = [B, C]                                              # Assigning of types.
+    msg.c = 'ololo'
+    bytes = msg.dumps()
+    ...
+    msg = A.loads(bytes)
+    msg2 = msg.b[0]()                                           # Creating a message of the loaded type.
+    
+You can send your `bytes` anywhere and you'll got your message type on the other side!
 
 More info
 ---------

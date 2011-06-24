@@ -517,7 +517,7 @@ class TypeMetadataType(Type):
         self.__field_metadata_type.add_field(2, 'name', Bytes, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(3, 'type', Bytes, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(4, 'flags', UVarint, flags=Flags.REQUIRED)
-        self.__field_metadata_type.add_field(5, 'embedded_metadata', EmbeddedMessage(self))
+        self.__field_metadata_type.add_field(5, 'embedded', EmbeddedMessage(self))
         # Metadata message description.
         self.__self_type = EmbeddedMessage(MessageType())
         self.__self_type.message_type.add_field(1, 'fields', EmbeddedMessage(self.__field_metadata_type), flags=(Flags.REPEATED | Flags.REQUIRED))
@@ -553,7 +553,7 @@ class TypeMetadataType(Type):
             field_info = (field.tag, field.name, g[field_type], field.flags)
             if field.flags & Flags.EMBEDDED_MASK == Flags.EMBEDDED:
                 field_info[3] -= Flags.EMBEDDED
-                field_info[2] = EmbeddedMessage(self.__restore_type(field.embedded_metadata))
+                field_info[2] = EmbeddedMessage(self.__restore_type(field.embedded))
             message_type.add_field(*field_info)
         return message_type
         

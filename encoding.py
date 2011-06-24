@@ -415,8 +415,11 @@ class MessageType(Type):
             except EOFError:
                 # Check if all required fields are present.
                 for tag, name in self.__tags_to_names.iteritems():
-                    if self.__has_flag(tag, Flags.REQUIRED, Flags.REQUIRED_MASK) and name not in message:
-                        raise ValueError('The field with the tag %s (\'%s\') is required but a value is missing.' % (tag, name))
+                    if self.__has_flag(tag, Flags.REQUIRED, Flags.REQUIRED_MASK) and not name in message:
+                        if self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
+                            message[name] = list() # Empty list (no values was in input stream). But required.
+                        else:
+                            raise ValueError('The field with the tag %s (\'%s\') is required but a value is missing.' % (tag, name))
                 return message
 
 class Message(dict):
@@ -428,7 +431,7 @@ class Message(dict):
         '''
         Initializes a new instance of the specified message type.
         '''
-        self.message_type = message_type
+        self.__dict__['message_type'] = message_type
         
     def __getattr__(self, name):
         '''
@@ -488,6 +491,12 @@ class EmbeddedMessage(Type):
         '''
         self.message_type = message_type
     
+    def __call__(self):
+        '''
+        Creates a message of the underlying message type.
+        '''
+        return self.message_type()
+    
     def dump(self, fp, value):
         Bytes.dump(fp, self.message_type.dumps(value))
         
@@ -497,48 +506,60 @@ class EmbeddedMessage(Type):
 
 # Describing messages themselves. ----------------------------------------------
 
-class TypeMetadataType(MessageType):
+class TypeMetadataType(Type):
 
-    WIRE_TYPE = 2 # It will be embedded message.
+    WIRE_TYPE = 2
 
     def __init__(self):
-        MessageType.__init__(self) # Call super to initialize internal dicts.
+        # Field description.
         self.__field_metadata_type = MessageType()
-        # A message type is described with a set of fields.
-        self.add_field(1, 'fields', EmbeddedMessage(self.__field_metadata_type), flags=Flags.REPEATED)
-        # Each of fields has ...
         self.__field_metadata_type.add_field(1, 'tag', UVarint, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(2, 'name', Bytes, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(3, 'type', Bytes, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(4, 'flags', UVarint, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(5, 'embedded_metadata', EmbeddedMessage(self))
+        # Metadata message description.
+        type_metadata_type = MessageType()
+        type_metadata_type.add_field(1, 'fields', EmbeddedMessage(self.__field_metadata_type), flags=(Flags.REPEATED | Flags.REQUIRED))
+        self.__self_type = EmbeddedMessage(type_metadata_type)
     
     def __create_message(self, message_type):
         '''
         Creates a message that contains info about the message_type.
         '''
-        message = self()
-        message.fields = list()
+        message, message.fields = self.__self_type(), list()
         for field in iter(message_type):
             field_meta = self.__field_metadata_type()
-            type_instance_name = field[2].__class__.__name__
-            if not type_instance_name.endswith('Type'):
-                raise TypeError('Invalid type name.') # We rely on naming. I know it's bad...
-            field_meta.tag, field_meta.name, field_meta.type, field_meta.flags = \
-                field[0], field[1], type_instance_name[:-4], field[3]
-            if isinstance(field[2], EmbeddedMessage):
+            field_meta.tag, field_meta.name, field_type, field_meta.flags = field
+            field_meta.type = type_str = field_type.__class__.__name__
+            if isinstance(field_type, EmbeddedMessage):
                 field_meta.flags |= Flags.EMBEDDED
-                field_meta.embedded_metadata = self.__create_message(field[2].message_type)
+                field_meta.embedded_metadata = self.__create_message(field_type.message_type)
+            elif not type_str.endswith('Type'):
+                raise TypeError('Type name of type singleton object should end with \'Type\'. Actual: \'%s\'.' % type_str)
+            else:
+                field_meta.type = type_str[:-4]
             message.fields.append(field_meta)
         return message
     
     def dump(self, fp, message_type):
-        MessageType.dump(self, fp, self.__create_message(message_type))
+        self.__self_type.dump(fp, self.__create_message(message_type))
+        
+    def __restore_type(self, message):
+        message_type, g = MessageType(), globals()
+        for field in message.fields:
+            field_type = field['type']
+            if not field_type in g:
+                raise TypeError('Primitive type \'%s\' not found in this protobuf module.' % field_type)
+            field_info = (field.tag, field.name, g[field_type], field.flags)
+            if field.flags & Flags.EMBEDDED_MASK == Flags.EMBEDDED:
+                field_info[3] -= Flags.EMBEDDED
+                field_info[2] = EmbeddedMessage(self.__restore_type(field.embedded_metadata))
+            message_type.add_field(*field_info)
+        return message_type
         
     def load(self, fp):
-        message, message_type = MessageType.load(self, fp), MessageType()
-        pass # TODO Construct message type here.
-        return message_type
+        return self.__restore_type(self.__self_type.load(fp))
     
-TypeMetadata = TypeMetadataType() # Use this type to dump/load metatypes.
+TypeMetadata = TypeMetadataType() # Use this type to dump and load metatypes.
 

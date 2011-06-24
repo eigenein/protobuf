@@ -290,7 +290,56 @@ class TestTypeMetadata(unittest.TestCase):
         Type1.add_field(1, 't', TypeMetadata)
         msg = Type1()
         msg.t = Test2
-        self.assertEqual(msg.dumps(), '\n\n\x0e\x08\x02\x12\x01b\x1a\x05Bytes \x00')
+        self.assertEqual(msg.dumps(), '\n\x10\n\x0e\x08\x02\x12\x01b\x1a\x05Bytes \x00')
+
+    def test_loads_1(self):
+        '''
+        Simple test.
+        '''
+        Type1 = MessageType()
+        Type1.add_field(1, 't', TypeMetadata)
+        msg = Type1.loads('\n\x10\n\x0e\x08\x02\x12\x01b\x1a\x05Bytes \x00')
+        self.assertIsInstance(msg.t, MessageType)
+        i = iter(msg.t)
+        self.assertEqual(i.next(), (2, 'b', Bytes, Flags.SIMPLE))
+        self.assertRaises(StopIteration, i.next)
+    
+    def test_dumps_and_loads_1(self):
+        '''
+        Integration test.
+        '''
+        A, B = MessageType(), MessageType()
+        A.add_field(1, 'a', Bytes)
+        A.add_field(2, 'b', TypeMetadata)
+        A.add_field(3, 'c', Bytes)
+        msg = A()
+        msg.a = '!'
+        msg.b = B
+        msg.c = '!'
+        bytes = msg.dumps()
+        msg = A.loads(bytes)
+        self.assertEqual(hash(msg.b), hash(B))
+    
+    def test_dumps_and_loads_2(self):
+        '''
+        Integration test.
+        '''
+        A, B, C = MessageType(), MessageType(), MessageType()
+        A.add_field(1, 'a', UVarint)
+        A.add_field(2, 'b', TypeMetadata, flags=Flags.REPEATED)
+        A.add_field(3, 'c', Bytes)
+        B.add_field(4, 'ololo', Float32)
+        B.add_field(5, 'c', TypeMetadata, flags=Flags.REPEATED)
+        B.add_field(6, 'd', Bool, flags=Flags.PACKED_REPEATED)
+        C.add_field(7, 'ghjhdf', UVarint)
+        msg = A()
+        msg.a = 1
+        msg.b = [B, C]
+        msg.c = 'ololo'
+        bytes = msg.dumps()
+        msg = A.loads(bytes)
+        self.assertEqual(hash(msg.b[0]), hash(B))
+        self.assertEqual(hash(msg.b[1]), hash(C))
 
 if __name__ == '__main__':
     unittest.main()

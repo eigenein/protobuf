@@ -222,6 +222,17 @@ class TestMessageType(unittest.TestCase):
         self.assertEquals(hash(Type1), hash(Type2))
         self.assertNotEquals(hash(Type1), hash(Type3))
         self.assertNotEquals(hash(Type1), hash(Type4))
+        
+    def test_iter_1(self):
+        '''
+        Tests __iter__.
+        '''
+        Type1 = MessageType()
+        Type1.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
+        Type1.add_field(2, 'c', Bytes, flags=Flags.PACKED_REPEATED)
+        i = iter(Type1)
+        self.assertEqual(i.next(), (1, 'b', UVarint, Flags.REPEATED))
+        self.assertEqual(i.next(), (2, 'c', Bytes, Flags.PACKED_REPEATED))
 
 class TestEmbeddedMessage(unittest.TestCase):
 
@@ -266,6 +277,20 @@ class TestEmbeddedMessage(unittest.TestCase):
         self.assertIn('c', msg)
         self.assertIn('a', msg.c)
         self.assertEqual(msg.c.a, 150)
+
+class TestTypeMetadata(unittest.TestCase):
+    
+    def test_dumps_1(self):
+        '''
+        Simple test.
+        '''
+        Test2 = MessageType()
+        Test2.add_field(2, 'b', Bytes)
+        Type1 = MessageType()
+        Type1.add_field(1, 't', TypeMetadata)
+        msg = Type1()
+        msg.t = Test2
+        self.assertEqual(msg.dumps(), '\n\n\x0e\x08\x02\x12\x01b\x1a\x05Bytes \x00')
 
 if __name__ == '__main__':
     unittest.main()

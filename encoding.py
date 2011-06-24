@@ -312,6 +312,13 @@ class MessageType(Type):
             _hash = hash(hash(self.__flags[tag]) + _hash * 23)
         return _hash
 
+    def __iter__(self):
+        '''
+        Iterates over all fields.
+        '''
+        for tag, name in self.__tags_to_names.iteritems():
+            yield (tag, name, self.__tags_to_types[tag], self.__flags[tag])
+
     def add_field(self, tag, name, field_type, flags=Flags.SIMPLE):
         '''
         Adds a field to the message type.
@@ -492,21 +499,41 @@ class EmbeddedMessage(Type):
 
 class TypeMetadataType(MessageType):
 
+    WIRE_TYPE = 2 # It will be embedded message.
+
     def __init__(self):
-        FieldMetadata = MessageType()
+        MessageType.__init__(self) # Call super to initialize internal dicts.
+        self.__field_metadata_type = MessageType()
         # A message type is described with a set of fields.
-        self.add_field(1, 'fields', EmbeddedMessage(FieldMetadata), flags=Flags.REPEATED)
+        self.add_field(1, 'fields', EmbeddedMessage(self.__field_metadata_type), flags=Flags.REPEATED)
         # Each of fields has ...
-        FieldMetadata.add_field(1, 'tag', UVarint, flags=Flags.REQUIRED)
-        FieldMetadata.add_field(2, 'name', Bytes, flags=Flags.REQUIRED)
-        FieldMetadata.add_field(3, 'type', Bytes, flags=Flags.REQUIRED)
-        FieldMetadata.add_field(4, 'flags', UVarint, flags=Flags.REQUIRED)
-        FieldMetadata.add_field(5, 'embedded_metadata', EmbeddedMessage(self))
+        self.__field_metadata_type.add_field(1, 'tag', UVarint, flags=Flags.REQUIRED)
+        self.__field_metadata_type.add_field(2, 'name', Bytes, flags=Flags.REQUIRED)
+        self.__field_metadata_type.add_field(3, 'type', Bytes, flags=Flags.REQUIRED)
+        self.__field_metadata_type.add_field(4, 'flags', UVarint, flags=Flags.REQUIRED)
+        self.__field_metadata_type.add_field(5, 'embedded_metadata', EmbeddedMessage(self))
+    
+    def __create_message(self, message_type):
+        '''
+        Creates a message that contains info about the message_type.
+        '''
+        message = self()
+        message.fields = list()
+        for field in iter(message_type):
+            field_meta = self.__field_metadata_type()
+            type_instance_name = field[2].__class__.__name__
+            if not type_instance_name.endswith('Type'):
+                raise TypeError('Invalid type name.') # We rely on naming. I know it's bad...
+            field_meta.tag, field_meta.name, field_meta.type, field_meta.flags = \
+                field[0], field[1], type_instance_name[:-4], field[3]
+            if isinstance(field[2], EmbeddedMessage):
+                field_meta.flags |= Flags.EMBEDDED
+                field_meta.embedded_metadata = self.__create_message(field[2].message_type)
+            message.fields.append(field_meta)
+        return message
     
     def dump(self, fp, message_type):
-        message = Message()
-        pass # Fill in message type here.
-        MessageType.dump(self, fp, message)
+        MessageType.dump(self, fp, self.__create_message(message_type))
         
     def load(self, fp):
         message, message_type = MessageType.load(self, fp), MessageType()

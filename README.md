@@ -6,7 +6,7 @@ protobuf
 -   README techniques added.
 -   Hashes of message types.
 -   Fixed: loading of missing required field doesn't raise `ValueError`.
--   Message `load` not uses `StringIO` for reading embedded messages and packed repeated fields.
+-   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
 
 #### Changes in v0.2
 
@@ -18,23 +18,18 @@ protobuf
 
 My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
 
-What and why
-------------
-
-I've written this just4fun, thus all questions like "What's the goal?" have no any sense.
+Using
+-----
 
 Fow now, there is full protobuf encoding implementation, so you can use the `encoding` module with full compatibility with the standard implementation.
 
 The `encoding` module is covered with unit tests, but you should understand that there are may be some unknown bugs. **Thus, use this software at your own risk.**
 
-Using
------
-
 Do `from encoding import *` and you're ready to go.
 
 Note: all names of message types are similar to described [there](http://code.google.com/apis/protocolbuffers/docs/encoding.html). ;-)
 
-### Sample 1. Simple
+### Sample 1. Introduction
 
 Assume you have the following definition:
 

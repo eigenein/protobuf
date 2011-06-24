@@ -7,7 +7,7 @@ protobuf
 -   Hashes of message types.
 -   Fixed: loading of missing required field doesn't raise `ValueError`.
 -   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
--   TypeMetadata! (read below)
+-   `TypeMetadata`! (read below)
 
 #### Changes in v0.2
 

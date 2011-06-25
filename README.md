@@ -8,6 +8,7 @@ protobuf
 -   Fixed: loading of missing required field doesn't raise `ValueError`.
 -   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
 -   `TypeMetadata`! (read below)
+-   Removed `MarshalableCode` (it's not `protobuf`s business).
 
 #### Changes in v0.2
 

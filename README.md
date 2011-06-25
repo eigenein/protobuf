@@ -1,6 +1,8 @@
 protobuf
 ========
 
+My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
+
 #### Changes in v0.3 (next)
 
 -   README techniques added.
@@ -9,7 +11,7 @@ protobuf
 -   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
 -   `TypeMetadata`! (read below)
 -   Removed `MarshalableCode` (it's not `protobuf`'s business).
--   Fixed: reading of Int32 values raises TypeError: 'str' object is not callable
+-   Fixed: reading of Int32 values raises `TypeError: 'str' object is not callable`
 
 #### Changes in v0.2
 
@@ -18,8 +20,6 @@ protobuf
 -   Unicode type.
 -   Python code object type.
 -   Fixed casting values to bool and from bool.
-
-My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
 
 Using
 -----
@@ -30,7 +30,7 @@ The `encoding` module is covered with tests, but you should understand that ther
 
 Do `from encoding import *` and you're ready to go.
 
-Note: all names of message types are similar to described [there](http://code.google.com/apis/protocolbuffers/docs/encoding.html). ;-)
+Note: all names of message types are similar to described [there](http://code.google.com/apis/protocolbuffers/docs/encoding.html). **;-)**
 
 ### Sample 1. Introduction
 

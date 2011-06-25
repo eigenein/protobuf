@@ -8,7 +8,7 @@ protobuf
 -   Fixed: loading of missing required field doesn't raise `ValueError`.
 -   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
 -   `TypeMetadata`! (read below)
--   Removed `MarshalableCode` (it's not `protobuf`s business).
+-   Removed `MarshalableCode` (it's not `protobuf`'s business).
 -   Fixed: reading of Int32 values raises TypeError: 'str' object is not callable
 
 #### Changes in v0.2

@@ -89,6 +89,14 @@ class TestInt64(unittest.TestCase):
     def test_loads_1(self):
         self.assertEqual(Int64.loads('\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE'), -2)
 
+class TestInt32(unittest.TestCase):
+
+    def test_dumps_1(self):
+        self.assertEqual(Int32.dumps(-2), '\xFF\xFF\xFF\xFE')
+    
+    def test_loads_1(self):
+        self.assertEqual(Int32.loads('\xFF\xFF\xFF\xFE'), -2)
+
 class TestBytes(unittest.TestCase):
 
     def test_dumps_1(self):

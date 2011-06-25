@@ -88,11 +88,9 @@ class BoolType(UVarintType):
     Represents a boolean type. Encodes True as UVarint 1, and False as UVarint 0.
     '''
 
-    def dump(self, fp, value):
-        UVarintType.dump(self, fp, 1 if value else 0)
+    dump = lambda self, fp, value: UVarintType.dump(self, fp, 1 if value else 0)
     
-    def load(self, fp):
-        return True if (UVarintType.load(self, fp) != 0) else False
+    load = lambda self, fp: UVarintType.load(self, fp) != 0
         
 class BytesType(Type):
     '''
@@ -106,16 +104,13 @@ class BytesType(Type):
         fp.write(value)
         
     def load(self, fp):
-        length = UVarint.load(fp)
-        return fp.read(length)
+        return fp.read(UVarint.load(fp))
 
 class UnicodeType(BytesType):
 
-    def dump(self, fp, value):
-        BytesType.dump(self, fp, value.encode('utf-8'))
-        
-    def load(self, fp):
-        return unicode(BytesType.load(self, fp), 'utf-8')
+    dump = lambda self, fp, value: BytesType.dump(self, fp, value.encode('utf-8'))
+
+    load = lambda self, fp: unicode(BytesType.load(self, fp), 'utf-8')
 
 class FixedLengthType(Type):
     '''
@@ -123,11 +118,9 @@ class FixedLengthType(Type):
     directly. Use derived types instead.
     '''
 
-    def dump(self, fp, value):
-        fp.write(value)
+    dump = lambda self, fp, value: fp.write(value)
         
-    def load(self, fp):
-        return fp.read(self.length())
+    load = lambda self, fp: fp.read(self.length())
 
 class Fixed64Type(FixedLengthType):
     '''
@@ -136,8 +129,7 @@ class Fixed64Type(FixedLengthType):
         
     WIRE_TYPE = 1
     
-    def length(self):
-        return 8
+    length = lambda self: 8
 
 class Fixed32Type(FixedLengthType):
     '''
@@ -146,19 +138,16 @@ class Fixed32Type(FixedLengthType):
 
     WIRE_TYPE = 5
 
-    def length(self):
-        return 4
+    length = lambda self: 4
 
 class Fixed64SubType(Fixed64Type):
     '''
     Represents a general pickle'able 64-bit value type.
     '''
 
-    def dump(self, fp, value):
-        Fixed64Type.dump(self, fp, struct.pack(self.format, value))
+    dump = lambda self, fp, value: Fixed64Type.dump(self, fp, struct.pack(self.format, value))
         
-    def load(self, fp):
-        return struct.unpack(self.format, Fixed64Type.load(self, fp))[0]
+    load = lambda self, fp: struct.unpack(self.format, Fixed64Type.load(self, fp))[0]
         
 class UInt64Type(Fixed64SubType):
     '''
@@ -186,12 +175,10 @@ class Fixed32SubType(Fixed32Type):
     Represents a pickle'able 32-bit value.
     '''
 
-    def dump(self, fp, value):
-        Fixed32Type.dump(self, fp, struct.pack(self.format, value))
+    dump = lambda self, fp, value: Fixed32Type.dump(self, fp, struct.pack(self.format, value))
+ 
+    load = lambda self, fp: struct.unpack(self.format, Fixed32Type.load(self, fp))[0]
         
-    def load(self, fp):
-        return struct.unpack(self.format(), Fixed32Type.load(self, fp))[0]
-
 class UInt32Type(Fixed32SubType):
     '''
     Represents an unsigned int32 type.
@@ -275,12 +262,7 @@ def _unpack_key(key):
     return key >> 3, key & 7
 
 # This used to correctly determine the length of unknown tags when loading a message.
-_wire_type_to_type_instance = {
-    0: Varint,
-    1: Fixed64,
-    2: Bytes,
-    5: Fixed32
-}
+_wire_type_to_type_instance = {0: Varint, 1: Fixed64, 2: Bytes, 5: Fixed32}
 
 class MessageType(Type):
     '''

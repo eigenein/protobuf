@@ -105,15 +105,6 @@ class TestUnicode(unittest.TestCase):
     def test_loads_1(self):
         self.assertEqual(Unicode.loads('\x0c\xd0\x9f\xd1\x80\xd0\xb8\xd0\xb2\xd0\xb5\xd1\x82'), u'Привет')
 
-class TestMarshalableCode(unittest.TestCase):
-
-    def test_dumps_and_loads(self):
-        def func():
-            return 42
-        code = MarshalableCode.loads(MarshalableCode.dumps(func.func_code))
-        f = types.FunctionType(code, globals())
-        self.assertEqual(f(), 42)
-
 class TestMessageType(unittest.TestCase):
 
     def test_dumps_1(self):

@@ -134,7 +134,6 @@ There are the following data types supported for now:
     Float32             # C++'s `float`.
     Bytes               # Pure bytes string.
     Unicode             # Unicode string.
-    MarshalableCode     # Python code object. Serialized with marshal module.
     TypeMetadata        # Type that describes another type.
 
 Some techniques

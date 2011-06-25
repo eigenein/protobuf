@@ -117,14 +117,6 @@ class UnicodeType(BytesType):
     def load(self, fp):
         return unicode(BytesType.load(self, fp), 'utf-8')
 
-class MarshalableCodeType(BytesType):
-
-    def dump(self, fp, value):
-        BytesType.dump(self, fp, marshal.dumps(value, 2))
-            
-    def load(self, fp):
-        return marshal.loads(BytesType.load(self, fp))
-
 class FixedLengthType(Type):
     '''
     Represents a general fixed-length value type. You should not use this type
@@ -237,7 +229,6 @@ Int32 = Int32Type()
 Float32 = Float32Type()
 Bytes = BytesType()
 Unicode = UnicodeType()
-MarshalableCode = MarshalableCodeType()
 
 # Messages. --------------------------------------------------------------------
 

@@ -229,7 +229,7 @@ class Flags:
     SINGLE, REPEATED, PACKED_REPEATED, REPEATED_MASK = 0, 2, 6, 6 # Repeated and packed-repeated fields.
     PRIMITIVE, EMBEDDED, EMBEDDED_MASK = 0, 8, 8 # Used by MessageMetaType to determine if a field contains embedded definition.
 
-class _EofWrapper:
+class EofWrapper:
     '''
     Wraps a stream to raise EOFError instead of just returning of ''.
     '''
@@ -351,7 +351,7 @@ class MessageType(Type):
                 raise ValueError('The field with the tag %s is required but a value is missing.' % tag)
         
     def load(self, fp):
-        fp, message = _EofWrapper(fp), self.__call__() # Wrap fp and create a new instance.
+        fp, message = EofWrapper(fp), self.__call__() # Wrap fp and create a new instance.
         while True:
             try:
                 tag, wire_type = _unpack_key(UVarint.load(fp))
@@ -370,7 +370,7 @@ class MessageType(Type):
                     elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
                         # Repeated packed value.
                         repeated_value = message[self.__tags_to_names[tag]] = list()
-                        internal_fp = _EofWrapper(fp, UVarint.load(fp)) # Limit with value length.
+                        internal_fp = EofWrapper(fp, UVarint.load(fp)) # Limit with value length.
                         while True:
                             try:
                                 repeated_value.append(field_type.load(internal_fp))
@@ -473,7 +473,7 @@ class EmbeddedMessage(Type):
         Bytes.dump(fp, self.message_type.dumps(value))
         
     def load(self, fp):
-        return self.message_type.load(_EofWrapper(fp, UVarint.load(fp))) # Limit with embedded message length.
+        return self.message_type.load(EofWrapper(fp, UVarint.load(fp))) # Limit with embedded message length.
 
 # Describing messages themselves. ----------------------------------------------
 

@@ -26,7 +26,7 @@ Using
 
 Fow now, there is full protobuf encoding implementation, so you can use the `encoding` module with full compatibility with the standard implementation.
 
-The `encoding` module is covered with unit tests, but you should understand that there are may be some unknown bugs. **Thus, use this software at your own risk.**
+The `encoding` module is covered with tests, but you should understand that there are may be some unknown bugs. **Thus, use this software at your own risk.**
 
 Do `from encoding import *` and you're ready to go.
 
@@ -144,6 +144,8 @@ Some techniques
 ### Streaming messages
 
 The Protocol Buffer format is not self delimiting. But you can wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
+
+The other option is to use `protobuf.EofWrapper` that has a `limit` parameter in its constructor. The `EofWrapper` raises `EOFError` when the specified number of bytes is read.
 
 ### Self-describing messages and TypeMetadata
 

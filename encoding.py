@@ -279,10 +279,10 @@ class MessageType(Type):
 
     def __hash__(self):
         _hash = 17
-        for tag, field_type in self.__tags_to_types.iteritems():
+        for tag, name, field_type, flags in iter(self):
             _hash = hash(tag + _hash * 23)
             _hash = hash(hash(field_type) + _hash * 23)
-            _hash = hash(hash(self.__flags[tag]) + _hash * 23)
+            _hash = hash(flags + _hash * 23)
         return _hash
 
     def __iter__(self):
@@ -370,8 +370,7 @@ class MessageType(Type):
                     elif self.__has_flag(tag, Flags.PACKED_REPEATED, Flags.REPEATED_MASK):
                         # Repeated packed value.
                         repeated_value = message[self.__tags_to_names[tag]] = list()
-                        repeated_value_length = UVarint.load(fp)
-                        internal_fp = _EofWrapper(fp, repeated_value_length)
+                        internal_fp = _EofWrapper(fp, UVarint.load(fp)) # Limit with value length.
                         while True:
                             try:
                                 repeated_value.append(field_type.load(internal_fp))
@@ -390,7 +389,7 @@ class MessageType(Type):
                 for tag, name in self.__tags_to_names.iteritems():
                     if self.__has_flag(tag, Flags.REQUIRED, Flags.REQUIRED_MASK) and not name in message:
                         if self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
-                            message[name] = list() # Empty list (no values was in input stream). But required.
+                            message[name] = list() # Empty list (no values was in input stream). But required field.
                         else:
                             raise ValueError('The field with the tag %s (\'%s\') is required but a value is missing.' % (tag, name))
                 return message
@@ -474,8 +473,7 @@ class EmbeddedMessage(Type):
         Bytes.dump(fp, self.message_type.dumps(value))
         
     def load(self, fp):
-        message_length = UVarint.load(fp)
-        return self.message_type.load(_EofWrapper(fp, message_length))
+        return self.message_type.load(_EofWrapper(fp, UVarint.load(fp))) # Limit with embedded message length.
 
 # Describing messages themselves. ----------------------------------------------
 
@@ -490,7 +488,7 @@ class TypeMetadataType(Type):
         self.__field_metadata_type.add_field(2, 'name', Bytes, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(3, 'type', Bytes, flags=Flags.REQUIRED)
         self.__field_metadata_type.add_field(4, 'flags', UVarint, flags=Flags.REQUIRED)
-        self.__field_metadata_type.add_field(5, 'embedded', EmbeddedMessage(self))
+        self.__field_metadata_type.add_field(5, 'embedded', EmbeddedMessage(self)) # Used to describe embedded messages.
         # Metadata message description.
         self.__self_type = EmbeddedMessage(MessageType())
         self.__self_type.message_type.add_field(1, 'fields', EmbeddedMessage(self.__field_metadata_type), flags=(Flags.REPEATED | Flags.REQUIRED))
@@ -518,6 +516,9 @@ class TypeMetadataType(Type):
         self.__self_type.dump(fp, self.__create_message(message_type))
         
     def __restore_type(self, message):
+        '''
+        Restores a message type by the information in the message.
+        '''
         message_type, g = MessageType(), globals()
         for field in message.fields:
             field_type = field['type']

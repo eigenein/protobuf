@@ -179,5 +179,5 @@ You can send your `bytes` anywhere and you'll got your message type on the other
 More info
 ---------
 
-See `encoding` to see the API and `run-tests` modules to see more usage samples.
+See `protobuf` to see the API and `run-tests` modules to see more usage samples.
     

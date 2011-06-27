@@ -3,6 +3,10 @@ protobuf
 
 My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
 
+#### Changes in next
+
+-   `encoding` module became `protobuf` module.
+
 #### Changes in v0.3
 
 -   README techniques added.

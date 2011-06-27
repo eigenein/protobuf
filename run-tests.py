@@ -9,7 +9,7 @@ eigenein (c) 2011
 
 import unittest
 import types
-from encoding import *
+from protobuf import *
 
 class TestUVarint(unittest.TestCase):
 

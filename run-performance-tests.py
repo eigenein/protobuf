@@ -47,7 +47,6 @@ fp = FakeOutput()
 # Tests themselves. ------------------------------------------------------------
 
 @test('UVarint dump')
-@testcase(0)
 @testcase(1)
 @testcase(0x7FFFFFFF)
 @testcase(12345678901234567890L)

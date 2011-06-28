@@ -6,6 +6,7 @@ My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](ht
 #### Changes in next
 
 -   `encoding` module became `protobuf` module.
+-   Performance tests.
 
 #### Changes in v0.3
 

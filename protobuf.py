@@ -88,7 +88,7 @@ class BoolType(UVarintType):
     Represents a boolean type. Encodes True as UVarint 1, and False as UVarint 0.
     '''
 
-    dump = lambda self, fp, value: UVarintType.dump(self, fp, 1 if value else 0)
+    dump = lambda self, fp, value: fp.write('\x01' if value else '\x00')
     
     load = lambda self, fp: UVarintType.load(self, fp) != 0
         

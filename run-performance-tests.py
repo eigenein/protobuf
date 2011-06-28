@@ -25,6 +25,7 @@ def runtests():
     for title, target in tests:
         if not target in test_cases:
             stmt = '%s()' % target
+            print title
             print '%s: %ss' % (stmt, min(timeit.repeat(stmt, 'import protobuf; from __main__ import %s' % target)))
         else:
             for args, kwargs in test_cases[target]:
@@ -33,7 +34,9 @@ def runtests():
                 allargs_str = args_str
                 allargs_str += ', ' + kwargs_str if len(args_str) > 0 and len(kwargs_str) > 0 else kwargs_str
                 stmt = '%s(%s)' % (target, allargs_str)
+                print title
                 print '%s: %ss' % (stmt, min(timeit.repeat(stmt, 'import protobuf; from __main__ import %s' % target)))
+        print '---------------------------------------------------------------'
         
 # Tests themselves. ------------------------------------------------------------
 

@@ -7,6 +7,7 @@ My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](ht
 
 -   `encoding` module became `protobuf` module.
 -   Performance tests.
+-   Bool.dump 2.25 times faster.
 
 #### Changes in v0.3
 
@@ -16,7 +17,7 @@ My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](ht
 -   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
 -   `TypeMetadata`! (read below)
 -   Removed `MarshalableCode` (it's not `protobuf`'s business).
--   Fixed: reading of Int32 values raises `TypeError: 'str' object is not callable`
+-   Fixed: reading of `Int32` values raises `TypeError: 'str' object is not callable`
 
 #### Changes in v0.2
 

@@ -78,6 +78,12 @@ def test_varint_dump(value):
 def test_varint_loads(value):
     Varint.loads(value)
 
+@test('Bool dump')
+@testcase(False)
+@testcase(True)
+def test_bool_dump(value):
+    Bool.dump(fp, value)
+
 # Main. ------------------------------------------------------------------------
 
 if __name__ == '__main__':

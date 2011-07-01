@@ -7,7 +7,10 @@ My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](ht
 
 -   `encoding` module became `protobuf` module.
 -   Performance tests.
--   Bool.dump 2.25 times faster.
+-   `Bool.dump` 2.2 times faster.
+-   `Varint` 14% faster.
+-   `add_field` chaining.
+-   `__hash__` 17% faster.
 
 #### Changes in v0.3
 
@@ -177,6 +180,12 @@ I've implemented a tool for this... Look:
     msg2 = msg.b[0]()                                           # Creating a message of the loaded type.
     
 You can send your `bytes` anywhere and you'll got your message type on the other side!
+
+### add_field chaining
+
+`add_field` return the message type itself, thus you can do so:
+
+    MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
 
 More info
 ---------

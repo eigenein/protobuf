@@ -75,6 +75,7 @@ def test_varint_dump(value):
 @test('Varint loads')
 @testcase('\x01')
 @testcase('\x02')
+@testcase('\x9E\xA7\x05')
 def test_varint_loads(value):
     Varint.loads(value)
 
@@ -83,6 +84,13 @@ def test_varint_loads(value):
 @testcase(True)
 def test_bool_dump(value):
     Bool.dump(fp, value)
+
+Type1 = MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
+
+@test('__hash__')
+@testcase()
+def test_hash():
+    h = hash(Type1)
 
 # Main. ------------------------------------------------------------------------
 

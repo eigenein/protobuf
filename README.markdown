@@ -3,9 +3,14 @@ protobuf
 
 My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
 
-#### Changes in next
+#### Changes in v0.3.1
 
 -   `encoding` module became `protobuf` module.
+-   Performance tests.
+-   `Bool.dump` 2.2 times faster.
+-   `Varint` 14% faster.
+-   `add_field` chaining.
+-   `__hash__` 17% faster.
 
 #### Changes in v0.3
 
@@ -15,7 +20,7 @@ My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](ht
 -   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
 -   `TypeMetadata`! (read below)
 -   Removed `MarshalableCode` (it's not `protobuf`'s business).
--   Fixed: reading of Int32 values raises `TypeError: 'str' object is not callable`
+-   Fixed: reading of `Int32` values raises `TypeError: 'str' object is not callable`
 
 #### Changes in v0.2
 
@@ -176,8 +181,14 @@ I've implemented a tool for this... Look:
     
 You can send your `bytes` anywhere and you'll got your message type on the other side!
 
+### add_field chaining
+
+`add_field` return the message type itself, thus you can do so:
+
+    MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
+
 More info
 ---------
 
-See `encoding` to see the API and `run-tests` modules to see more usage samples.
+See `protobuf` to see the API and `run-tests` modules to see more usage samples.
     

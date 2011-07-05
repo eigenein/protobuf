@@ -77,18 +77,22 @@ class VarintType(UVarintType):
     '''
     
     def dump(self, fp, value):
-        UVarintType.dump(self, fp, abs(value) * 2 - (1 if value < 0 else 0))
+        encoded_varint = abs(value) << 1
+        if value < 0:
+            encoded_varint -= 1
+        UVarintType.dump(self, fp, encoded_varint)
         
     def load(self, fp):
-        div, mod = divmod(UVarintType.load(self, fp) + 1, 2)
-        return -div if mod == 0 else div
+        encoded_varint = UVarintType.load(self, fp) + 1
+        div = encoded_varint >> 1
+        return div if encoded_varint & 1 else -div
       
 class BoolType(UVarintType):
     '''
     Represents a boolean type. Encodes True as UVarint 1, and False as UVarint 0.
     '''
 
-    dump = lambda self, fp, value: UVarintType.dump(self, fp, 1 if value else 0)
+    dump = lambda self, fp, value: fp.write('\x01' if value else '\x00') # Similarly to UVarint.
     
     load = lambda self, fp: UVarintType.load(self, fp) != 0
         
@@ -280,9 +284,7 @@ class MessageType(Type):
     def __hash__(self):
         _hash = 17
         for tag, name, field_type, flags in iter(self):
-            _hash = hash(tag + _hash * 23)
-            _hash = hash(hash(field_type) + _hash * 23)
-            _hash = hash(flags + _hash * 23)
+            _hash = hash((_hash, tag, field_type, flags))
         return _hash
 
     def __iter__(self):
@@ -301,6 +303,7 @@ class MessageType(Type):
         self.__tags_to_names[tag] = name
         self.__tags_to_types[tag] = field_type
         self.__flags[tag] = flags
+        return self # Allow add_field chaining.
 
     def remove_field(self, tag):
         '''

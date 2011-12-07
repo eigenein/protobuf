@@ -437,7 +437,7 @@ class Message(dict):
         '''
         Dumps the message into a write-like object.
         '''
-        return self.message_type.dump(self, value)   
+        return self.message_type.dump(fp, self)   
 
 def loads(self, s, message_type):
     '''

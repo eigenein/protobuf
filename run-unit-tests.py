@@ -9,6 +9,7 @@ eigenein (c) 2011
 
 import unittest
 import types
+import StringIO
 from protobuf import *
 
 class TestUVarint(unittest.TestCase):
@@ -114,6 +115,15 @@ class TestUnicode(unittest.TestCase):
         self.assertEqual(Unicode.loads('\x0c\xd0\x9f\xd1\x80\xd0\xb8\xd0\xb2\xd0\xb5\xd1\x82'), u'Привет')
 
 class TestMessageType(unittest.TestCase):
+
+    def test_dump_1(self):
+        Test2 = MessageType()
+        Test2.add_field(2, 'b', Bytes)
+        msg = Test2()
+        msg.b = 'testing'
+        fp = StringIO.StringIO()
+        msg.dump(fp)
+        self.assertEqual(fp.getvalue(), '\x12\x07\x74\x65\x73\x74\x69\x6e\x67')
 
     def test_dumps_1(self):
         Test2 = MessageType()

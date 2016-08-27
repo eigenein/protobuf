@@ -4,7 +4,7 @@
 '''
 Implements the Google's protobuf encoding.
 
-eigenein (c) 2011
+eigenein (c) 2011-2016
 '''
 
 import cStringIO

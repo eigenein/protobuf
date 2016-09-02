@@ -243,6 +243,15 @@ class TestMessageType(unittest.TestCase):
         self.assertEqual(i.next(), (1, 'b', UVarint, Flags.REPEATED))
         self.assertEqual(i.next(), (2, 'c', Bytes, Flags.PACKED_REPEATED))
 
+    def test_empty_optional_bytes(self):
+        '''
+        Regression test to prove that a bytes field of length zero is loaded correctly.
+        '''
+        Type1 = MessageType()
+        Type1.add_field(1, 'a', Bytes)
+        msg = Type1.loads('\n\x00')
+        self.assertEqual(msg.a, '')
+
 class TestEmbeddedMessage(unittest.TestCase):
 
     def test_dumps_1(self):

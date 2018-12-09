@@ -7,11 +7,11 @@ Runs unit tests.
 eigenein (c) 2011
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import unittest
 
-from protobuf import *
+from pure_protobuf.protobuf import *
 
 
 class TestUVarint(unittest.TestCase):

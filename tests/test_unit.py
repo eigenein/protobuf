@@ -9,9 +9,24 @@ eigenein (c) 2011
 
 from __future__ import absolute_import, print_function
 
+import io
 import unittest
 
-from pure_protobuf.protobuf import *
+from pure_protobuf.protobuf import (
+    Bool,
+    Bytes,
+    EmbeddedMessage,
+    Flags,
+    Float32,
+    Int32,
+    Int64,
+    MessageType,
+    TypeMetadata,
+    UInt64,
+    Unicode,
+    UVarint,
+    Varint,
+)
 
 
 class TestUVarint(unittest.TestCase):
@@ -265,7 +280,8 @@ class TestMessageType(unittest.TestCase):
 
     def test_empty_optional_bytes(self):
         """
-        Regression test to prove that a bytes field of length zero is loaded correctly.
+        Regression test to prove that a bytes field of length zero is loaded
+        correctly.
         """
         Type1 = MessageType()
         Type1.add_field(1, "a", Bytes)

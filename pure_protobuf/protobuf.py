@@ -481,12 +481,10 @@ class MessageType(Type):
             except EOFError:
                 # Check if all required fields are present.
                 for tag, name in six.iteritems(self.__tags_to_names):
-                    if (
-                        self.__has_flag(
-                            tag, Flags.REQUIRED, Flags.REQUIRED_MASK
-                        )
-                        and (name not in message)
-                    ):
+                    has_flag = self.__has_flag(
+                        tag, Flags.REQUIRED, Flags.REQUIRED_MASK
+                    )
+                    if (has_flag and (name not in message)):
                         if self.__has_flag(
                             tag, Flags.REPEATED, Flags.REPEATED_MASK
                         ):

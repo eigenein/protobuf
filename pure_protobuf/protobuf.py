@@ -4,7 +4,7 @@
 '''
 Implements the Google's protobuf encoding.
 
-eigenein (c) 2011
+eigenein (c) 2011-2016
 '''
 
 import cStringIO
@@ -245,6 +245,8 @@ class EofWrapper:
         '''
         Reads a string. Raises EOFError on end of stream.
         '''
+        if size == 0:
+            return ''
         if self.__limit is not None:
             size = min(size, self.__limit)
             self.__limit -= size

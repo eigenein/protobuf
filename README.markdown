@@ -3,7 +3,7 @@ protobuf
 
 My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
 
-![Travis](https://img.shields.io/travis/eigenein/protobuf/:repo.svg) 
+[![Build Status](https://travis-ci.org/eigenein/protobuf.svg?branch=master)](https://travis-ci.org/eigenein/protobuf) 
 ![PyPI version](https://img.shields.io/pypi/v/pure-protobuf.svg) 
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/pure-protobuf.svg) 
 ![PyPI license](https://img.shields.io/pypi/l/pure-protobuf.svg)

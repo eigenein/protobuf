@@ -1,0 +1,6 @@
+language: python
+python:
+  - "pypy"
+  - "2.7"
+script:
+  - pytest tests/test_unit.py

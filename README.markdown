@@ -3,6 +3,13 @@ protobuf
 
 My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
 
+
+![PyPI version](https://img.shields.io/pypi/v/pure-protobuf.svg) 
+![PyPI python versions](https://img.shields.io/pypi/pyversions/pure-protobuf.svg) 
+![PyPI format](https://img.shields.io/pypi/format/pure-protobuf.svg) 
+![PyPI status](https://img.shields.io/pypi/status/pure-protobuf.svg) 
+![PyPI license](https://img.shields.io/pypi/l/pure-protobuf.svg)
+
 #### Changes in v0.3.1
 
 -   `encoding` module became `protobuf` module.

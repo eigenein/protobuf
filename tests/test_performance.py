@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import timeit
-from protobuf import *
+from pure_protobuf.protobuf import *
 
 tests = list()
 test_cases = dict()
@@ -23,7 +23,7 @@ def testcase(*args, **kwargs):
             test_cases[target.__name__] = [(args, kwargs)]
         return target
     return wrapper
-        
+
 def runtests():
     for title, target in tests:
         print '\033[95mTest: %s\033[0m' % title
@@ -33,21 +33,21 @@ def runtests():
             allargs_str = args_str
             allargs_str += ', ' + kwargs_str if len(args_str) > 0 and len(kwargs_str) > 0 else kwargs_str
             stmt = '%s(%s)' % (target, allargs_str)
-            print '%s: \033[92m%.4fs\033[0m' % (stmt.ljust(70), 
+            print '%s: \033[92m%.4fs\033[0m' % (stmt.ljust(70),
                 min(
                     timeit.repeat(stmt, 'from __main__ import %s' % target, repeat=repeat, number=number)
                 ))
         print '\033[94m%s\033[0m' % '-' * 80
         print
-        
+
 # Fake output. -----------------------------------------------------------------
 
 class FakeOutput:
-    
+
     def write(self, s):
         pass
 
-fp = FakeOutput()      
+fp = FakeOutput()
 
 # Tests themselves. ------------------------------------------------------------
 
@@ -57,7 +57,7 @@ fp = FakeOutput()
 @testcase(12345678901234567890L)
 def test_uvarint_dump(value):
     UVarint.dump(fp, value)
-    
+
 @test('UVarint loads')
 @testcase('\x03')
 @testcase('\x8E\x02')

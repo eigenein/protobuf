@@ -10,28 +10,28 @@ eigenein (c) 2011
 import unittest
 import types
 import StringIO
-from protobuf import *
+from pure_protobuf.protobuf import *
 
 class TestUVarint(unittest.TestCase):
 
     def test_dumps_1(self):
         self.assertEqual(UVarint.dumps(0), '\x00')
-        
+
     def test_dumps_2(self):
         self.assertEqual(UVarint.dumps(3), '\x03')
-        
+
     def test_dumps_3(self):
         self.assertEqual(UVarint.dumps(270), '\x8E\x02')
-        
+
     def test_dumps_4(self):
         self.assertEqual(UVarint.dumps(86942), '\x9E\xA7\x05')
-        
+
     def test_loads_1(self):
         self.assertEqual(UVarint.loads('\x00'), 0)
-    
+
     def test_loads_2(self):
         self.assertEqual(UVarint.loads('\x03'), 3)
-        
+
     def test_loads_3(self):
         self.assertEqual(UVarint.loads('\x8E\x02'), 270)
 
@@ -39,28 +39,28 @@ class TestUVarint(unittest.TestCase):
         self.assertEqual(UVarint.loads('\x9E\xA7\x05'), 86942)
 
 class TestVarint(unittest.TestCase):
-    
+
     def test_dumps_1(self):
         self.assertEqual(Varint.dumps(0), '\x00')
-    
+
     def test_dumps_2(self):
         self.assertEqual(Varint.dumps(-1), '\x01')
-        
+
     def test_dumps_3(self):
         self.assertEqual(Varint.dumps(1), '\x02')
-    
+
     def test_dumps_4(self):
         self.assertEqual(Varint.dumps(-2), '\x03')
-        
+
     def test_loads_1(self):
         self.assertEqual(Varint.loads('\x00'), 0)
-    
+
     def test_loads_2(self):
         self.assertEqual(Varint.loads('\x01'), -1)
-        
+
     def test_loads_3(self):
         self.assertEqual(Varint.loads('\x02'), 1)
-        
+
     def test_loads_4(self):
         self.assertEqual(Varint.loads('\x03'), -2)
 
@@ -69,7 +69,7 @@ class TestBool(unittest.TestCase):
     def test_dumps_1(self):
         self.assertEqual(Bool.dumps(True), '\x01')
         self.assertEqual(Bool.dumps(False), '\x00')
-        
+
     def test_loads_1(self):
         self.assertEqual(Bool.loads('\x00'), False)
         self.assertEqual(Bool.loads('\x01'), True)
@@ -78,15 +78,15 @@ class TestUInt64(unittest.TestCase):
 
     def test_dumps_1(self):
         self.assertEqual(UInt64.dumps(1), '\x00\x00\x00\x00\x00\x00\x00\x01')
-    
+
     def test_loads_1(self):
         self.assertEqual(UInt64.loads('\x00\x00\x00\x00\x00\x00\x00\x01'), 1)
-        
+
 class TestInt64(unittest.TestCase):
 
     def test_dumps_1(self):
         self.assertEqual(Int64.dumps(-2), '\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE')
-    
+
     def test_loads_1(self):
         self.assertEqual(Int64.loads('\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE'), -2)
 
@@ -94,7 +94,7 @@ class TestInt32(unittest.TestCase):
 
     def test_dumps_1(self):
         self.assertEqual(Int32.dumps(-2), '\xFF\xFF\xFF\xFE')
-    
+
     def test_loads_1(self):
         self.assertEqual(Int32.loads('\xFF\xFF\xFF\xFE'), -2)
 
@@ -102,7 +102,7 @@ class TestBytes(unittest.TestCase):
 
     def test_dumps_1(self):
         self.assertEqual(Bytes.dumps('testing'), '\x07\x74\x65\x73\x74\x69\x6e\x67')
-        
+
     def test_loads_1(self):
         self.assertEqual(Bytes.loads('\x07\x74\x65\x73\x74\x69\x6e\x67'), 'testing')
 
@@ -110,7 +110,7 @@ class TestUnicode(unittest.TestCase):
 
     def test_dumps_1(self):
         self.assertEqual(Unicode.dumps(u'Привет'), '\x0c\xd0\x9f\xd1\x80\xd0\xb8\xd0\xb2\xd0\xb5\xd1\x82')
-        
+
     def test_loads_1(self):
         self.assertEqual(Unicode.loads('\x0c\xd0\x9f\xd1\x80\xd0\xb8\xd0\xb2\xd0\xb5\xd1\x82'), u'Привет')
 
@@ -140,7 +140,7 @@ class TestMessageType(unittest.TestCase):
         Test2.add_field(2, 'b', Bytes)
         msg = Test2()
         self.assertEqual(msg.dumps(), '')
-        
+
     def test_dumps_3(self):
         '''
         Tests missing required value.
@@ -160,7 +160,7 @@ class TestMessageType(unittest.TestCase):
         msg = Test2()
         msg.b = (1, 2, 3)
         self.assertEqual(msg.dumps(), '\x08\x01\x08\x02\x08\x03')
-    
+
     def test_dumps_5(self):
         '''
         Tests packed repeated value.
@@ -179,7 +179,7 @@ class TestMessageType(unittest.TestCase):
         Test2.add_field(2, 'b', Bytes)
         msg = Test2.loads('')
         self.assertNotIn('b', msg)
-    
+
     def test_loads_1_1(self):
         '''
         Tests missing required value.
@@ -188,7 +188,7 @@ class TestMessageType(unittest.TestCase):
         Test2.add_field(2, 'b', Bytes, flags=Flags.REQUIRED)
         with self.assertRaises(ValueError):
             Test2.loads('')
-    
+
     def test_loads_2(self):
         '''
         Tests that the last value in the input stream is assigned to
@@ -198,7 +198,7 @@ class TestMessageType(unittest.TestCase):
         Test2.add_field(1, 'b', UVarint)
         msg = Test2.loads('\x08\x01\x08\x02\x08\x03')
         self.assertEquals(msg.b, 3)
-    
+
     def test_loads_3(self):
         '''
         Tests repeated value.
@@ -208,7 +208,7 @@ class TestMessageType(unittest.TestCase):
         msg = Test2.loads('\x08\x01\x08\x02\x08\x03')
         self.assertIn('b', msg)
         self.assertEquals(msg.b, [1, 2, 3])
-        
+
     def test_loads_4(self):
         '''
         Tests packed repeated value.
@@ -218,7 +218,7 @@ class TestMessageType(unittest.TestCase):
         msg = Test4.loads('\x22\x06\x03\x8E\x02\x9E\xA7\x05')
         self.assertIn('d', msg)
         self.assertEquals(msg.d, [3, 270, 86942])
-    
+
     def test_hash_1(self):
         '''
         Tests __hash__.
@@ -231,7 +231,7 @@ class TestMessageType(unittest.TestCase):
         self.assertEquals(hash(Type1), hash(Type2))
         self.assertNotEquals(hash(Type1), hash(Type3))
         self.assertNotEquals(hash(Type1), hash(Type4))
-        
+
     def test_iter_1(self):
         '''
         Tests __iter__.
@@ -266,7 +266,7 @@ class TestEmbeddedMessage(unittest.TestCase):
         msg.c = Test1()
         msg.c.a = 150
         self.assertEqual(msg.dumps(), '\x1a\x03\x08\x96\x01')
-    
+
     def test_dumps_and_loads(self):
         '''
         Tests that boundaries of embedded messages are properly read.
@@ -285,7 +285,7 @@ class TestEmbeddedMessage(unittest.TestCase):
         self.assertEqual(msg.a, 1)
         self.assertEqual(msg.c, 3)
         self.assertEqual(msg.b.a, 2)
-    
+
     def test_loads_1(self):
         Test1 = MessageType()
         Test1.add_field(1, 'a', UVarint)
@@ -297,7 +297,7 @@ class TestEmbeddedMessage(unittest.TestCase):
         self.assertEqual(msg.c.a, 150)
 
 class TestTypeMetadata(unittest.TestCase):
-    
+
     def test_dumps_1(self):
         '''
         Simple test.
@@ -321,7 +321,7 @@ class TestTypeMetadata(unittest.TestCase):
         i = iter(msg.t)
         self.assertEqual(i.next(), (2, 'b', Bytes, Flags.SIMPLE))
         self.assertRaises(StopIteration, i.next)
-    
+
     def test_dumps_and_loads_1(self):
         '''
         Integration test.
@@ -337,7 +337,7 @@ class TestTypeMetadata(unittest.TestCase):
         bytes = msg.dumps()
         msg = A.loads(bytes)
         self.assertEqual(hash(msg.b), hash(B))
-    
+
     def test_dumps_and_loads_2(self):
         '''
         Integration test.

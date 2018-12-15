@@ -8,45 +8,8 @@ My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](ht
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/pure-protobuf.svg) 
 ![PyPI license](https://img.shields.io/pypi/l/pure-protobuf.svg)
 
-#### Changes in v0.3.1
-
--   `encoding` module became `protobuf` module.
--   Performance tests.
--   `Bool.dump` 2.2 times faster.
--   `Varint` 14% faster.
--   `add_field` chaining.
--   `__hash__` 17% faster.
-
-#### Changes in v0.3
-
--   README techniques added.
--   Hashes of message types.
--   Fixed: loading of missing required field doesn't raise `ValueError`.
--   Message `load` doesn't use `StringIO` for reading embedded messages and packed repeated fields anymore.
--   `TypeMetadata`! (read below)
--   Removed `MarshalableCode` (it's not `protobuf`'s business).
--   Fixed: reading of `Int32` values raises `TypeError: 'str' object is not callable`
-
-#### Changes in v0.2
-
--   Fixed `Int32` type name (was `Int32Type`).
--   Added validation of message type.
--   Unicode type.
--   Python code object type.
--   Fixed casting values to bool and from bool.
-
 Using
 -----
-
-Fow now, there is full protobuf encoding implementation, so you can use the `encoding` module with full compatibility with the standard implementation.
-
-The `encoding` module is covered with tests, but you should understand that there are may be some unknown bugs. **Thus, use this software at your own risk.**
-
-Do `from encoding import *` and you're ready to go.
-
-Note: all names of message types are similar to described [there](http://code.google.com/apis/protocolbuffers/docs/encoding.html). **;-)**
-
-### Sample 1. Introduction
 
 Assume you have the following definition:
 
@@ -56,8 +19,12 @@ Assume you have the following definition:
     
 First, you should create the message type:
 
-    Test2 = MessageType()
-    Test2.add_field(2, 'b', String)
+```python
+from pure_protobuf.protobuf import MessageType, Unicode
+
+Test2 = MessageType()
+Test2.add_field(2, 'b', Unicode)
+```
     
 Then, create a message and fill it with the appropriate data:
 
@@ -66,8 +33,10 @@ Then, create a message and fill it with the appropriate data:
     
 You can dump this now!
 
-    print msg.dumps() # This will dump into a string.
-    msg.dump(open('/tmp/message', 'wb')) # And this will dump into any write-like object.
+```python
+print msg.dumps() # This will dump into a string.
+msg.dump(open('/tmp/message', 'wb')) # And this will dump into any write-like object.
+```
     
 You also can load this message with:
 

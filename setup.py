@@ -19,5 +19,9 @@ setup(
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'License :: OSI Approved',
+        'License :: OSI Approved :: Apache Software License',
     ],
 )

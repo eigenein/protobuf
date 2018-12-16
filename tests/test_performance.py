@@ -1,11 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 import timeit
-from pure_protobuf.protobuf import *
+
 import six
+
+from pure_protobuf.protobuf import (
+    Bool,
+    EmbeddedMessage,
+    MessageType,
+    UVarint,
+    Varint,
+)
 
 tests = list()
 test_cases = dict()
@@ -65,7 +72,7 @@ def runtests():
         print()
 
 
-# Fake output. -----------------------------------------------------------------
+# Fake output. ----------------------------------------------------------------
 
 
 class FakeOutput:
@@ -75,7 +82,7 @@ class FakeOutput:
 
 fp = FakeOutput()
 
-# Tests themselves. ------------------------------------------------------------
+# Tests themselves. -----------------------------------------------------------
 
 
 @test('UVarint dump')
@@ -125,10 +132,10 @@ Type1 = MessageType().add_field(
 @test('__hash__')
 @testcase()
 def test_hash():
-    h = hash(Type1)
+    hash(Type1)
 
 
-# Main. ------------------------------------------------------------------------
+# Main. -----------------------------------------------------------------------
 
 if __name__ == '__main__':
     print()

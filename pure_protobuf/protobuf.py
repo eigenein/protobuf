@@ -8,12 +8,13 @@ eigenein (c) 2011-2016
 '''
 
 from __future__ import absolute_import
+
 import cStringIO
 import struct
-import marshal
+
 import six
 
-# Types. -----------------------------------------------------------------------
+# Types. ----------------------------------------------------------------------
 
 
 class Type:
@@ -97,7 +98,8 @@ class VarintType(UVarintType):
 
 class BoolType(UVarintType):
     '''
-    Represents a boolean type. Encodes True as UVarint 1, and False as UVarint 0.
+    Represents a boolean type. Encodes True as UVarint 1, and False as
+    UVarint 0.
     '''
 
     dump = lambda self, fp, value: fp.write(
@@ -238,8 +240,8 @@ class Float32Type(Fixed32SubType):
     format = 'f'
 
 
-# Types instances. -------------------------------------------------------------
-# You should actually use these types instances when defining your message type.
+# Types instances. ------------------------------------------------------------
+# You should use these types instances when defining your message type.
 
 UVarint = UVarintType()
 Varint = VarintType()
@@ -255,7 +257,7 @@ Float32 = Float32Type()
 Bytes = BytesType()
 Unicode = UnicodeType()
 
-# Messages. --------------------------------------------------------------------
+# Messages. -------------------------------------------------------------------
 
 
 class Flags:
@@ -265,17 +267,20 @@ class Flags:
 
     SIMPLE = 0  # Single value field.
     REQUIRED, REQUIRED_MASK = 1, 1  # Required field_type.
+    # Repeated and packed-repeated fields.
     SINGLE, REPEATED, PACKED_REPEATED, REPEATED_MASK = (
         0,
         2,
         6,
         6,
-    )  # Repeated and packed-repeated fields.
+    )
+    # Used by MessageMetaType to determine if a field contains embedded
+    # definition.
     PRIMITIVE, EMBEDDED, EMBEDDED_MASK = (
         0,
         8,
         8,
-    )  # Used by MessageMetaType to determine if a field contains embedded definition.
+    )
 
 
 class EofWrapper:
@@ -316,7 +321,8 @@ def _unpack_key(key):
     return key >> 3, key & 7
 
 
-# This used to correctly determine the length of unknown tags when loading a message.
+# This used to correctly determine the length of unknown tags when loading a
+# message.
 _wire_type_to_type_instance = {0: Varint, 1: Fixed64, 2: Bytes, 5: Fixed32}
 
 
@@ -382,7 +388,8 @@ class MessageType(Type):
     def dump(self, fp, value):
         if self != value.message_type:
             raise TypeError(
-                'Attempting to dump an object with type that\'s different from mine.'
+                'Attempting to dump an object with type that\'s different '
+                'from mine.'
             )
         for tag, field_type in six.iteritems(self.__tags_to_types):
             if self.__tags_to_names[tag] in value:
@@ -408,8 +415,8 @@ class MessageType(Type):
                         field_type.dump(fp, single_value)
             elif self.__has_flag(tag, Flags.REQUIRED, Flags.REQUIRED_MASK):
                 raise ValueError(
-                    'The field with the tag %s is required but a value is missing.'
-                    % tag
+                    'The field with the tag %s is required but a value is '
+                    'missing.' % tag
                 )
 
     def load(self, fp):
@@ -427,12 +434,15 @@ class MessageType(Type):
                     ):
                         if wire_type != field_type.WIRE_TYPE:
                             raise TypeError(
-                                'The received value with the tag %s has incorrect wiretype: %s instead of %s expected.'
+                                'The received value with the tag %s has '
+                                'incorrect wiretype: %s instead of %s '
+                                'expected.'
                                 % (tag, wire_type, field_type.WIRE_TYPE)
                             )
                     elif wire_type != Bytes.WIRE_TYPE:
                         raise TypeError(
-                            'Tag %s has wiretype %s while the field is packed repeated.'
+                            'Tag %s has wiretype %s while the field is packed '
+                            'repeated.'
                             % (tag, wire_type)
                         )
                     if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):
@@ -472,23 +482,20 @@ class MessageType(Type):
             except EOFError:
                 # Check if all required fields are present.
                 for tag, name in six.iteritems(self.__tags_to_names):
-                    if (
-                        self.__has_flag(
-                            tag, Flags.REQUIRED, Flags.REQUIRED_MASK
-                        )
-                        and not name in message
-                    ):
+                    has_flag = self.__has_flag(
+                        tag, Flags.REQUIRED, Flags.REQUIRED_MASK
+                    )
+                    if has_flag and (name not in message):
                         if self.__has_flag(
                             tag, Flags.REPEATED, Flags.REPEATED_MASK
                         ):
-                            message[
-                                name
-                            ] = (
-                                list()
-                            )  # Empty list (no values was in input stream). But required field.
+                            # Empty list (no values was in input stream).
+                            # But required field.
+                            message[name] = list()
                         else:
                             raise ValueError(
-                                'The field with the tag %s (\'%s\') is required but a value is missing.'
+                                'The field with the tag %s (\'%s\') is '
+                                'required but a value is missing.'
                                 % (tag, name)
                             )
                 return message
@@ -515,18 +522,17 @@ class Message(dict):
         '''
         Sets a value of the specified message field.
         '''
-        (self.__dict__ if name in self.__dict__ else self).__setitem__(
-            name, value
-        )
+        mapping = self.__dict__ if name in self.__dict__ else self
+        mapping.__setitem__(name, value)
+
         return value
 
-    def __delattr__(self, name):
+    def __delattr__(self, name, value):
         '''
         Removes a value of the specified message field.
         '''
-        (self.__dict__ if name in self.__dict__ else self).__delitem__(
-            name, value
-        )
+        mapping = self.__dict__ if name in self.__dict__ else self
+        mapping.__delitem__(name, value)
 
     def dumps(self):
         '''
@@ -555,7 +561,7 @@ def load(self, fp, message_type):
     return message_type.load(fp)
 
 
-# Embedded message. ------------------------------------------------------------
+# Embedded message. -----------------------------------------------------------
 
 
 class EmbeddedMessage(Type):
@@ -586,7 +592,7 @@ class EmbeddedMessage(Type):
         )  # Limit with embedded message length.
 
 
-# Describing messages themselves. ----------------------------------------------
+# Describing messages themselves. ---------------------------------------------
 
 
 class TypeMetadataType(Type):
@@ -638,7 +644,8 @@ class TypeMetadataType(Type):
                 )
             elif not type_str.endswith('Type'):
                 raise TypeError(
-                    'Type name of type singleton object should end with \'Type\'. Actual: \'%s\'.'
+                    'Type name of type singleton object should end with '
+                    '\'Type\'. Actual: \'%s\'.'
                     % type_str
                 )
             else:
@@ -656,7 +663,7 @@ class TypeMetadataType(Type):
         message_type, g = MessageType(), globals()
         for field in message.fields:
             field_type = field['type']
-            if not field_type in g:
+            if field_type not in g:
                 raise TypeError(
                     'Primitive type \'%s\' not found in this protobuf module.'
                     % field_type

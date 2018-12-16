@@ -4,8 +4,6 @@
 from __future__ import absolute_import, print_function
 import timeit
 
-import six
-
 from pure_protobuf.protobuf import (
     Bool,
     EmbeddedMessage,
@@ -45,7 +43,7 @@ def runtests():
         for args, kwargs in test_cases[target]:
             args_str = ', '.join(repr(arg) for arg in args)
             kwargs_str = ', '.join(
-                '%s=%s' % (k, repr(v)) for k, v in six.iteritems(kwargs)
+                '%s=%s' % (k, repr(v)) for k, v in kwargs.iteritems()
             )
             allargs_str = args_str
             allargs_str += (

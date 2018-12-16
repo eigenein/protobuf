@@ -12,8 +12,6 @@ from __future__ import absolute_import
 import cStringIO
 import struct
 
-import six
-
 # Types. ----------------------------------------------------------------------
 
 
@@ -130,7 +128,7 @@ class UnicodeType(BytesType):
         self, fp, value.encode('utf-8')
     )
 
-    load = lambda self, fp: six.text_type(BytesType.load(self, fp), 'utf-8')
+    load = lambda self, fp: unicode(BytesType.load(self, fp), 'utf-8')
 
 
 class FixedLengthType(Type):
@@ -349,7 +347,7 @@ class MessageType(Type):
         '''
         Iterates over all fields.
         '''
-        for tag, name in six.iteritems(self.__tags_to_names):
+        for tag, name in self.__tags_to_names.iteritems():
             yield (tag, name, self.__tags_to_types[tag], self.__flags[tag])
 
     def add_field(self, tag, name, field_type, flags=Flags.SIMPLE):
@@ -391,7 +389,7 @@ class MessageType(Type):
                 'Attempting to dump an object with type that\'s different '
                 'from mine.'
             )
-        for tag, field_type in six.iteritems(self.__tags_to_types):
+        for tag, field_type in self.__tags_to_types.iteritems():
             if self.__tags_to_names[tag] in value:
                 if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):
                     # Single value.
@@ -481,7 +479,7 @@ class MessageType(Type):
                     _wire_type_to_type_instance[wire_type].load(fp)
             except EOFError:
                 # Check if all required fields are present.
-                for tag, name in six.iteritems(self.__tags_to_names):
+                for tag, name in self.__tags_to_names.iteritems():
                     has_flag = self.__has_flag(
                         tag, Flags.REQUIRED, Flags.REQUIRED_MASK
                     )

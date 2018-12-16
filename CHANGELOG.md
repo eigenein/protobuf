@@ -1,3 +1,7 @@
+### `0.4.1`
+
+- Added style checking with `flake8`.
+
 ### `0.4.0`
 
 - Add packaging and publish to PyPI.

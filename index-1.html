@@ -1,0 +1,33 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Unknown </title></head><body>
+<h3 id="040"><code>0.4.0</code></h3>
+<ul>
+<li>Add packaging and publish to PyPI.</li>
+</ul>
+<h3 id="031"><code>0.3.1</code></h3>
+<ul>
+<li><code>encoding</code> module became <code>protobuf</code> module.</li>
+<li>Performance tests.</li>
+<li><code>Bool.dump</code> 2.2 times faster.</li>
+<li><code>Varint</code> 14% faster.</li>
+<li><code>add_field</code> chaining.</li>
+<li><code>__hash__</code> 17% faster.</li>
+</ul>
+<h3 id="03"><code>0.3</code></h3>
+<ul>
+<li>README techniques added.</li>
+<li>Hashes of message types.</li>
+<li>Fixed: loading of missing required field doesn't raise <code>ValueError</code>.</li>
+<li>Message <code>load</code> doesn't use <code>StringIO</code> for reading embedded messages and packed repeated fields anymore.</li>
+<li>Add <code>TypeMetadata</code></li>
+<li>Removed <code>MarshalableCode</code> (it's not <code>protobuf</code>'s business).</li>
+<li>Fixed: reading of <code>Int32</code> values raises <code>TypeError: 'str' object is not callable</code></li>
+</ul>
+<h3 id="02"><code>0.2</code></h3>
+<ul>
+<li>Fixed <code>Int32</code> type name (was <code>Int32Type</code>).</li>
+<li>Added validation of message type.</li>
+<li><code>Unicode</code> type.</li>
+<li>Python code object type.</li>
+<li>Fixed casting values to <code>bool</code> and from <code>bool</code>.</li>
+</ul>
+</body></html>

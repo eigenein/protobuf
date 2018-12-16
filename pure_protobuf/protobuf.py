@@ -530,7 +530,7 @@ class Message(dict):
         Removes a value of the specified message field.
         '''
         mapping = self.__dict__ if name in self.__dict__ else self
-        mapping.__delitem__(name, value)
+        mapping.__delattr__(name, value)
 
     def dumps(self):
         '''

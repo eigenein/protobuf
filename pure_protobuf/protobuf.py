@@ -7,9 +7,11 @@ Implements the Google's protobuf encoding.
 eigenein (c) 2011-2016
 '''
 
+from __future__ import absolute_import
 import cStringIO
 import struct
 import marshal
+import six
 
 # Types. -----------------------------------------------------------------------
 
@@ -114,7 +116,7 @@ class UnicodeType(BytesType):
 
     dump = lambda self, fp, value: BytesType.dump(self, fp, value.encode('utf-8'))
 
-    load = lambda self, fp: unicode(BytesType.load(self, fp), 'utf-8')
+    load = lambda self, fp: six.text_type(BytesType.load(self, fp), 'utf-8')
 
 class FixedLengthType(Type):
     '''
@@ -293,7 +295,7 @@ class MessageType(Type):
         '''
         Iterates over all fields.
         '''
-        for tag, name in self.__tags_to_names.iteritems():
+        for tag, name in six.iteritems(self.__tags_to_names):
             yield (tag, name, self.__tags_to_types[tag], self.__flags[tag])
 
     def add_field(self, tag, name, field_type, flags=Flags.SIMPLE):
@@ -332,7 +334,7 @@ class MessageType(Type):
     def dump(self, fp, value):
         if self != value.message_type:
             raise TypeError('Attempting to dump an object with type that\'s different from mine.')
-        for tag, field_type in self.__tags_to_types.iteritems():
+        for tag, field_type in six.iteritems(self.__tags_to_types):
             if self.__tags_to_names[tag] in value:
                 if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):
                     # Single value.
@@ -391,7 +393,7 @@ class MessageType(Type):
                     _wire_type_to_type_instance[wire_type].load(fp)
             except EOFError:
                 # Check if all required fields are present.
-                for tag, name in self.__tags_to_names.iteritems():
+                for tag, name in six.iteritems(self.__tags_to_names):
                     if self.__has_flag(tag, Flags.REQUIRED, Flags.REQUIRED_MASK) and not name in message:
                         if self.__has_flag(tag, Flags.REPEATED, Flags.REPEATED_MASK):
                             message[name] = list() # Empty list (no values was in input stream). But required field.

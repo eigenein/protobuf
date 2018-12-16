@@ -7,6 +7,7 @@ Runs unit tests.
 eigenein (c) 2011
 '''
 
+from __future__ import absolute_import
 import unittest
 import types
 import StringIO
@@ -240,8 +241,8 @@ class TestMessageType(unittest.TestCase):
         Type1.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
         Type1.add_field(2, 'c', Bytes, flags=Flags.PACKED_REPEATED)
         i = iter(Type1)
-        self.assertEqual(i.next(), (1, 'b', UVarint, Flags.REPEATED))
-        self.assertEqual(i.next(), (2, 'c', Bytes, Flags.PACKED_REPEATED))
+        self.assertEqual(next(i), (1, 'b', UVarint, Flags.REPEATED))
+        self.assertEqual(next(i), (2, 'c', Bytes, Flags.PACKED_REPEATED))
 
     def test_empty_optional_bytes(self):
         '''
@@ -319,7 +320,7 @@ class TestTypeMetadata(unittest.TestCase):
         msg = Type1.loads('\n\x10\n\x0e\x08\x02\x12\x01b\x1a\x05Bytes \x00')
         self.assertIsInstance(msg.t, MessageType)
         i = iter(msg.t)
-        self.assertEqual(i.next(), (2, 'b', Bytes, Flags.SIMPLE))
+        self.assertEqual(next(i), (2, 'b', Bytes, Flags.SIMPLE))
         self.assertRaises(StopIteration, i.next)
 
     def test_dumps_and_loads_1(self):

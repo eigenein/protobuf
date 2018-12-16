@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import print_function
 import timeit
 from pure_protobuf.protobuf import *
+import six
 
 tests = list()
 test_cases = dict()
@@ -26,19 +29,19 @@ def testcase(*args, **kwargs):
 
 def runtests():
     for title, target in tests:
-        print '\033[95mTest: %s\033[0m' % title
+        print('\033[95mTest: %s\033[0m' % title)
         for args, kwargs in test_cases[target]:
             args_str = ', '.join(repr(arg) for arg in args)
-            kwargs_str = ', '.join('%s=%s' % (k, repr(v)) for k, v in kwargs.iteritems())
+            kwargs_str = ', '.join('%s=%s' % (k, repr(v)) for k, v in six.iteritems(kwargs))
             allargs_str = args_str
             allargs_str += ', ' + kwargs_str if len(args_str) > 0 and len(kwargs_str) > 0 else kwargs_str
             stmt = '%s(%s)' % (target, allargs_str)
-            print '%s: \033[92m%.4fs\033[0m' % (stmt.ljust(70),
+            print('%s: \033[92m%.4fs\033[0m' % (stmt.ljust(70),
                 min(
                     timeit.repeat(stmt, 'from __main__ import %s' % target, repeat=repeat, number=number)
-                ))
-        print '\033[94m%s\033[0m' % '-' * 80
-        print
+                )))
+        print('\033[94m%s\033[0m' % '-' * 80)
+        print()
 
 # Fake output. -----------------------------------------------------------------
 
@@ -54,7 +57,7 @@ fp = FakeOutput()
 @test('UVarint dump')
 @testcase(1)
 @testcase(0x7FFFFFFF)
-@testcase(12345678901234567890L)
+@testcase(12345678901234567890)
 def test_uvarint_dump(value):
     UVarint.dump(fp, value)
 
@@ -68,7 +71,7 @@ def test_uvarint_loads(value):
 @test('Varint dump')
 @testcase(-1)
 @testcase(-0x7FFFFFFE)
-@testcase(-12345678901234567890L)
+@testcase(-12345678901234567890)
 def test_varint_dump(value):
     Varint.dump(fp, value)
 
@@ -95,17 +98,17 @@ def test_hash():
 # Main. ------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    print
+    print()
     try:
-        print '\033[95mRunning tests with repeat=%s, number=%s\033[0m' % (repeat, number)
-        print '\033[94m%s\033[0m' % '-' * 80
-        print
+        print('\033[95mRunning tests with repeat=%s, number=%s\033[0m' % (repeat, number))
+        print('\033[94m%s\033[0m' % '-' * 80)
+        print()
         runtests()
     except KeyboardInterrupt:
-        print
-        print '\033[91mInterrupted.\033[0m'
-        print
+        print()
+        print('\033[91mInterrupted.\033[0m')
+        print()
     else:
-        print '\033[92mDone.\033[0m'
-        print
+        print('\033[92mDone.\033[0m')
+        print()
 

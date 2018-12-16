@@ -1,5 +1,4 @@
-protobuf
-========
+# `pure-protobuf`
 
 My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
 
@@ -8,14 +7,15 @@ My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](ht
 ![PyPI Python versions](https://img.shields.io/pypi/pyversions/pure-protobuf.svg) 
 ![PyPI license](https://img.shields.io/pypi/l/pure-protobuf.svg)
 
-Using
------
+## Usage
 
 Assume you have the following definition:
 
-    message Test2 {
-      string b = 2;
-    }
+```
+message Test2 {
+  string b = 2;
+}
+```
     
 First, you should create the message type:
 
@@ -28,8 +28,10 @@ Test2.add_field(2, 'b', Unicode)
     
 Then, create a message and fill it with the appropriate data:
 
-    msg = Test2()
-    msg.b = 'testing'
+```python
+msg = Test2()
+msg.b = 'testing'
+```
     
 You can dump this now!
 
@@ -40,11 +42,15 @@ msg.dump(open('/tmp/message', 'wb')) # And this will dump into any write-like ob
     
 You also can load this message with:
 
-    msg = Test2.load(open('/tmp/message', 'rb'))
+```python
+msg = Test2.load(open('/tmp/message', 'rb'))
+```
 
 or with:
 
-    msg = load(open('/tmp/message', 'rb'), Test2)
+```python
+msg = load(open('/tmp/message', 'rb'), Test2)
+```
     
 Simple enough. :)
 
@@ -52,8 +58,10 @@ Simple enough. :)
 
 To add a missing field you should pass an additional `flags` parameter to `add_field` like this:
 
-    Test2 = MessageType()
-    Test2.add_field(2, 'b', String, flags=Flags.REQUIRED)
+```python
+Test2 = MessageType()
+Test2.add_field(2, 'b', String, flags=Flags.REQUIRED)
+```
     
 If you'll not fill a required field, then ValueError will be raised during serialization.
 
@@ -61,19 +69,23 @@ If you'll not fill a required field, then ValueError will be raised during seria
 
 Do like this:
 
-    Test2 = MessageType()
-    Test2.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
-    msg = Test2()
-    msg.b = (1, 2, 3)
+```python
+Test2 = MessageType()
+Test2.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
+msg = Test2()
+msg.b = (1, 2, 3)
+```
     
 A value of repeated field can be any iterable object. The loaded value will always be `list`.
 
 ### Sample 4. Packed repeated field
 
-    Test4 = MessageType()
-    Test4.add_field(4, 'd', UVarint, flags=Flags.PACKED_REPEATED)
-    msg = Test4()
-    msg.d = (3, 270, 86942)
+```python
+Test4 = MessageType()
+Test4.add_field(4, 'd', UVarint, flags=Flags.PACKED_REPEATED)
+msg = Test4()
+msg.d = (3, 270, 86942)
+```
     
 ### Sample 5. Embedded messages
 
@@ -89,20 +101,22 @@ and
       required Test1 c = 3;
     }
     
-To create an embedded field, pass EmbeddedMessage as the type of field and fill it like this:
+To create an embedded field, pass `EmbeddedMessage` as the type of field and fill it like this:
 
-    # Create the type.
-    Test1 = MessageType()
-    Test1.add_field(1, 'a', UVarint)
-    Test3 = MessageType()
-    Test3.add_field(3, 'c', EmbeddedMessage(Test1))
-    # Fill the message.
-    msg = Test3()
-    msg.c = Test1()
-    msg.c.a = 150
+```python
+# Create the type.
+Test1 = MessageType()
+Test1.add_field(1, 'a', UVarint)
+Test3 = MessageType()
+Test3.add_field(3, 'c', EmbeddedMessage(Test1))
+
+# Fill in the message.
+msg = Test3()
+msg.c = Test1()
+msg.c.a = 150
+```
     
-Data types
-----------
+## Data types
 
 There are the following data types supported for now:
 
@@ -121,48 +135,49 @@ There are the following data types supported for now:
     Unicode             # Unicode string.
     TypeMetadata        # Type that describes another type.
 
-Some techniques
----------------
+## Some techniques
 
 ### Streaming messages
 
-The Protocol Buffer format is not self delimiting. But you can wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
+The Protocol Buffers format is not self delimiting. But you can wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
 
 The other option is to use `protobuf.EofWrapper` that has a `limit` parameter in its constructor. The `EofWrapper` raises `EOFError` when the specified number of bytes is read.
 
-### Self-describing messages and TypeMetadata
+### Self-describing messages and `TypeMetadata`
 
 There is no any description of the message type in a message itself. Therefore, if you want to send a self-described messages, you should send the a description of the message too.
 
 I've implemented a tool for this... Look:
 
-    A, B, C = MessageType(), MessageType(), MessageType()
-    A.add_field(1, 'a', UVarint)
-    A.add_field(2, 'b', TypeMetadata, flags=Flags.REPEATED)     # <- Look here!
-    A.add_field(3, 'c', Bytes)
-    B.add_field(4, 'ololo', Float32)
-    B.add_field(5, 'c', TypeMetadata, flags=Flags.REPEATED)     # <- And here!
-    B.add_field(6, 'd', Bool, flags=Flags.PACKED_REPEATED)
-    C.add_field(7, 'ghjhdf', UVarint)
-    msg = A()
-    msg.a = 1
-    msg.b = [B, C]                                              # Assigning of types.
-    msg.c = 'ololo'
-    bytes = msg.dumps()
-    ...
-    msg = A.loads(bytes)
-    msg2 = msg.b[0]()                                           # Creating a message of the loaded type.
-    
+```python
+A, B, C = MessageType(), MessageType(), MessageType()
+A.add_field(1, 'a', UVarint)
+A.add_field(2, 'b', TypeMetadata, flags=Flags.REPEATED)     # <- Look here!
+A.add_field(3, 'c', Bytes)
+B.add_field(4, 'ololo', Float32)
+B.add_field(5, 'c', TypeMetadata, flags=Flags.REPEATED)     # <- And here!
+B.add_field(6, 'd', Bool, flags=Flags.PACKED_REPEATED)
+C.add_field(7, 'ghjhdf', UVarint)
+msg = A()
+msg.a = 1
+msg.b = [B, C]                                              # Assigning of types.
+msg.c = 'ololo'
+bytes = msg.dumps()
+...
+msg = A.loads(bytes)
+msg2 = msg.b[0]()                                           # Creating a message of the loaded type.
+```
+
 You can send your `bytes` anywhere and you'll got your message type on the other side!
 
-### add_field chaining
+### `add_field` chaining
 
 `add_field` return the message type itself, thus you can do so:
 
-    MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
+```python
+MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
+```
 
-More info
----------
+## More info
 
 See `protobuf` to see the API and `run-tests` modules to see more usage samples.
-    

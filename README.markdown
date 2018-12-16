@@ -11,7 +11,7 @@ My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](ht
 
 Assume you have the following definition:
 
-```
+```proto
 message Test2 {
   string b = 2;
 }
@@ -91,15 +91,19 @@ msg.d = (3, 270, 86942)
 
 Consider the following definitions:
 
-    message Test1 {
-      int32 a = 1;
-    }
+```proto
+message Test1 {
+  int32 a = 1;
+}
+```
     
 and
-    
-    message Test3 {
-      required Test1 c = 3;
-    }
+
+```proto
+message Test3 {
+  required Test1 c = 3;
+}
+```
     
 To create an embedded field, pass `EmbeddedMessage` as the type of field and fill it like this:
 

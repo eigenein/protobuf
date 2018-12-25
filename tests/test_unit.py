@@ -286,6 +286,17 @@ class TestMessageType(unittest.TestCase):
         msg = Type1.loads('\n\x00')
         self.assertEqual(msg.a, '')
 
+    def test_delattr(self):
+        '''
+        Tests __delattr__
+        '''
+        message_type = MessageType()
+        message_type.add_field(2, 'b', Bytes)
+        message = message_type()
+        message.b = 'testing'
+        del message.b
+        self.assertFalse(hasattr(message, 'b'))
+
 
 class TestEmbeddedMessage(unittest.TestCase):
     def test_dumps_1(self):

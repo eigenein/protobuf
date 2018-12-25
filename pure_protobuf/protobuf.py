@@ -525,12 +525,12 @@ class Message(dict):
 
         return value
 
-    def __delattr__(self, name, value):
+    def __delattr__(self, name):
         '''
         Removes a value of the specified message field.
         '''
         mapping = self.__dict__ if name in self.__dict__ else self
-        mapping.__delattr__(name, value)
+        del mapping[name]
 
     def dumps(self):
         '''

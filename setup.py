@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pure-protobuf',
-    version='0.4.0',
+    version='0.4.1',
     description=(
         'Python implementation of Protocol Buffer (protobuf) data types'
     ),

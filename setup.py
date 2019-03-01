@@ -4,7 +4,7 @@ setup(
     name='pure-protobuf',
     version='0.4.1',
     description='Python implementation of Protocol Buffers data types',
-    long_description=open('README.markdown').read(),
+    long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     author='Pavel Perestoronin',
     author_email='eigenein@gmail.com',

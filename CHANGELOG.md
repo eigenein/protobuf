@@ -1,12 +1,19 @@
-### `0.4.1`
+## `master`
+
+- Add initial contribution guide.
+- Add `Makefile`.
+- Use `pytest`.
+- Use `isort`.
+
+## `0.4.1`
 
 - Added style checking with `flake8`.
 
-### `0.4.0`
+## `0.4.0`
 
 - Add packaging and publish to PyPI.
 
-### `0.3.1`
+## `0.3.1`
 
 - `encoding` module became `protobuf` module.
 - Performance tests.
@@ -15,7 +22,7 @@
 - `add_field` chaining.
 - `__hash__` 17% faster.
 
-### `0.3`
+## `0.3`
 
 - README techniques added.
 - Hashes of message types.
@@ -25,7 +32,7 @@
 - Removed `MarshalableCode` (it's not `protobuf`'s business).
 - Fixed: reading of `Int32` values raises `TypeError: 'str' object is not callable`
 
-### `0.2`
+## `0.2`
 
 - Fixed `Int32` type name (was `Int32Type`).
 - Added validation of message type.

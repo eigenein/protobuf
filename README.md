@@ -168,7 +168,7 @@ msg.a = 1
 msg.b = [B, C]                                              # Assigning of types.
 msg.c = 'ololo'
 bytes = msg.dumps()
-...
+# ...
 msg = A.loads(bytes)
 msg2 = msg.b[0]()                                           # Creating a message of the loaded type.
 ```
@@ -181,8 +181,3 @@ You can send your `bytes` anywhere and you'll got your message type on the other
 
 ```python
 MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
-```
-
-## More info
-
-See `protobuf` to see the API and `run-tests` modules to see more usage samples.

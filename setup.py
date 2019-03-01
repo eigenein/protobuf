@@ -1,11 +1,9 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name='pure-protobuf',
     version='0.4.1',
-    description=(
-        'Python implementation of Protocol Buffer (protobuf) data types'
-    ),
+    description='Python implementation of Protocol Buffers data types',
     long_description=open('README.markdown').read(),
     long_description_content_type='text/markdown',
     author='Pavel Perestoronin',

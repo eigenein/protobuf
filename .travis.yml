@@ -6,3 +6,5 @@ install:
   - pip install flake8 isort
 script:
   - pytest
+  - flake8 pure_protobuf tests
+  - isort -rc -c pure_protobuf tests

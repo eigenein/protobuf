@@ -9,7 +9,7 @@ from __future__ import absolute_import
 
 from pytest import mark, raises
 
-from pure_protobuf.protobuf import (
+from pure_protobuf import (
     Bool,
     Bytes,
     EmbeddedMessage,

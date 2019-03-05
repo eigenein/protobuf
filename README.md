@@ -18,107 +18,112 @@ message Test2 {
 }
 ```
     
-First, you should create the message type:
+This is how you can create a message and get it serialized:
 
 ```python
-from pure_protobuf.protobuf import MessageType, Unicode
+from __future__ import print_function
 
-Test2 = MessageType()
-Test2.add_field(2, 'b', Unicode)
+from StringIO import StringIO
+
+from pure_protobuf import MessageType, Unicode
+
+# Create the type instance and add the field.
+type_ = MessageType()
+type_.add_field(2, 'b', Unicode)
+
+message = type_()
+message.b = 'testing'
+
+# Dump into a string.
+print(message.dumps())
+
+# Dump into a file-like object.
+fp = StringIO()
+message.dump(fp)
+
+# Load from a string.
+assert type_.loads(message.dumps()) == message
+
+# Load from a file-like object.
+fp.seek(0)
+assert type_.load(fp) == message
 ```
-    
-Then, create a message and fill it with the appropriate data:
-
-```python
-msg = Test2()
-msg.b = 'testing'
-```
-    
-You can dump this now!
-
-```python
-print msg.dumps() # This will dump into a string.
-msg.dump(open('/tmp/message', 'wb')) # And this will dump into any write-like object.
-```
-    
-You also can load this message with:
-
-```python
-msg = Test2.load(open('/tmp/message', 'rb'))
-```
-
-or with:
-
-```python
-msg = load(open('/tmp/message', 'rb'), Test2)
-```
-    
-Simple enough. :)
 
 ### Sample 2. Required field
 
 To add a missing field you should pass an additional `flags` parameter to `add_field` like this:
 
 ```python
-Test2 = MessageType()
-Test2.add_field(2, 'b', String, flags=Flags.REQUIRED)
+from pure_protobuf.protobuf import Flags, MessageType, Unicode
+
+type_ = MessageType()
+type_.add_field(2, 'b', Unicode, flags=Flags.REQUIRED)
+
+message = type_()
+message.b = 'hello, world'
+
+assert type_.dumps(message)
 ```
     
-If you'll not fill a required field, then ValueError will be raised during serialization.
+If you'll not fill in a required field, then `ValueError` will be raised during serialization.
 
 ### Sample 3. Repeated field
 
-Do like this:
-
 ```python
-Test2 = MessageType()
-Test2.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
-msg = Test2()
-msg.b = (1, 2, 3)
+from pure_protobuf.protobuf import Flags, MessageType, UVarint
+
+type_ = MessageType()
+type_.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
+
+message = type_()
+message.b = (1, 2, 3)
+
+assert type_.dumps(message)
 ```
     
-A value of repeated field can be any iterable object. The loaded value will always be `list`.
+Value of a repeated field can be any iterable object. The loaded value will always be `list`.
 
 ### Sample 4. Packed repeated field
 
 ```python
-Test4 = MessageType()
-Test4.add_field(4, 'd', UVarint, flags=Flags.PACKED_REPEATED)
-msg = Test4()
-msg.d = (3, 270, 86942)
+from pure_protobuf.protobuf import Flags, MessageType, UVarint
+
+type_ = MessageType()
+type_.add_field(4, 'd', UVarint, flags=Flags.PACKED_REPEATED)
+
+message = type_()
+message.d = (3, 270, 86942)
+
+assert type_.dumps(message)
 ```
     
 ### Sample 5. Embedded messages
-
-Consider the following definitions:
 
 ```proto
 message Test1 {
   int32 a = 1;
 }
-```
-    
-and
 
-```proto
 message Test3 {
   required Test1 c = 3;
 }
 ```
     
-To create an embedded field, pass `EmbeddedMessage` as the type of field and fill it like this:
+To create an embedded field, wrap inner type with `EmbeddedMessage`:
 
 ```python
-# Create the type.
-Test1 = MessageType()
-Test1.add_field(1, 'a', UVarint)
-Test3 = MessageType()
-Test3.add_field(3, 'c', EmbeddedMessage(Test1))
+from pure_protobuf import EmbeddedMessage, MessageType, UVarint
 
-# Fill in the message.
-msg = Test3()
-msg.c = Test1()
-msg.c.a = 150
+inner_type = MessageType()
+inner_type.add_field(1, 'a', UVarint)
+outer_type = MessageType()
+outer_type.add_field(3, 'c', EmbeddedMessage(inner_type))
+
+message = outer_type()
+message.c = inner_type()
+message.c.a = 150
+
+assert outer_type.dumps(message)
 ```
     
 ## Data types
@@ -138,47 +143,21 @@ There are the following data types supported for now:
     Float32             # C++'s `float`.
     Bytes               # Pure bytes string.
     Unicode             # Unicode string.
-    TypeMetadata        # Type that describes another type.
 
 ## Some techniques
 
 ### Streaming messages
 
-The Protocol Buffers format is not self delimiting. But you can wrap you message type in `EmbeddedMessage` class and write/read it sequentially.
+The Protocol Buffers format is not self-delimiting. But you can wrap you message type in `EmbeddedMessage` class and write or read it sequentially.
 
 The other option is to use `protobuf.EofWrapper` that has a `limit` parameter in its constructor. The `EofWrapper` raises `EOFError` when the specified number of bytes is read.
-
-### Self-describing messages and `TypeMetadata`
-
-There is no any description of the message type in a message itself. Therefore, if you want to send a self-described messages, you should send the a description of the message too.
-
-I've implemented a tool for this... Look:
-
-```python
-A, B, C = MessageType(), MessageType(), MessageType()
-A.add_field(1, 'a', UVarint)
-A.add_field(2, 'b', TypeMetadata, flags=Flags.REPEATED)     # <- Look here!
-A.add_field(3, 'c', Bytes)
-B.add_field(4, 'ololo', Float32)
-B.add_field(5, 'c', TypeMetadata, flags=Flags.REPEATED)     # <- And here!
-B.add_field(6, 'd', Bool, flags=Flags.PACKED_REPEATED)
-C.add_field(7, 'ghjhdf', UVarint)
-msg = A()
-msg.a = 1
-msg.b = [B, C]                                              # Assigning of types.
-msg.c = 'ololo'
-bytes = msg.dumps()
-# ...
-msg = A.loads(bytes)
-msg2 = msg.b[0]()                                           # Creating a message of the loaded type.
-```
-
-You can send your `bytes` anywhere and you'll got your message type on the other side!
 
 ### `add_field` chaining
 
 `add_field` return the message type itself, thus you can do so:
 
 ```python
+from pure_protobuf import EmbeddedMessage, MessageType, UVarint
+
 MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
 ```

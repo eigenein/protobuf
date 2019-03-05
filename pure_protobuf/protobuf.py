@@ -12,8 +12,8 @@ from __future__ import absolute_import
 import cStringIO
 import struct
 
-# Types. ----------------------------------------------------------------------
 
+# Types. ----------------------------------------------------------------------
 
 class Type(object):
     """
@@ -255,8 +255,8 @@ Float32 = Float32Type()
 Bytes = BytesType()
 Unicode = UnicodeType()
 
-# Messages. -------------------------------------------------------------------
 
+# Messages. -------------------------------------------------------------------
 
 class Flags(object):
     """
@@ -291,9 +291,9 @@ class EofWrapper:
         self.__limit = limit
 
     def read(self, size=None):
-        '''
+        """
         Reads a string. Raises EOFError on end of stream.
-        '''
+        """
         if size == 0:
             return ''
         if self.__limit is not None:

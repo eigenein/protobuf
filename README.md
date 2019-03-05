@@ -128,29 +128,27 @@ assert outer_type.dumps(message)
     
 ## Data types
 
-There are the following data types supported for now:
-
-    UVarint             # Unsigned integer.
-    Varint              # Signed integer.
-    Bool                # Boolean.
-    Fixed64             # 8-byte string.
-    UInt64              # C++'s 64-bit `unsigned long long`
-    Int64               # C++'s 64-bit `long long`
-    Float64             # C++'s `double`.
-    Fixed32             # 4-byte string.
-    UInt32              # C++'s 32-bit `unsigned int`.
-    Int32               # C++'s 32-bit `int`.
-    Float32             # C++'s `float`.
-    Bytes               # Pure bytes string.
-    Unicode             # Unicode string.
+| Type      | Python  | Description                        |
+|-----------|---------|------------------------------------|
+| `UVarint` | `int`   | unsigned integer (variable length) |
+| `Varint`  | `int`   | signed integer (variable length)   |
+| `Bool`    | `bool`  | boolean                            |
+| `Fixed64` | `bytes` | 8-byte string                      |
+| `UInt64`  | `int`   | C 64-bit `unsigned long long`      |
+| `Int64`   | `int`   | C 64-bit `long long`               |
+| `Float64` | `float` | C `double`                         |
+| `Fixed32` | `bytes` | 4-byte string                      |
+| `UInt32`  | `int`   | C 32-bit `unsigned int`            |
+| `Int32`   | `int`   | C 32-bit `int`                     |
+| `Float32` | `float` | C `float`                          |
+| `Bytes`   | `bytes` | byte string                        |
+| `Unicode` | `str`   | unicode string                     |
 
 ## Some techniques
 
 ### Streaming messages
 
-The Protocol Buffers format is not self-delimiting. But you can wrap you message type in `EmbeddedMessage` class and write or read it sequentially.
-
-The other option is to use `protobuf.EofWrapper` that has a `limit` parameter in its constructor. The `EofWrapper` raises `EOFError` when the specified number of bytes is read.
+The Protocol Buffers format is not self-delimiting. But you can wrap your message type with `EmbeddedMessage` and write or read messages sequentially.
 
 ### `add_field` chaining
 

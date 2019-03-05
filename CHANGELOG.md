@@ -4,6 +4,7 @@
 - Add `Makefile`.
 - Use `pytest`.
 - Use `isort`.
+- Remove `TypeMetadataType`. It is not a part of the standard, and I'd like to focus on maintaining compatibility with the reference implementation.
 
 ## `0.4.1`
 

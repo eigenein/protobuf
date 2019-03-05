@@ -1,6 +1,6 @@
 # `pure-protobuf`
 
-My own implementation of [Google](http://www.google.com)'s [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html).
+Python implementation of [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html) data types.
 
 [![Build Status](https://travis-ci.org/eigenein/protobuf.svg?branch=master)](https://travis-ci.org/eigenein/protobuf)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/)
@@ -181,3 +181,4 @@ You can send your `bytes` anywhere and you'll got your message type on the other
 
 ```python
 MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
+```

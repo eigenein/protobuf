@@ -4,7 +4,7 @@
 - Add `Makefile`.
 - Use `pytest`.
 - Use `isort`.
-- Remove `TypeMetadataType`. It is not a part of the standard, and I'd like to focus on maintaining compatibility with the reference implementation.
+- **Breaking change**. Remove `TypeMetadataType`. It is not a part of the standard, and I'd like to focus on maintaining compatibility with the reference implementation.
 - Test snippets in `README.md`.
 
 ## `0.4.1`

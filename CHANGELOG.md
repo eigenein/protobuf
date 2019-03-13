@@ -6,6 +6,9 @@
 - Use `isort`.
 - **Breaking change**. Remove `TypeMetadataType`. It is not a part of the standard, and I'd like to focus on maintaining compatibility with the reference implementation.
 - Test snippets in `README.md`.
+- **Breaking change**. Drop `Message.__delattr__` support.
+- Add Python 3 support.
+- Change license to MIT.
 
 ## `0.4.1`
 

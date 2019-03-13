@@ -1,19 +1,18 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+# coding: utf-8
 
 """
-Python implementation of Protocol Buffers data types.
-
-`pure-protobuf` contributors © 2011-2019
+Legacy interface.
 """
 
 from __future__ import absolute_import
 
-import cStringIO
 import struct
-
+from io import BytesIO
 
 # Types. ----------------------------------------------------------------------
+from pure_protobuf.six import b
+
 
 class Type(object):
     """
@@ -36,7 +35,7 @@ class Type(object):
         """
         Dumps its value to string and returns this string.
         """
-        fp = cStringIO.StringIO()
+        fp = BytesIO()
         self.dump(fp, value)
         return fp.getvalue()
 
@@ -44,7 +43,7 @@ class Type(object):
         """
         Loads its value from a string and returns a read value.
         """
-        return self.load(cStringIO.StringIO(s))
+        return self.load(BytesIO(s))
 
     def __hash__(self):
         """
@@ -64,9 +63,7 @@ class UVarintType(Type):
         shifted_value = True
         while shifted_value:
             shifted_value = value >> 7
-            fp.write(
-                chr((value & 0x7F) | (0x80 if shifted_value != 0 else 0x00))
-            )
+            fp.write(bytearray(((value & 0x7F) | (0x80 if shifted_value != 0 else 0x00),)))
             value = shifted_value
 
     def load(self, fp):
@@ -100,11 +97,11 @@ class BoolType(UVarintType):
     UVarint 0.
     """
 
-    dump = lambda self, fp, value: fp.write(
-        '\x01' if value else '\x00'
-    )  # Similarly to UVarint.
+    def dump(self, fp, value):
+        fp.write(b('\x01' if value else '\x00'))  # similarly to UVarint
 
-    load = lambda self, fp: UVarintType.load(self, fp) != 0
+    def load(self, fp):
+        return UVarintType.load(self, fp) != 0
 
 
 class BytesType(Type):
@@ -124,11 +121,11 @@ class BytesType(Type):
 
 class UnicodeType(BytesType):
 
-    dump = lambda self, fp, value: BytesType.dump(
-        self, fp, value.encode('utf-8')
-    )
+    def dump(self, fp, value):
+        return BytesType.dump(self, fp, value.encode('utf-8'))
 
-    load = lambda self, fp: unicode(BytesType.load(self, fp), 'utf-8')
+    def load(self, fp):
+        return BytesType.load(self, fp).decode('utf-8')
 
 
 class FixedLengthType(Type):
@@ -137,9 +134,14 @@ class FixedLengthType(Type):
     directly. Use derived types instead.
     """
 
-    dump = lambda self, fp, value: fp.write(value)
+    def dump(self, fp, value):
+        fp.write(value)
 
-    load = lambda self, fp: fp.read(self.length())
+    def load(self, fp):
+        return fp.read(self.length())
+
+    def length(self):
+        raise NotImplementedError()
 
 
 class Fixed64Type(FixedLengthType):
@@ -149,7 +151,8 @@ class Fixed64Type(FixedLengthType):
 
     WIRE_TYPE = 1
 
-    length = lambda self: 8
+    def length(self):
+        return 8
 
 
 class Fixed32Type(FixedLengthType):
@@ -159,7 +162,8 @@ class Fixed32Type(FixedLengthType):
 
     WIRE_TYPE = 5
 
-    length = lambda self: 4
+    def length(self):
+        return 4
 
 
 class Fixed64SubType(Fixed64Type):
@@ -347,7 +351,7 @@ class MessageType(Type):
         """
         Iterates over all fields.
         """
-        for tag, name in self.__tags_to_names.iteritems():
+        for tag, name in self.__tags_to_names.items():
             yield (tag, name, self.__tags_to_types[tag], self.__flags[tag])
 
     def add_field(self, tag, name, field_type, flags=Flags.SIMPLE):
@@ -389,7 +393,7 @@ class MessageType(Type):
                 'Attempting to dump an object with type that\'s different '
                 'from mine.'
             )
-        for tag, field_type in self.__tags_to_types.iteritems():
+        for tag, field_type in self.__tags_to_types.items():
             if self.__tags_to_names[tag] in value:
                 if self.__has_flag(tag, Flags.SINGLE, Flags.REPEATED_MASK):
                     # Single value.
@@ -400,7 +404,7 @@ class MessageType(Type):
                 ):
                     # Repeated packed value.
                     UVarint.dump(fp, _pack_key(tag, Bytes.WIRE_TYPE))
-                    internal_fp = cStringIO.StringIO()
+                    internal_fp = BytesIO()
                     for single_value in value[self.__tags_to_names[tag]]:
                         field_type.dump(internal_fp, single_value)
                     Bytes.dump(fp, internal_fp.getvalue())
@@ -479,7 +483,7 @@ class MessageType(Type):
                     _wire_type_to_type_instance[wire_type].load(fp)
             except EOFError:
                 # Check if all required fields are present.
-                for tag, name in self.__tags_to_names.iteritems():
+                for tag, name in self.__tags_to_names.items():
                     has_flag = self.__has_flag(
                         tag, Flags.REQUIRED, Flags.REQUIRED_MASK
                     )
@@ -508,6 +512,7 @@ class Message(dict):
         """
         Initializes a new instance of the specified message type.
         """
+        super(Message, self).__init__()
         self.__dict__['message_type'] = message_type
 
     def __getattr__(self, name):
@@ -524,13 +529,6 @@ class Message(dict):
         mapping.__setitem__(name, value)
 
         return value
-
-    def __delattr__(self, name):
-        """
-        Removes a value of the specified message field.
-        """
-        mapping = self.__dict__ if name in self.__dict__ else self
-        del mapping[name]
 
     def dumps(self):
         """

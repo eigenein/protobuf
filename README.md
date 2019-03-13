@@ -23,7 +23,7 @@ This is how you can create a message and get it serialized:
 ```python
 from __future__ import print_function
 
-from StringIO import StringIO
+from io import BytesIO
 
 from pure_protobuf import MessageType, Unicode
 
@@ -38,7 +38,7 @@ message.b = 'testing'
 print(message.dumps())
 
 # Dump into a file-like object.
-fp = StringIO()
+fp = BytesIO()
 message.dump(fp)
 
 # Load from a string.

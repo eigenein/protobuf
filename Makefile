@@ -10,7 +10,7 @@ PYTEST := $(BIN)/pytest
 
 .PHONY: venv
 venv:
-	@virtualenv -p python2.7 venv
+	@virtualenv -p python3.7 venv
 	@$(PIP) install isort flake8 pytest
 
 .PHONY: test

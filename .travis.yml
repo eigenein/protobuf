@@ -1,9 +1,12 @@
 language: python
+dist: xenial
 python:
-  - "pypy"
   - "2.7"
+  - "3.5"
+  - "3.6"
+  - "3.7"
 install:
-  - pip install flake8 isort
+  - pip install --upgrade flake8 isort pytest
 script:
   - pytest
   - flake8 pure_protobuf tests

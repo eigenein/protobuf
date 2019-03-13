@@ -1,4 +1,4 @@
-## `master`
+## `0.5.0`
 
 - Add initial contribution guide.
 - Add `Makefile`.

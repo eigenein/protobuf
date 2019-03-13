@@ -6,8 +6,8 @@ python:
   - "3.6"
   - "3.7"
 install:
-  - pip install --upgrade flake8 isort pytest
+  - pip install --upgrade -e .[dev]
 script:
-  - pytest
+  - pytest --cov-report term-missing --cov pure_protobuf
   - flake8 pure_protobuf tests
-  - isort -rc -c pure_protobuf tests
+  - isort -rc -c --diff pure_protobuf tests

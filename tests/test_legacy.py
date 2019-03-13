@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 """
 `pure-protobuf` contributors © 2011-2019
@@ -7,24 +6,29 @@
 
 from __future__ import absolute_import
 
+import warnings
 from io import BytesIO
 
 from pytest import mark, raises
 
-from pure_protobuf import (
-    Bool,
-    Bytes,
-    EmbeddedMessage,
-    Flags,
-    Int32,
-    Int64,
-    MessageType,
-    UInt64,
-    Unicode,
-    UVarint,
-    Varint,
-)
 from pure_protobuf.six import b
+
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore', DeprecationWarning)
+    # noinspection PyDeprecation
+    from pure_protobuf.legacy import (
+        Bool,
+        Bytes,
+        EmbeddedMessage,
+        Flags,
+        Int32,
+        Int64,
+        MessageType,
+        UInt64,
+        Unicode,
+        UVarint,
+        Varint,
+    )
 
 
 @mark.parametrize('value, expected', [
@@ -84,42 +88,42 @@ def test_loads_bool(value, expected):
 
 
 @mark.parametrize('value, expected', [
-    (1, b('\x00\x00\x00\x00\x00\x00\x00\x01')),
+    (1, b('\x01\x00\x00\x00\x00\x00\x00\x00')),
 ])
 def test_dumps_uint64(value, expected):
     assert UInt64.dumps(value) == expected
 
 
 @mark.parametrize('value, expected', [
-    (b('\x00\x00\x00\x00\x00\x00\x00\x01'), 1),
+    (b('\x01\x00\x00\x00\x00\x00\x00\x00'), 1),
 ])
 def test_loads_uint64(value, expected):
     assert UInt64.loads(value) == expected
 
 
 @mark.parametrize('value, expected', [
-    (-2, b('\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE')),
+    (-2, b('\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF')),
 ])
 def test_dumps_int64(value, expected):
     assert Int64.dumps(value) == expected
 
 
 @mark.parametrize('value, expected', [
-    (b('\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFE'), -2),
+    (b('\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF'), -2),
 ])
 def test_loads_int64(value, expected):
     assert Int64.loads(value) == expected
 
 
 @mark.parametrize('value, expected', [
-    (-2, b('\xFF\xFF\xFF\xFE')),
+    (-2, b('\xFE\xFF\xFF\xFF')),
 ])
 def test_dumps_int32(value, expected):
     assert Int32.dumps(value) == expected
 
 
 @mark.parametrize('value, expected', [
-    (b('\xFF\xFF\xFF\xFE'), -2),
+    (b('\xFE\xFF\xFF\xFF'), -2),
 ])
 def test_loads_int32(value, expected):
     assert Int32.loads(value) == expected

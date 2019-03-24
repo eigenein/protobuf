@@ -1,17 +1,23 @@
-#!/usr/bin/env python3
 # coding: utf-8
 
 """
 Legacy interface.
+
+`pure-protobuf` contributors © 2011-2019
 """
 
 from __future__ import absolute_import
 
 import struct
+import warnings
 from io import BytesIO
 
-# Types. ----------------------------------------------------------------------
 from pure_protobuf.six import b
+
+warnings.warn(
+    'the legacy interface is deprecated and will be removed, use the dataclasses interface',
+    DeprecationWarning,
+)
 
 
 class Type(object):
@@ -185,7 +191,7 @@ class UInt64Type(Fixed64SubType):
     Represents an unsigned int64 type.
     """
 
-    format = '>Q'
+    format = '<Q'
 
 
 class Int64Type(Fixed64SubType):
@@ -193,7 +199,7 @@ class Int64Type(Fixed64SubType):
     Represents a signed int64 type.
     """
 
-    format = '>q'
+    format = '<q'
 
 
 class Float64Type(Fixed64SubType):
@@ -201,7 +207,7 @@ class Float64Type(Fixed64SubType):
     Represents a double precision floating point type.
     """
 
-    format = 'd'
+    format = '<d'
 
 
 class Fixed32SubType(Fixed32Type):
@@ -223,7 +229,7 @@ class UInt32Type(Fixed32SubType):
     Represents an unsigned int32 type.
     """
 
-    format = '>I'
+    format = '<I'
 
 
 class Int32Type(Fixed32SubType):
@@ -231,7 +237,7 @@ class Int32Type(Fixed32SubType):
     Represents a signed int32 type.
     """
 
-    format = '>i'
+    format = '<i'
 
 
 class Float32Type(Fixed32SubType):
@@ -239,7 +245,7 @@ class Float32Type(Fixed32SubType):
     Represents a single precision floating point type.
     """
 
-    format = 'f'
+    format = '<f'
 
 
 # Types instances. ------------------------------------------------------------

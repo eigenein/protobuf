@@ -10,7 +10,12 @@ setup(
     author_email='eigenein@gmail.com',
     url='https://github.com/eigenein/protobuf',
     packages=find_packages(exclude=['tests']),
-    install_requires=[],
+    install_requires=[
+        'dataclasses>=0.6,<1.0; python_version >= "3.6" and python_version < "3.7"',
+    ],
+    extras_require={
+        'dev': ['flake8', 'isort', 'pytest', 'pytest-cov'],
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

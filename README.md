@@ -17,7 +17,7 @@ The legacy interface is deprecated and still available via `pure_protobuf.legacy
 
 This guide describes how to use `pure-protobuf` to structure your data. It tries to follow [the standard developer guide](https://developers.google.com/protocol-buffers/docs/proto3). It also assumes that you're familiar with Protocol Buffers.
 
-### Defining A Message Type
+### Defining a message type
 
 Let's look at [the simple example](https://developers.google.com/protocol-buffers/docs/proto3#simple). Here's how it looks like in `proto3` syntax:
 
@@ -57,21 +57,138 @@ assert SearchRequest(
 ).dumps() == b'\x0A\x05hello\x10\x01\x18\x0A'
 ```
 
-### Specifying Field Types
+### Serializing
 
-### Assigning Field Numbers
+Each class wrapped with `@message` gets two methods attached:
+- `dumps() -> bytes` to serialize message into a byte string
+- `dump(io: IO)` to serialize message into a file-like object
 
-### Specifying Field Rules
+### Deserializing
 
-### Scalar Value Types
+Each classes wrapped with `@message` gets two class methods attached:
+- `loads(bytes_: bytes) -> TMessage` to deserialize a message from a byte string
+- `load(io: IO) -> TMessage` to deserialize a message from a file-like object
 
-### Default Values
+These methods are also available as standalone functions in `pure_protobuf.dataclasses_`:
+- `load(cls: Type[T], io: IO) -> T`
+- `loads(cls: Type[T], bytes_: bytes) -> T`
+
+### Specifying field types
+
+In `pure-protobuf` types are specified with [type hints](https://www.python.org/dev/peps/pep-0484/). Native Python `float`, `str`, `bytes` and `bool` types are supported. Since other Protocol Buffers types don't exist as native Python types, the package uses [`NewType`](https://docs.python.org/3/library/typing.html#newtype) to define them. They're available via [`pure_protobuf.types`](pure_protobuf/types.py) and named in the same way.
+
+### Assigning field numbers
+
+Field numbers are provided via the `metadata` parameter of the [`field`](https://docs.python.org/3/library/dataclasses.html#dataclasses.field) function: `field(..., metadata={'number': number})`. However, to improve readability and save some characters, `pure-protobuf` provides a helper function `pure_protobuf.dataclasses_.field` which accepts field number as the first positional parameter and just passes it to the standard `field` function.
+
+### Specifying field rules
+
+`typing.List` and `typing.Iterable` annotations are automatically converted to repeated fields. Repeated fields of scalar numeric types use packed encoding by default:
+
+```python
+# Python 3.6+
+
+from dataclasses import dataclass
+from typing import List
+
+from pure_protobuf.dataclasses_ import field, message
+from pure_protobuf.types import int32
+
+
+@message
+@dataclass
+class Message:
+    foo: List[int32] = field(1, default_factory=list)
+```
+
+### Default values
+
+In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unassigned. It means that the standard `default` and `default_factory` parameters of the `field` function work as usual.
+
+It's allowed to wrap a field type with [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional). It's discarded by `pure-protobuf` but allows you to hint a nullable field properly.
 
 ### Enumerations
 
-### Using Other Message Types
+Subclasses of the standard [`IntEnum`](https://docs.python.org/3/library/enum.html#intenum) class are supported:
 
-## Legacy Interface
+```python
+# Python 3.6+
+
+from dataclasses import dataclass
+from enum import IntEnum
+
+from pure_protobuf.dataclasses_ import field, message
+
+
+class TestEnum(IntEnum):
+    BAR = 1
+
+
+@message
+@dataclass
+class Test:
+    foo: TestEnum = field(1)
+
+
+assert Test(foo=TestEnum.BAR).dumps() == b'\x08\x01'
+assert Test.loads(b'\x08\x01') == Test(foo=TestEnum.BAR)
+```
+
+### Using other message types
+
+Embedded messages are defined the same way as normal dataclasses:
+
+```python
+# Python 3.6+
+
+from dataclasses import dataclass
+
+from pure_protobuf.dataclasses_ import field, message
+from pure_protobuf.types import int32
+
+
+@message
+@dataclass
+class Test1:
+    a: int32 = field(1, default=0)
+
+
+@message
+@dataclass
+class Test3:
+    c: Test1 = field(3, default_factory=Test1)
+
+
+assert Test3(c=Test1(a=int32(150))).dumps() == b'\x1A\x03\x08\x96\x01'
+```
+
+### Well-known message types
+
+`pure_protobuf.google` also provides built-in definitions for the following [well-known message types](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf):
+
+| Python     | `pure-protobuf.google` | Google      |
+| `datetime` | `Timestamp`            | `Timestamp` |
+|            | `Any_`                 | `Any`       |
+
+Python types are handled automatically, you have nothing to do but use them normally in type hints:
+
+```python
+# Python 3.6+
+
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
+
+from pure_protobuf.dataclasses_ import field, message
+
+
+@message
+@dataclass
+class Test:
+    timestamp: Optional[datetime] = field(0, default=None)
+```
+
+## Legacy interface
 
 Assume you have the following definition:
 
@@ -110,7 +227,7 @@ fp.seek(0)
 assert type_.load(fp) == message
 ```
 
-### Sample 2. Required field
+### Required field
 
 To add a missing field you should pass an additional `flags` parameter to `add_field` like this:
 
@@ -128,7 +245,7 @@ assert type_.dumps(message)
     
 If you'll not fill in a required field, then `ValueError` will be raised during serialization.
 
-### Sample 3. Repeated field
+### Repeated field
 
 ```python
 from pure_protobuf.legacy import Flags, MessageType, UVarint
@@ -144,7 +261,7 @@ assert type_.dumps(message)
     
 Value of a repeated field can be any iterable object. The loaded value will always be `list`.
 
-### Sample 4. Packed repeated field
+### Packed repeated field
 
 ```python
 from pure_protobuf.legacy import Flags, MessageType, UVarint
@@ -158,7 +275,7 @@ message.d = (3, 270, 86942)
 assert type_.dumps(message)
 ```
     
-### Sample 5. Embedded messages
+### Embedded messages
 
 ```proto
 message Test1 {

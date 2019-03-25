@@ -26,9 +26,10 @@ class Timestamp:
     nanos: int32 = field(2)
 
 
+# noinspection PyPep8Naming
 @message
 @dataclass
-class WellKnownAny:
+class Any_:
     """
     See also: https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/any.proto
     """

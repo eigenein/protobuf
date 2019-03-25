@@ -1,6 +1,6 @@
 """
 Type hints for the dataclasses interface.
-Defines custom Protocol Buffers types that doesn't exist as native types in Python.
+Defines custom Protocol Buffers types that don't exist as native types in Python.
 See also: https://developers.google.com/protocol-buffers/docs/proto3#scalar
 
 `pure-protobuf` contributors © 2011-2019

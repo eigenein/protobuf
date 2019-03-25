@@ -14,7 +14,7 @@ setup(
         'dataclasses>=0.6,<1.0; python_version >= "3.6" and python_version < "3.7"',
     ],
     extras_require={
-        'dev': ['flake8', 'isort', 'pytest', 'pytest-cov'],
+        'dev': ['flake8', 'isort', 'pytest', 'pytest-cov', 'coveralls'],
     },
     classifiers=[
         'Development Status :: 5 - Production/Stable',

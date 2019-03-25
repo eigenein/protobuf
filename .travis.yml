@@ -11,3 +11,5 @@ script:
   - pytest --cov-report term-missing --cov pure_protobuf
   - flake8 pure_protobuf tests
   - isort -rc -c --diff pure_protobuf tests
+after_success:
+  - coveralls

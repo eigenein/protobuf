@@ -61,8 +61,13 @@ class NonRepeatedField(Field):
     See also: https://developers.google.com/protocol-buffers/docs/encoding#optional
     """
 
+    def __init__(self, number: int, name: str, serializer: Serializer, is_optional: bool):
+        super().__init__(number, name, serializer)
+        self.is_optional = is_optional
+
     def validate(self, value: Any):
-        self.serializer.validate(value)
+        if value is not None or not self.is_optional:
+            self.serializer.validate(value)
 
     def dump(self, value: Any, io: IO):
         if value is not None:

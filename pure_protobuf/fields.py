@@ -94,10 +94,10 @@ class RepeatedField(Field, ABC):
             self.serializer.validate(item)
 
     def load(self, wire_type: WireType, io: IO) -> Any:
-        # Protocol buffer parsers must be able to parse repeated fields
-        # that were compiled as packed as if they were not packed, and vice versa.
-        # See also: https://developers.google.com/protocol-buffers/docs/encoding#packed
-        if wire_type == WireType.BYTES:
+        if self.serializer.wire_type != WireType.BYTES and wire_type == WireType.BYTES:
+            # Protocol buffer parsers must be able to parse repeated fields
+            # that were compiled as packed as if they were not packed, and vice versa.
+            # See also: https://developers.google.com/protocol-buffers/docs/encoding#packed
             return list(self.load_packed(bytes_serializer.load(io)))
         if wire_type == self.serializer.wire_type:
             return [self.serializer.load(io)]

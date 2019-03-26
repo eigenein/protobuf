@@ -14,10 +14,21 @@ from pure_protobuf.enums import WireType
 from pure_protobuf.serializers import (
     BooleanSerializer,
     BytesSerializer,
+    DoubleSerializer,
+    FloatSerializer,
     IntEnumSerializer,
     PackingSerializer,
+    Serializer,
+    SignedFixed32Serializer,
+    SignedFixed64Serializer,
+    SignedInt32Serializer,
+    SignedInt64Serializer,
     SignedVarintSerializer,
     StringSerializer,
+    UnsignedFixed32Serializer,
+    UnsignedFixed64Serializer,
+    UnsignedInt32Serializer,
+    UnsignedInt64Serializer,
     UnsignedVarintSerializer,
 )
 from pure_protobuf.types import int32, uint
@@ -48,6 +59,27 @@ def class_3(class_1: Type) -> Type:
     class Test3:
         c: class_1 = field(3, default_factory=class_1)
     return Test3
+
+
+@mark.parametrize('serializer_class, value', [
+    (SignedVarintSerializer, 'hello'),
+    (BytesSerializer, 42),
+    (StringSerializer, 42),
+    (UnsignedInt32Serializer, 0x1_00000000),
+    (UnsignedInt64Serializer, -1),
+    (SignedInt32Serializer, 0x80000000),
+    (SignedInt64Serializer, 0x80000000_00000000),
+    (BooleanSerializer, 42),
+    (SignedFixed32Serializer, 'hello'),
+    (UnsignedFixed32Serializer, 'hello'),
+    (SignedFixed64Serializer, 'hello'),
+    (UnsignedFixed64Serializer, 'hello'),
+    (FloatSerializer, 'hello'),
+    (DoubleSerializer, 'hello'),
+])
+def test_serializer_value_error(serializer_class: Type[Serializer], value: Any):
+    with raises(ValueError):
+        serializer_class().validate(value)
 
 
 @mark.parametrize('value, bytes_', [
@@ -212,6 +244,3 @@ def test_enum():
 
     assert value.dumps() == bytes_
     assert Test.loads(bytes_) == value
-
-
-# TODO: test individual skip functions.

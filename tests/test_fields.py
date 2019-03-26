@@ -4,7 +4,7 @@
 from io import BytesIO
 from typing import List, Optional
 
-from pytest import mark
+from pytest import mark, raises
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.fields import NonRepeatedField, PackedRepeatedField, UnpackedRepeatedField
@@ -14,8 +14,8 @@ from pure_protobuf.serializers import BytesSerializer, UnsignedVarintSerializer
 @mark.parametrize('value, bytes_', [
     (b'testing', b'\x0A\x07testing'),
 ])
-def test_scalar_field(value: bytes, bytes_: bytes):
-    field = NonRepeatedField(1, 'a', BytesSerializer())
+def test_non_repeated_field(value: bytes, bytes_: bytes):
+    field = NonRepeatedField(1, 'a', BytesSerializer(), False)
     assert field.dumps(value) == bytes_
     with BytesIO(bytes_) as io:
         assert field.load(WireType(UnsignedVarintSerializer().load(io) & 0b111), io) == value
@@ -25,8 +25,16 @@ def test_scalar_field(value: bytes, bytes_: bytes):
     (1, b'\x08\x01'),
     (None, b''),
 ])
-def test_optional_scalar_field(value: Optional[int], expected: bytes):
-    assert NonRepeatedField(1, 'a', UnsignedVarintSerializer()).dumps(value) == expected
+def test_optional_non_repeated_field(value: Optional[int], expected: bytes):
+    assert NonRepeatedField(1, 'a', UnsignedVarintSerializer(), True).dumps(value) == expected
+
+
+@mark.parametrize('value', [
+    None,
+])
+def test_non_repeated_field_value_error(value: Optional[int]):
+    with raises(ValueError):
+        NonRepeatedField(1, 'a', UnsignedVarintSerializer(), False).validate(value)
 
 
 @mark.parametrize('value, bytes_', [

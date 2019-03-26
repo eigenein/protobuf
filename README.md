@@ -101,11 +101,11 @@ class Message:
     foo: List[int32] = field(1, default_factory=list)
 ```
 
+It's also possible to wrap a field type with [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional). If `None` is assigned to an `Optional` field, then the field will be skipped during serialization.
+
 ### Default values
 
 In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unassigned. It means that the standard `default` and `default_factory` parameters of the `field` function work as usual.
-
-It's allowed to wrap a field type with [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional). It's discarded by `pure-protobuf` but allows you to hint a nullable field properly.
 
 ### Enumerations
 

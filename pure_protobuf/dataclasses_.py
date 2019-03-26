@@ -124,7 +124,7 @@ def make_field(number: int, name: str, type_: Any) -> Tuple[int, Field]:
     Figure out how to serialize and de-serialize the field.
     Returns the field number and a corresponding ``Field`` instance.
     """
-    type_ = remove_optional(type_)
+    is_optional, type_ = get_optional(type_)
     is_repeated, type_ = get_repeated(type_)
 
     if isinstance(type_, type) and issubclass(type_, Message):
@@ -144,7 +144,7 @@ def make_field(number: int, name: str, type_: Any) -> Tuple[int, Field]:
 
     if not is_repeated:
         # Non-repeated field.
-        return number, NonRepeatedField(number, name, serializer)
+        return number, NonRepeatedField(number, name, serializer, is_optional)
     elif serializer.wire_type != WireType.BYTES:
         # Repeated fields of scalar numeric types are packed by default.
         # See also: https://developers.google.com/protocol-buffers/docs/encoding#packed
@@ -154,9 +154,9 @@ def make_field(number: int, name: str, type_: Any) -> Tuple[int, Field]:
         return number, UnpackedRepeatedField(number, name, serializer)
 
 
-def remove_optional(type_: Any) -> Any:
+def get_optional(type_: Any) -> Tuple[bool, Any]:
     """
-    Removes ``Optional`` type annotation if present.
+    Extracts ``Optional`` type annotation if present.
     This may be useful if a user wants to annotate a field with ``Optional[...]`` and set default to ``None``.
     """
     if getattr(type_, '__origin__', None) is Union:
@@ -166,9 +166,9 @@ def remove_optional(type_: Any) -> Any:
         if len(args) == 2 and NoneType in args:
             # Extract inner type.
             type_, = args - {NoneType}
-            return type_
+            return True, type_
 
-    return type_
+    return False, type_
 
 
 def get_repeated(type_: Any) -> Tuple[bool, Any]:

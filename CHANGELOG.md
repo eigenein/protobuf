@@ -1,4 +1,4 @@
-## `master`
+## `1.0.0`
 
 - New dataclasses interface for defining types using [Python type hinting](https://www.python.org/dev/peps/pep-0484/).
 - Legacy interface is available via `pure_protobuf.legacy`.

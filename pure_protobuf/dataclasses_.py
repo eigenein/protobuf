@@ -139,8 +139,8 @@ def make_field(number: int, name: str, type_: Any) -> Tuple[int, Field]:
         try:
             serializer = SERIALIZERS[type_]
         except KeyError:
-            import pure_protobuf.google  # `dataclasses_` has to already be imported beforehand
-            serializer = pure_protobuf.google.SERIALIZERS[type_]
+            import pure_protobuf.serializers.google  # `dataclasses_` has to already be imported beforehand
+            serializer = pure_protobuf.serializers.google.SERIALIZERS[type_]
 
     if not is_repeated:
         # Non-repeated field.

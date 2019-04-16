@@ -1,3 +1,7 @@
+## `master`
+
+- Chore: #40 move Google well-known types out to a separate namespace
+
 ## `1.0.1`
 
 - Fix: #46 accept a bytes-like object as a byte-string field value

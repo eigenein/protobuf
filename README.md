@@ -75,7 +75,7 @@ These methods are also available as standalone functions in `pure_protobuf.datac
 
 ### Specifying field types
 
-In `pure-protobuf` types are specified with [type hints](https://www.python.org/dev/peps/pep-0484/). Native Python `float`, `str`, `bytes` and `bool` types are supported. Since other Protocol Buffers types don't exist as native Python types, the package uses [`NewType`](https://docs.python.org/3/library/typing.html#newtype) to define them. They're available via [`pure_protobuf.types`](pure_protobuf/types.py) and named in the same way.
+In `pure-protobuf` types are specified with [type hints](https://www.python.org/dev/peps/pep-0484/). Native Python `float`, `str`, `bytes` and `bool` types are supported. Since other Protocol Buffers types don't exist as native Python types, the package uses [`NewType`](https://docs.python.org/3/library/typing.html#newtype) to define them. They're available via `pure_protobuf.types` and named in the same way.
 
 ### Assigning field numbers
 
@@ -214,7 +214,7 @@ message = type_()
 message.b = 'testing'
 
 # Dump into a string.
-print(message.dumps())
+assert message.dumps() == b'\x12\x07testing'
 
 # Dump into a file-like object.
 fp = BytesIO()

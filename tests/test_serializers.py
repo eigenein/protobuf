@@ -89,6 +89,7 @@ def test_serializer_value_error(serializer_class: Type[Serializer], value: Any):
     (86942, b'\x9E\xA7\x05'),
 ])
 def test_unsigned_varint_serializer(value: int, bytes_: bytes):
+    UnsignedVarintSerializer().validate(value)
     assert UnsignedVarintSerializer().dumps(value) == bytes_
     assert UnsignedVarintSerializer().loads(bytes_) == value
 
@@ -100,14 +101,18 @@ def test_unsigned_varint_serializer(value: int, bytes_: bytes):
     (-2, b'\x03'),
 ])
 def test_signed_varint_serializer(value: int, bytes_: bytes):
+    SignedVarintSerializer().validate(value)
     assert SignedVarintSerializer().dumps(value) == bytes_
     assert SignedVarintSerializer().loads(bytes_) == value
 
 
 @mark.parametrize('value, bytes_', [
     (b'testing', b'\x07testing'),
+    (bytearray(b'testing'), b'\x07testing'),
+    (memoryview(b'testing'), b'\x07testing'),
 ])
 def test_bytes_serializer(value: bytes, bytes_: bytes):
+    BytesSerializer().validate(value)
     assert BytesSerializer().dumps(value) == bytes_
     assert BytesSerializer().loads(bytes_) == value
 
@@ -116,6 +121,7 @@ def test_bytes_serializer(value: bytes, bytes_: bytes):
     ('Привет', b'\x0c\xd0\x9f\xd1\x80\xd0\xb8\xd0\xb2\xd0\xb5\xd1\x82'),
 ])
 def test_string_serializer(value: str, bytes_: bytes):
+    StringSerializer().validate(value)
     assert StringSerializer().dumps(value) == bytes_
     assert StringSerializer().loads(bytes_) == value
 
@@ -125,6 +131,7 @@ def test_string_serializer(value: str, bytes_: bytes):
     (False, b'\x00'),
 ])
 def test_boolean_serializer(value: bool, bytes_: bytes):
+    BooleanSerializer().validate(value)
     assert BooleanSerializer().dumps(value) == bytes_
     assert BooleanSerializer().loads(bytes_) == value
 
@@ -136,6 +143,7 @@ def test_boolean_serializer(value: bool, bytes_: bytes):
     (WireType.LONG, b'\x05'),
 ])
 def test_int_enum_serializer(value: IntEnum, bytes_: bytes):
+    IntEnumSerializer(WireType).validate(value)
     assert IntEnumSerializer(WireType).dumps(value) == bytes_
     assert IntEnumSerializer(WireType).loads(bytes_) == value
 
@@ -145,6 +153,7 @@ def test_int_enum_serializer(value: IntEnum, bytes_: bytes):
     (270, b'\x02\x8E\x02'),
 ])
 def test_packing_serializer(value: int, bytes_: bytes):
+    PackingSerializer(UnsignedVarintSerializer()).validate(value)
     assert PackingSerializer(UnsignedVarintSerializer()).dumps(value) == bytes_
     assert PackingSerializer(UnsignedVarintSerializer()).loads(bytes_) == value
 

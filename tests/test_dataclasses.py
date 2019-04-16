@@ -4,7 +4,7 @@
 
 # noinspection PyCompatibility
 from dataclasses import dataclass
-from typing import Any, List, Optional, Tuple
+from typing import Any, ByteString, List, Optional, Tuple
 
 from pytest import mark, raises
 
@@ -18,6 +18,7 @@ from pure_protobuf.dataclasses_ import make_field, message
     (1, 'a', List[types.int32], [1, 150, 2], b'\x0A\x04\x01\x96\x01\x02'),
     (1, 'a', List[bytes], [b'\x42', b'\x43'], b'\x0A\x01\x42' b'\x0A\x01\x43'),
     (1, 'a', Optional[bytes], None, b''),
+    (1, 'a', ByteString, b'Testing', b'\x0A\x07Testing'),
     # TODO: repeated embedded message.
 ])
 def test_make_field(number: int, name: str, type_: Any, value: Any, expected: bytes):

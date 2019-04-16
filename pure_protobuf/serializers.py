@@ -96,8 +96,10 @@ class BytesSerializer(Serializer):
     wire_type = WireType.BYTES
 
     def validate(self, value: Any):
-        if not isinstance(value, bytes):
-            raise ValueError('a byte string is expected')
+        try:
+            memoryview(value)
+        except TypeError:
+            raise ValueError(f'a bytes-like object is required, not `{type(value)}`')
 
     def dump(self, value: Any, io: IO):
         unsigned_varint_serializer.dump(len(value), io)

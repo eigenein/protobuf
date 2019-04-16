@@ -1,4 +1,6 @@
-## `master`
+## `1.0.1`
+
+- Fix: #46 accept a bytes-like object as a byte-string field value
 
 ## `1.0.0`
 

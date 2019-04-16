@@ -10,7 +10,7 @@ from abc import ABC
 from collections import abc
 from enum import IntEnum
 from io import BytesIO
-from typing import Any, ClassVar, Dict, Iterable, List, Tuple, Type, TypeVar, Union, get_type_hints
+from typing import Any, ByteString, ClassVar, Dict, Iterable, List, Tuple, Type, TypeVar, Union, get_type_hints
 
 from pure_protobuf import serializers, types
 from pure_protobuf.enums import WireType
@@ -185,6 +185,7 @@ def get_repeated(type_: Any) -> Tuple[bool, Any]:
 SERIALIZERS: Dict[Type, Serializer] = {
     bool: serializers.BooleanSerializer(),
     bytes: serializers.bytes_serializer,
+    ByteString: serializers.bytes_serializer,
     float: serializers.FloatSerializer(),
     int: serializers.signed_varint_serializer,  # is not a part of the standard
     str: serializers.StringSerializer(),

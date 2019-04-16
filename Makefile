@@ -18,4 +18,4 @@ test:
 	@$(PYTEST) --cov-report term-missing --cov pure_protobuf
 	@$(FLAKE8) pure_protobuf tests
 	@$(ISORT) -rc -c pure_protobuf tests
-	# TODO: mypy
+	@# TODO: mypy

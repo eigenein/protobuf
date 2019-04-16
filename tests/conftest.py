@@ -8,6 +8,6 @@ if sys.version_info < (3, 6, 0, 0):
     collect_ignore.extend([
         'test_dataclasses.py',
         'test_fields.py',
-        'test_google.py',
         'test_serializers.py',
+        'types/test_google.py',
     ])

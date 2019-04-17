@@ -193,6 +193,8 @@ class Test:
 
 ## Legacy interface
 
+The legacy interface is deprecated and stays in "maintanance mode" for Python 2 users. New projects should strongly consider using the dataclasses.
+
 Assume you have the following definition:
 
 ```proto

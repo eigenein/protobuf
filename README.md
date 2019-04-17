@@ -166,10 +166,10 @@ assert Test3(c=Test1(a=int32(150))).dumps() == b'\x1A\x03\x08\x96\x01'
 
 `pure_protobuf.google` also provides built-in definitions for the following [well-known message types](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf):
 
-| Python     | `pure-protobuf.google` | Google      |
-| ---------- | ---------------------- | ----------- |
-| `datetime` | `Timestamp`            | `Timestamp` |
-|            | `Any_`                 | `Any`       |
+| Python     | `pure_protobuf.types.google` | `.proto`    |
+| ---------- | ---------------------------- | ----------- |
+| `datetime` | `Timestamp`                  | `Timestamp` |
+| TODO       | `Any_`                       | `Any`       |
 
 Python types are handled automatically, you have nothing to do but use them normally in type hints:
 

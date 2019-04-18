@@ -1,5 +1,6 @@
 ## `master`
 
+- New: #34 support `google.protobuf.Duration`
 - Chore: #40 move Google well-known types out to a separate namespace
 
 ## `1.0.1`

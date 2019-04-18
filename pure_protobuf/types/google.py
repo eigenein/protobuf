@@ -13,12 +13,27 @@ from pure_protobuf.types import int32, int64
 
 @message
 @dataclass
-class Timestamp:
+class TimeSpan:
     """
-    See also: https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/timestamp.proto
+    Base class to represent timespan as whole seconds plus its nanoseconds part.
     """
     seconds: int64 = field(1)
     nanos: int32 = field(2)
+
+
+@dataclass
+class Timestamp(TimeSpan):
+    """
+    See also: https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/timestamp.proto
+    """
+
+
+@dataclass
+class Duration(TimeSpan):
+    """
+    See also: https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#duration
+    See also: https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/duration.proto
+    """
 
 
 # noinspection PyPep8Naming

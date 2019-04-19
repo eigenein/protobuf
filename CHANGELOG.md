@@ -1,6 +1,7 @@
 ## `master`
 
 - New: #34 support `google.protobuf.Duration`
+- New: #26 support [`google.protobuf.Any`](https://developers.google.com/protocol-buffers/docs/proto3#any)
 - Chore: #40 move Google well-known types out to a separate namespace
 
 ## `1.0.1`

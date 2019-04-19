@@ -36,6 +36,7 @@ class Message(ABC):
     """
 
     serializer: ClassVar[Serializer]
+    type_url: ClassVar[str]
 
     def validate(self):
         self.serializer.validate(self)
@@ -104,11 +105,13 @@ def message(cls: Type[T]) -> Type[T]:
             for field_ in dataclasses.fields(cls)
         )
     except KeyError as e:
+        # FIXME: catch `KeyError` in `make_field` and re-raise as `TypeError`.
         raise TypeError(f'type is not serializable: {e}') from e
 
     # noinspection PyUnresolvedReferences
     Message.register(cls)
     cls.serializer = MessageSerializer(cls)
+    cls.type_url = f'type.googleapis.com/{cls.__module__}.{cls.__name__}'
     cls.validate = Message.validate
     cls.dump = Message.dump
     cls.dumps = Message.dumps

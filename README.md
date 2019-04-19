@@ -168,13 +168,13 @@ assert Test3(c=Test1(a=int32(150))).dumps() == b'\x1A\x03\x08\x96\x01'
 
 `pure_protobuf.google` also provides built-in definitions for the following [well-known message types](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf):
 
-| Python      | `pure_protobuf.types.google` | `.proto`    |
-| ----------- | ---------------------------- | ----------- |
-| `datetime`  | `Timestamp`                  | `Timestamp` |
-| `timedelta` | `Duration`                   | `Duration`  |
-| TODO        | `Any_`                       | `Any`       |
+| Annotation   | `pure_protobuf.types.google` | `.proto`    |
+| ------------ | ---------------------------- | ----------- |
+| `datetime`   | `Timestamp`                  | `Timestamp` |
+| `timedelta`  | `Duration`                   | `Duration`  |
+| `typing.Any` | `Any_`                       | `Any`       |
 
-Python types are handled automatically, you have nothing to do but use them normally in type hints:
+They're handled automatically, you have nothing to do but use them normally in type hints:
 
 ```python
 # Python 3.6+
@@ -189,7 +189,32 @@ from pure_protobuf.dataclasses_ import field, message
 @message
 @dataclass
 class Test:
-    timestamp: Optional[datetime] = field(0, default=None)
+    timestamp: Optional[datetime] = field(1, default=None)
+```
+
+#### [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any)
+
+Since `pure-protobuf` is not able to download or parse `.proto` definitions, it provides a limited implementation of the [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any) message type. That is, you still have to define all message classes in the usual way. Then, `pure-protobuf` will be able to import and instantiate an encoded value:
+
+```python
+# Python 3.6+
+
+from dataclasses import dataclass
+from typing import Any, Optional
+
+from pure_protobuf.dataclasses_ import field, message
+from pure_protobuf.types.google import Timestamp
+
+
+@message
+@dataclass
+class Message:
+    value: Optional[Any] = field(1)
+
+
+# Here `Timestamp` is used just as an example, in principle any importable user type works.
+message = Message(value=Timestamp(seconds=42))
+assert Message.loads(message.dumps()) == message
 ```
 
 ## Legacy interface

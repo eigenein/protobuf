@@ -11,16 +11,16 @@ from pure_protobuf.dataclasses_ import field, message
 from pure_protobuf.types import int32, int64
 
 
-@message
 @dataclass
 class TimeSpan:
     """
     Base class to represent timespan as whole seconds plus its nanoseconds part.
     """
-    seconds: int64 = field(1)
-    nanos: int32 = field(2)
+    seconds: int64 = field(1, default=0)
+    nanos: int32 = field(2, default=0)
 
 
+@message
 @dataclass
 class Timestamp(TimeSpan):
     """
@@ -28,6 +28,7 @@ class Timestamp(TimeSpan):
     """
 
 
+@message
 @dataclass
 class Duration(TimeSpan):
     """

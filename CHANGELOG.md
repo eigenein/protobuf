@@ -2,6 +2,7 @@
 
 - New: #34 support `google.protobuf.Duration`
 - New: #26 support [`google.protobuf.Any`](https://developers.google.com/protocol-buffers/docs/proto3#any)
+- New: #56 provide public API for reading and writing `VarInt`s
 - Chore: #40 move Google well-known types out to a separate namespace
 
 ## `1.0.1`

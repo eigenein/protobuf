@@ -11,10 +11,12 @@ from itertools import count
 from struct import pack, unpack
 from typing import Any, Type
 
+from pure_protobuf import types
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps, Loads
 
 
+# TODO: add type argument, see also https://github.com/eigenein/protobuf/issues/27
 class Serializer(Dumps, Loads, ABC):
     # Default wire type for a value.
     # May be overridden by a wrapping serializer.
@@ -42,22 +44,14 @@ class UnsignedVarintSerializer(Serializer):
     wire_type = WireType.VARINT
 
     def validate(self, value: Any):
-        if not isinstance(value, int):
-            raise ValueError('an integer is expected')
+        if not isinstance(value, int) or value < 0:
+            raise ValueError('a non-negative integer is expected')
 
     def dump(self, value: Any, io: IO):
-        while value > 0x7F:
-            io.write(bytes((value & 0x7F | 0x80,)))
-            value >>= 7
-        io.write(bytes((value,)))
+        write_varint(value, io)
 
     def load(self, io: IO) -> Any:
-        value = 0
-        for shift in count(0, 7):
-            byte, = io.read(1)
-            value |= (byte & 0x7F) << shift
-            if not byte & 0x80:
-                return value
+        return read_varint(io)
 
 
 unsigned_varint_serializer = UnsignedVarintSerializer()
@@ -435,6 +429,28 @@ class PackingSerializer(Serializer):
 
     def merge(self, old_value: Any, new_value: Any) -> Any:
         return self.inner.merge(old_value, new_value)
+
+
+def read_varint(io: IO) -> types.uint:
+    """
+    Read unsigned `VarInt` from a file-like object.
+    """
+    value = 0
+    for shift in count(0, 7):
+        byte, = io.read(1)
+        value |= (byte & 0x7F) << shift
+        if not byte & 0x80:
+            return value
+
+
+def write_varint(value: types.uint, io: IO):
+    """
+    Write unsigned `VarInt` to a file-like object.
+    """
+    while value > 0x7F:
+        io.write(bytes((value & 0x7F | 0x80,)))
+        value >>= 7
+    io.write(bytes((value,)))
 
 
 def skip_varint(io: IO):

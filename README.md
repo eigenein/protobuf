@@ -4,7 +4,7 @@ Python implementation of [Protocol Buffers](http://code.google.com/apis/protocol
 
 [![Build Status](https://travis-ci.org/eigenein/protobuf.svg?branch=master)](https://travis-ci.org/eigenein/protobuf)
 [![Coverage Status](https://coveralls.io/repos/github/eigenein/protobuf/badge.svg?branch=master)](https://coveralls.io/github/eigenein/protobuf?branch=master)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pure-protobuf.svg)](https://pypistats.org/packages/pure-protobuf)
 [![PyPI – Version](https://img.shields.io/pypi/v/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#history)
 [![PyPI – Python](https://img.shields.io/pypi/pyversions/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#files)
 [![License](https://img.shields.io/pypi/l/pure-protobuf.svg)](https://github.com/eigenein/protobuf/blob/master/LICENSE)

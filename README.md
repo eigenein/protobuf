@@ -57,7 +57,7 @@ assert SearchRequest(
 ).dumps() == b'\x0A\x05hello\x10\x01\x18\x0A'
 ```
 
-Keep in mind that `@message` decorator should **always** stay on top of `@dataclass`.
+Keep in mind that `@message` decorator should **always** stay on top of [`@dataclass`](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass).
 
 ### Serializing
 
@@ -85,7 +85,7 @@ Field numbers are provided via the `metadata` parameter of the [`field`](https:/
 
 ### Specifying field rules
 
-`typing.List` and `typing.Iterable` annotations are automatically converted to repeated fields. Repeated fields of scalar numeric types use packed encoding by default:
+[`typing.List`](https://docs.python.org/3/library/typing.html#typing.List) and [`typing.Iterable`](https://docs.python.org/3/library/typing.html#typing.Iterable) annotations are automatically converted to [repeated fields](https://developers.google.com/protocol-buffers/docs/proto3#specifying-field-rules). Repeated fields of scalar numeric types use packed encoding by default:
 
 ```python
 # Python 3.6+
@@ -219,7 +219,7 @@ assert Message.loads(message.dumps()) == message
 
 ## Legacy interface
 
-The legacy interface is deprecated and stays in "maintanance mode" for Python 2 users. It will be removed one day. New projects should strongly consider using the dataclasses.
+**The legacy interface is deprecated and stays in "maintanance mode" for Python 2 users. It will be removed one day. New projects should strongly consider using the dataclasses.**
 
 Assume you have the following definition:
 

@@ -1,4 +1,4 @@
-## `master`
+## `1.2.0`
 
 - New: #63 convenience method for an optional field
 

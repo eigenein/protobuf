@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='pure-protobuf',
-    version='1.1.0',
+    version='1.2.0',
     description='Python implementation of Protocol Buffers data types with dataclasses support',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

@@ -1,5 +1,7 @@
 ## `master`
 
+- New: #63 convenience method for an optional field
+
 ## `1.1.0`
 
 - New: #34 support `google.protobuf.Duration`

@@ -208,7 +208,7 @@ def test_class_3(class_1: Any, class_2: Any, class_3: Any):
 
 def test_merge_repeated_embedded_message():
     # For embedded message fields, the parser merges multiple instances of the same field,
-    # as if with the Message::MergeFrom method.
+    # as if with the `Message::MergeFrom` method.
     # See also: https://developers.google.com/protocol-buffers/docs/encoding#optional
 
     @message

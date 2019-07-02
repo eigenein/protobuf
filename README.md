@@ -107,7 +107,50 @@ It's also possible to wrap a field type with [`typing.Optional`](https://docs.py
 
 ### Default values
 
-In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unassigned. It means that the standard `default` and `default_factory` parameters of the `field` function work as usual.
+In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unassigned. It means that the standard `default` and `default_factory` parameters of the `field` function work as usual:
+
+```python
+# Python 3.6+
+
+from dataclasses import dataclass
+from typing import Optional
+
+from pure_protobuf.dataclasses_ import field, message
+from pure_protobuf.types import int32
+
+
+@message
+@dataclass
+class Foo:
+    bar: int32 = field(1, default=42)
+    qux: Optional[int32] = field(2, default=None)
+
+
+assert Foo().dumps() == b'\x08\x2A'
+assert Foo.loads(b'') == Foo(bar=42)
+```
+
+In fact, the pattern `qux: Optional[int32] = field(2, default=None)` is so common that there's a convenience function `optional_field` to define an `Optional` field with `None` value by default:
+
+```python
+# Python 3.6+
+
+from dataclasses import dataclass
+from typing import Optional
+
+from pure_protobuf.dataclasses_ import optional_field, message
+from pure_protobuf.types import int32
+
+
+@message
+@dataclass
+class Foo:
+    qux: Optional[int32] = optional_field(2)
+
+
+assert Foo().dumps() == b''
+assert Foo.loads(b'') == Foo(qux=None)
+```
 
 ### Enumerations
 

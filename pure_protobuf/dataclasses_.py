@@ -84,10 +84,17 @@ def loads(cls: Type[T], bytes_: bytes) -> T:
 
 def field(number: int, *args, **kwargs) -> dataclasses.Field:
     """
-    Convenience method to assign field numbers.
+    Convenience function to assign field numbers.
     Calls the standard ``dataclasses.field`` function with the metadata assigned.
     """
     return dataclasses.field(*args, metadata={'number': number}, **kwargs)
+
+
+def optional_field(number: int, *args, **kwargs) -> dataclasses.Field:
+    """
+    Convenience function to define a field which is assigned `None` by default.
+    """
+    return field(number, *args, default=None, **kwargs)
 
 
 def message(cls: Type[T]) -> Type[T]:

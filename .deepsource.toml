@@ -6,7 +6,9 @@ test_patterns = [
 
 exclude_patterns = [
   ".github",
-  "docs"
+  "docs",
+  "pure_protobuf/legacy.py",
+  "pure_protobuf/six.py"
 ]
 
 [[analyzers]]

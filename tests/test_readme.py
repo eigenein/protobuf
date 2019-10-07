@@ -20,4 +20,4 @@ readme = open(join(dirname(dirname(__file__)), 'README.md'), 'rt').read()
 def test_code_block(code):
     if code.lstrip().startswith('# Python 3.6+') and sys.version_info < (3, 6, 0, 0):
         skip('Python 3.6+ is needed')
-    exec(code, {})
+    exec(code, {})  # skipcq: PYL-W0122

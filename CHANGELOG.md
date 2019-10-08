@@ -1,3 +1,7 @@
+## `master`
+
+- Break: drop Python 2.x and 3.5 support and remove the legacy interface #59
+
 ## `1.2.0`
 
 - New: #63 convenience method for an optional field

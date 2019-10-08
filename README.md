@@ -34,8 +34,6 @@ message SearchRequest {
 And this is how you define it with `pure-protobuf`:
 
 ```python
-# Python 3.6+
-
 from dataclasses import dataclass
 
 from pure_protobuf.dataclasses_ import field, message
@@ -88,8 +86,6 @@ Field numbers are provided via the `metadata` parameter of the [`field`](https:/
 [`typing.List`](https://docs.python.org/3/library/typing.html#typing.List) and [`typing.Iterable`](https://docs.python.org/3/library/typing.html#typing.Iterable) annotations are automatically converted to [repeated fields](https://developers.google.com/protocol-buffers/docs/proto3#specifying-field-rules). Repeated fields of scalar numeric types use packed encoding by default:
 
 ```python
-# Python 3.6+
-
 from dataclasses import dataclass
 from typing import List
 
@@ -110,8 +106,6 @@ It's also possible to wrap a field type with [`typing.Optional`](https://docs.py
 In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unassigned. It means that the standard `default` and `default_factory` parameters of the `field` function work as usual:
 
 ```python
-# Python 3.6+
-
 from dataclasses import dataclass
 from typing import Optional
 
@@ -133,8 +127,6 @@ assert Foo.loads(b'') == Foo(bar=42)
 In fact, the pattern `qux: Optional[int32] = field(2, default=None)` is so common that there's a convenience function `optional_field` to define an `Optional` field with `None` value by default:
 
 ```python
-# Python 3.6+
-
 from dataclasses import dataclass
 from typing import Optional
 
@@ -157,8 +149,6 @@ assert Foo.loads(b'') == Foo(qux=None)
 Subclasses of the standard [`IntEnum`](https://docs.python.org/3/library/enum.html#intenum) class are supported:
 
 ```python
-# Python 3.6+
-
 from dataclasses import dataclass
 from enum import IntEnum
 
@@ -184,8 +174,6 @@ assert Test.loads(b'\x08\x01') == Test(foo=TestEnum.BAR)
 Embedded messages are defined the same way as normal dataclasses:
 
 ```python
-# Python 3.6+
-
 from dataclasses import dataclass
 
 from pure_protobuf.dataclasses_ import field, message
@@ -220,8 +208,6 @@ assert Test3(c=Test1(a=int32(150))).dumps() == b'\x1A\x03\x08\x96\x01'
 They're handled automatically, you have nothing to do but use them normally in type hints:
 
 ```python
-# Python 3.6+
-
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -240,8 +226,6 @@ class Test:
 Since `pure-protobuf` is not able to download or parse `.proto` definitions, it provides a limited implementation of the [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any) message type. That is, you still have to define all message classes in the usual way. Then, `pure-protobuf` will be able to import and instantiate an encoded value:
 
 ```python
-# Python 3.6+
-
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -258,156 +242,4 @@ class Message:
 # Here `Timestamp` is used just as an example, in principle any importable user type works.
 message = Message(value=Timestamp(seconds=42))
 assert Message.loads(message.dumps()) == message
-```
-
-## Legacy interface
-
-**The legacy interface is deprecated and stays in "maintanance mode" for Python 2 users. It will be removed one day. New projects should strongly consider using the dataclasses.**
-
-Assume you have the following definition:
-
-```proto
-message Test2 {
-  string b = 2;
-}
-```
-    
-This is how you can create a message and get it serialized:
-
-```python
-from io import BytesIO
-
-from pure_protobuf.legacy import MessageType, Unicode
-
-# Create the type instance and add the field.
-type_ = MessageType()
-type_.add_field(2, 'b', Unicode)
-
-message = type_()
-message.b = 'testing'
-
-# Dump into a string.
-assert message.dumps() == b'\x12\x07testing'
-
-# Dump into a file-like object.
-fp = BytesIO()
-message.dump(fp)
-
-# Load from a string.
-assert type_.loads(message.dumps()) == message
-
-# Load from a file-like object.
-fp.seek(0)
-assert type_.load(fp) == message
-```
-
-### Required field
-
-To add a missing field you should pass an additional `flags` parameter to `add_field` like this:
-
-```python
-from pure_protobuf.legacy import Flags, MessageType, Unicode
-
-type_ = MessageType()
-type_.add_field(2, 'b', Unicode, flags=Flags.REQUIRED)
-
-message = type_()
-message.b = 'hello, world'
-
-assert type_.dumps(message)
-```
-    
-If you'll not fill in a required field, then `ValueError` will be raised during serialization.
-
-### Repeated field
-
-```python
-from pure_protobuf.legacy import Flags, MessageType, UVarint
-
-type_ = MessageType()
-type_.add_field(1, 'b', UVarint, flags=Flags.REPEATED)
-
-message = type_()
-message.b = (1, 2, 3)
-
-assert type_.dumps(message)
-```
-    
-Value of a repeated field can be any iterable object. The loaded value will always be `list`.
-
-### Packed repeated field
-
-```python
-from pure_protobuf.legacy import Flags, MessageType, UVarint
-
-type_ = MessageType()
-type_.add_field(4, 'd', UVarint, flags=Flags.PACKED_REPEATED)
-
-message = type_()
-message.d = (3, 270, 86942)
-
-assert type_.dumps(message)
-```
-    
-### Embedded messages
-
-```proto
-message Test1 {
-  int32 a = 1;
-}
-
-message Test3 {
-  required Test1 c = 3;
-}
-```
-    
-To create an embedded field, wrap inner type with `EmbeddedMessage`:
-
-```python
-from pure_protobuf.legacy import EmbeddedMessage, MessageType, UVarint
-
-inner_type = MessageType()
-inner_type.add_field(1, 'a', UVarint)
-outer_type = MessageType()
-outer_type.add_field(3, 'c', EmbeddedMessage(inner_type))
-
-message = outer_type()
-message.c = inner_type()
-message.c.a = 150
-
-assert outer_type.dumps(message)
-```
-    
-### Data types
-
-| Type      | Python  | Description                        |
-|-----------|---------|------------------------------------|
-| `UVarint` | `int`   | unsigned integer (variable length) |
-| `Varint`  | `int`   | signed integer (variable length)   |
-| `Bool`    | `bool`  | boolean                            |
-| `Fixed64` | `bytes` | 8-byte string                      |
-| `UInt64`  | `int`   | C 64-bit `unsigned long long`      |
-| `Int64`   | `int`   | C 64-bit `long long`               |
-| `Float64` | `float` | C `double`                         |
-| `Fixed32` | `bytes` | 4-byte string                      |
-| `UInt32`  | `int`   | C 32-bit `unsigned int`            |
-| `Int32`   | `int`   | C 32-bit `int`                     |
-| `Float32` | `float` | C `float`                          |
-| `Bytes`   | `bytes` | byte string                        |
-| `Unicode` | `str`   | unicode string                     |
-
-### Some techniques
-
-#### Streaming messages
-
-The Protocol Buffers format is not self-delimiting. But you can wrap your message type with `EmbeddedMessage` and write or read messages sequentially.
-
-#### `add_field` chaining
-
-`add_field` return the message type itself, thus you can do so:
-
-```python
-from pure_protobuf.legacy import EmbeddedMessage, MessageType, UVarint
-
-MessageType().add_field(1, 'a', EmbeddedMessage(MessageType().add_field(1, 'a', UVarint)))
 ```

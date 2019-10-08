@@ -29,5 +29,7 @@ jobs:
         flake8 pure_protobuf tests
         isort -rc -c --diff pure_protobuf tests
     - name: Coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         coveralls

@@ -29,6 +29,7 @@ jobs:
         flake8 pure_protobuf tests
         isort -rc -c --diff pure_protobuf tests
     - name: Coveralls
+      if: matrix.python-version == '3.7'
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |

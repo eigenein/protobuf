@@ -30,4 +30,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'License :: OSI Approved :: MIT License',
     ],
+    project_urls={
+        'Changelog': 'https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md',
+    },
 )

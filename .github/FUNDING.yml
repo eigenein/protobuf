@@ -1,3 +1,6 @@
 github: []
-custom: ['https://www.paypal.me/eigenein', 'https://money.yandex.ru/to/410011693851843']
+custom:
+- 'https://www.paypal.me/eigenein'
+- 'https://bunq.me/eigenein'
+- 'https://money.yandex.ru/to/410011693851843'
 ko_fi: 'eigenein'

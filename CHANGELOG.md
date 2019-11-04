@@ -1,4 +1,4 @@
-## `master`
+## `2.0.0`
 
 - Break: drop Python 2.x and 3.5 support and remove the legacy interface #59
 

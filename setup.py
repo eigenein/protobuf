@@ -9,7 +9,7 @@ setup(
     author='Pavel Perestoronin',
     author_email='eigenein@gmail.com',
     url='https://github.com/eigenein/protobuf',
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=['tests*']),
     zip_safe=True,
     install_requires=[
         'dataclasses>=0.6,<1.0; python_version < "3.7"',

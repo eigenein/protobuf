@@ -55,7 +55,7 @@ assert SearchRequest(
 ).dumps() == b'\x0A\x05hello\x10\x01\x18\x0A'
 ```
 
-Keep in mind that `@message` decorator should **always** stay on top of [`@dataclass`](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass).
+Keep in mind that `@message` decorator **must** stay on top of [`@dataclass`](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass).
 
 ### Serializing
 

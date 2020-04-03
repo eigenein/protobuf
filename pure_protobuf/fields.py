@@ -11,6 +11,8 @@ from pure_protobuf.io_ import IO, Dumps
 from pure_protobuf.serializers import Serializer, bytes_serializer, unsigned_varint_serializer
 
 
+# TODO: perhaps it's good to add a type parameter:
+# TODO: https://docs.python.org/3/library/typing.html#user-defined-generic-types
 class Field(Dumps, ABC):
     def __init__(self, number: int, name: str, serializer: Serializer):
         self.number = number

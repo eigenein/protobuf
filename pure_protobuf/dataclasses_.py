@@ -65,6 +65,26 @@ class Message(ABC):
             ))
 
 
+class OneOf:
+    """
+    Defines an oneof field.
+    See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
+    """
+    def __init__(self, *fields: Field):
+        self.fields = fields
+        # TODO: implement automatic clearing.
+
+    def __get__(self, message_: Message, owner: Type = None) -> Any:
+        """
+        Retrieve the currently set value (if any).
+        """
+        for field_ in self.fields:
+            value = getattr(message_, field_.name)
+            if value is not None:
+                return value
+        return None
+
+
 def load(cls: Type[T], io: IO) -> T:
     """
     Deserializes a message from a file-like object.
@@ -186,7 +206,7 @@ def get_repeated(type_: Any) -> Tuple[bool, Any]:
         return False, type_
 
 
-SERIALIZERS: Dict[Type, Serializer] = {
+SERIALIZERS: Dict[Any, Serializer] = {
     bool: serializers.BooleanSerializer(),
     bytes: serializers.bytes_serializer,
     ByteString: serializers.bytes_serializer,

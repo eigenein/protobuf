@@ -1,17 +1,15 @@
 """
 Google Protocol Buffers well-known types.
-
-`pure-protobuf` contributors © 2011-2019
 """
 
 from datetime import datetime, timedelta, timezone
 from importlib import import_module
 from math import modf
-from typing import Any, Dict, Tuple, Type
+from typing import Any, Tuple
 
-from pure_protobuf.dataclasses_ import Message
+from pure_protobuf.dataclasses_ import SERIALIZERS, Message
 from pure_protobuf.io_ import IO
-from pure_protobuf.serializers import MessageSerializer, PackingSerializer, Serializer
+from pure_protobuf.serializers import MessageSerializer, PackingSerializer
 from pure_protobuf.types import int32, int64
 from pure_protobuf.types.google import Any_, Duration, Timestamp
 
@@ -99,8 +97,6 @@ def unsplit_seconds(seconds: int64, nanos: int32) -> float:
     return float(seconds) + float(nanos) / 1_000_000_000.0
 
 
-SERIALIZERS: Dict[Any, Serializer] = {
-    Any: PackingSerializer(AnySerializer()),
-    datetime: PackingSerializer(TimestampSerializer()),
-    timedelta: PackingSerializer(DurationSerializer()),
-}
+SERIALIZERS[Any] = PackingSerializer(AnySerializer())
+SERIALIZERS[datetime] = PackingSerializer(TimestampSerializer())
+SERIALIZERS[timedelta] = PackingSerializer(DurationSerializer())

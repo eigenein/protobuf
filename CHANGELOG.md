@@ -1,5 +1,6 @@
 ## `master`
 
+- Chore: refactor Google type serializers registration
 - Chore: #27 integrate mypy checks, fix some of mypy errors
 - Chore: exclude every test package when installing by @shibotto
 

@@ -3,14 +3,13 @@
 """
 
 # noinspection PyCompatibility
-from dataclasses import dataclass
 from typing import Any, ByteString, List, Optional, Tuple
 
 from pytest import mark, raises
 
 from pure_protobuf import types
 # noinspection PyProtectedMember
-from pure_protobuf.dataclasses_ import make_field, message
+from pure_protobuf.dataclasses_ import make_field
 
 
 @mark.parametrize('number, name, type_, value, expected', [
@@ -42,18 +41,6 @@ def test_make_field_value_error(number: int, name: str, type_: Any, value: Any):
 @mark.parametrize('type_', [
     Tuple[int, str],
 ])
-def test_make_field_key_error(type_: Any):
-    with raises(KeyError):
-        make_field(1, 'a', type_)
-
-
-@mark.parametrize('type_', [
-    Tuple[int, str],
-])
-def test_message_type_error(type_: Any):
-    @dataclass
-    class Test:
-        foo: type_  # type: ignore
-
+def test_make_field_type_error(type_: Any):
     with raises(TypeError):
-        message(Test)
+        make_field(1, 'a', type_)

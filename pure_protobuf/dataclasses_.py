@@ -2,8 +2,6 @@
 
 """
 Python 3.6+ type hinting interface.
-
-`pure-protobuf` contributors © 2011-2019
 """
 
 from abc import ABC
@@ -105,15 +103,11 @@ def message(cls: Type[T]) -> Type[T]:
 
     type_hints = get_type_hints(cls)
 
-    try:
-        # Used to list all fields and locate fields by field number.
-        cls.__protobuf_fields__: Dict[int, Field] = dict(
-            make_field(field_.metadata['number'], field_.name, type_hints[field_.name])
-            for field_ in dataclasses.fields(cls)
-        )
-    except KeyError as e:
-        # FIXME: catch `KeyError` in `make_field` and re-raise as `TypeError`.
-        raise TypeError(f'type is not serializable: {e}') from e
+    # Used to list all fields and locate fields by field number.
+    cls.__protobuf_fields__: Dict[int, Field] = dict(
+        make_field(field_.metadata['number'], field_.name, type_hints[field_.name])
+        for field_ in dataclasses.fields(cls)
+    )
 
     # noinspection PyUnresolvedReferences
     Message.register(cls)
@@ -149,9 +143,8 @@ def make_field(number: int, name: str, type_: Any) -> Tuple[int, Field]:
         # Predefined type.
         try:
             serializer = SERIALIZERS[type_]
-        except KeyError:
-            import pure_protobuf.serializers.google  # `dataclasses_` has to already be imported beforehand
-            serializer = pure_protobuf.serializers.google.SERIALIZERS[type_]
+        except KeyError as e:
+            raise TypeError(f'type is not serializable: {type_}') from e
 
     if not is_repeated:
         # Non-repeated field.
@@ -212,7 +205,6 @@ SERIALIZERS: Dict[Type, Serializer] = {
     types.uint: serializers.unsigned_varint_serializer,  # is not a part of the standard
     # TODO: `map`.
 }
-
 
 __all__ = [
     'field',

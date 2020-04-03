@@ -99,7 +99,7 @@ def unsplit_seconds(seconds: int64, nanos: int32) -> float:
     return float(seconds) + float(nanos) / 1_000_000_000.0
 
 
-SERIALIZERS: Dict[Type, Serializer] = {
+SERIALIZERS: Dict[Any, Serializer] = {
     Any: PackingSerializer(AnySerializer()),
     datetime: PackingSerializer(TimestampSerializer()),
     timedelta: PackingSerializer(DurationSerializer()),

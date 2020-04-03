@@ -9,7 +9,7 @@ from abc import ABC
 from enum import IntEnum
 from itertools import count
 from struct import pack, unpack
-from typing import Any, Type
+from typing import Any, Dict, Type
 
 from pure_protobuf import types
 from pure_protobuf.enums import WireType
@@ -381,7 +381,7 @@ class MessageSerializer(Serializer):
                 raise ValueError(f'field `{field_.name}`: {e}, got `{field_value}`') from e
 
     def load(self, io: IO) -> Any:
-        values = {}
+        values: Dict[str, Any] = {}
         while True:
             try:
                 key = unsigned_varint_serializer.load(io)
@@ -441,6 +441,7 @@ def read_varint(io: IO) -> types.uint:
         value |= (byte & 0x7F) << shift
         if not byte & 0x80:
             return value
+    assert False, 'unreachable code'
 
 
 def write_varint(value: types.uint, io: IO):

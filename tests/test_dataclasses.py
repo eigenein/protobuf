@@ -53,7 +53,7 @@ def test_make_field_key_error(type_: Any):
 def test_message_type_error(type_: Any):
     @dataclass
     class Test:
-        foo: type_
+        foo: type_  # type: ignore
 
     with raises(TypeError):
         message(Test)

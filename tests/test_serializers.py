@@ -57,7 +57,7 @@ def class_3(class_1: Type) -> Type:
     @message
     @dataclass
     class Test3:
-        c: class_1 = field(3, default_factory=class_1)
+        c: class_1 = field(3, default_factory=class_1)  # type: ignore
     return Test3
 
 

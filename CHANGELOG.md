@@ -1,3 +1,8 @@
+## `master`
+
+- Chore: #27 integrate mypy checks, fix some of mypy errors
+- Chore: exclude every test package when installing by @shibotto
+
 ## `2.0.0`
 
 - Break: drop Python 2.x and 3.5 support and remove the legacy interface #59

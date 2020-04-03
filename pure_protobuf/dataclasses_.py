@@ -137,6 +137,7 @@ def make_field(number: int, name: str, type_: Any) -> Tuple[int, Field]:
     is_optional, type_ = get_optional(type_)
     is_repeated, type_ = get_repeated(type_)
 
+    serializer: Serializer
     if isinstance(type_, type) and issubclass(type_, Message):
         # Embedded message.
         serializer = PackingSerializer(type_.serializer)

@@ -135,7 +135,7 @@ class UnsignedInt32Serializer(Serializer):
     def validate(self, value: Any):
         unsigned_varint_serializer.validate(value)
         if not 0 <= value <= 0xFFFFFFFF:
-            raise ValueError(f'value is out of 32-bit unsigned integer range')
+            raise ValueError('value is out of 32-bit unsigned integer range')
 
     def dump(self, value: Any, io: IO):
         unsigned_varint_serializer.dump(value, io)
@@ -154,7 +154,7 @@ class UnsignedInt64Serializer(Serializer):
     def validate(self, value: Any):
         unsigned_varint_serializer.validate(value)
         if not 0 <= value <= 0xFFFFFFFF_FFFFFFFF:
-            raise ValueError(f'value is out of 64-bit unsigned integer range')
+            raise ValueError('value is out of 64-bit unsigned integer range')
 
     def dump(self, value: Any, io: IO):
         unsigned_varint_serializer.dump(value, io)
@@ -173,7 +173,7 @@ class SignedInt32Serializer(Serializer):
     def validate(self, value: Any):
         signed_varint_serializer.validate(value)
         if not -0x7FFFFFFF <= value <= 0x7FFFFFFF:
-            raise ValueError(f'value is out of 32-bit signed integer range')
+            raise ValueError('value is out of 32-bit signed integer range')
 
     def dump(self, value: Any, io: IO):
         signed_varint_serializer.dump(value, io)
@@ -192,7 +192,7 @@ class SignedInt64Serializer(Serializer):
     def validate(self, value: Any):
         signed_varint_serializer.validate(value)
         if not -0x7FFFFFFF_FFFFFFFF <= value <= 0x7FFFFFFF_FFFFFFFF:
-            raise ValueError(f'value is out of 64-bit signed integer range')
+            raise ValueError('value is out of 64-bit signed integer range')
 
     def dump(self, value: Any, io: IO):
         signed_varint_serializer.dump(value, io)

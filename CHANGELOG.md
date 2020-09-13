@@ -1,5 +1,6 @@
-## `master`
+## `2.0.1`
 
+- Fix: F541 f-string is missing placeholders
 - Chore: refactor Google type serializers registration
 - Chore: #27 integrate mypy checks, fix some of mypy errors
 - Chore: exclude every test package when installing by @shibotto

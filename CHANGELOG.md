@@ -1,3 +1,6 @@
+## `master`
+-  New: support for `field(..., packed=False)` to serialize unpacked repeated fields
+
 ## `2.0.1`
 
 - Fix: F541 f-string is missing placeholders

@@ -99,6 +99,21 @@ class Message:
     foo: List[int32] = field(1, default_factory=list)
 ```
 
+In case, unpacked encoding is explicitly wanted, the `packed`-argument of `field` can be used as in:
+
+```python
+from dataclasses import dataclass
+from typing import List
+
+from pure_protobuf.dataclasses_ import field, message
+from pure_protobuf.types import int32
+
+@message
+@dataclass
+class Message:
+    foo: List[int32] = field(1, default_factory=list, packed=False)
+```
+
 It's also possible to wrap a field type with [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional). If `None` is assigned to an `Optional` field, then the field will be skipped during serialization.
 
 ### Default values

@@ -3,6 +3,10 @@
 
 BIN := venv/bin
 
+.PHONY: build
+build:
+	@$(BIN)/python -m build --sdist --wheel
+
 .PHONY: venv
 venv:
 	@python3 -m venv venv

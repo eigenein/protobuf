@@ -1,5 +1,6 @@
-## `master`
--  New: support for `field(..., packed=False)` to serialize unpacked repeated fields
+## `2.1.0`
+
+- New: support for `field(..., packed=False)` to serialize unpacked repeated fields (@d70-t)
 
 ## `2.0.1`
 

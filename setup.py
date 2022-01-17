@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='pure-protobuf',
-    version='2.0.1',
+    version='2.1.0',
     description='Python implementation of Protocol Buffers data types with dataclasses support',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
@@ -15,7 +15,7 @@ setup(
         'dataclasses>=0.6,<1.0; python_version < "3.7"',
     ],
     extras_require={
-        'dev': ['flake8', 'isort', 'mypy', 'pytest', 'coveralls'],
+        'dev': ['flake8', 'isort', 'mypy', 'pytest', 'coveralls', 'build'],
     },
     classifiers=[
         'Development Status :: 5 - Production/Stable',

@@ -100,12 +100,12 @@ def loads(cls: Type[T], bytes_: bytes) -> T:
         return load(cls, io)
 
 
-def field(number: int, *args, **kwargs) -> dataclasses.Field:
+def field(number: int, *args, packed=True, **kwargs) -> dataclasses.Field:
     """
     Convenience function to assign field numbers.
     Calls the standard ``dataclasses.field`` function with the metadata assigned.
     """
-    return dataclasses.field(*args, metadata={'number': number}, **kwargs)
+    return dataclasses.field(*args, metadata={'number': number, 'packed': packed}, **kwargs)
 
 
 def optional_field(number: int, *args, **kwargs) -> dataclasses.Field:
@@ -125,7 +125,7 @@ def message(cls: Type[T]) -> Type[T]:
 
     # Used to list all fields and locate fields by field number.
     cls.__protobuf_fields__: Dict[int, Field] = dict(
-        make_field(field_.metadata['number'], field_.name, type_hints[field_.name])
+        make_field(field_.metadata['number'], field_.name, type_hints[field_.name], field_.metadata['packed'])
         for field_ in dataclasses.fields(cls)
     )
 
@@ -143,7 +143,7 @@ def message(cls: Type[T]) -> Type[T]:
     return cls
 
 
-def make_field(number: int, name: str, type_: Any) -> Tuple[int, Field]:
+def make_field(number: int, name: str, type_: Any, packed: bool = True) -> Tuple[int, Field]:
     """
     Figure out how to serialize and de-serialize the field.
     Returns the field number and a corresponding ``Field`` instance.
@@ -169,7 +169,7 @@ def make_field(number: int, name: str, type_: Any) -> Tuple[int, Field]:
     if not is_repeated:
         # Non-repeated field.
         return number, NonRepeatedField(number, name, serializer, is_optional)
-    elif serializer.wire_type != WireType.BYTES:
+    elif serializer.wire_type != WireType.BYTES and packed:
         # Repeated fields of scalar numeric types are packed by default.
         # See also: https://developers.google.com/protocol-buffers/docs/encoding#packed
         return number, PackedRepeatedField(number, name, serializer)

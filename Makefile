@@ -17,7 +17,11 @@ test check: check/pytest check/flake8 check/isort check/mypy
 
 .PHONY: check/pytest
 check/pytest:
-	@$(BIN)/coverage run --source=pure_protobuf -m pytest tests
+	@$(BIN)/coverage run --source=pure_protobuf -m pytest --benchmark-disable tests
+
+.PHONY: benchmark
+benchmark:
+	@$(BIN)/pytest --benchmark-only --benchmark-columns=mean,stddev,median,ops --benchmark-warmup=on tests
 
 .PHONY: check/flake8
 check/flake8:

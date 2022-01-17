@@ -32,6 +32,7 @@ from pure_protobuf.serializers import (
     UnsignedVarintSerializer,
 )
 from pure_protobuf.types import int32, uint
+from tests import _test_id
 
 
 @fixture
@@ -82,28 +83,44 @@ def test_serializer_value_error(serializer_class: Type[Serializer], value: Any):
         serializer_class().validate(value)
 
 
-@mark.parametrize('value, bytes_', [
+UNSIGNED_VARINT_TESTS = [
     (0, b'\x00'),
     (3, b'\x03'),
     (270, b'\x8E\x02'),
     (86942, b'\x9E\xA7\x05'),
-])
-def test_unsigned_varint_serializer(value: int, bytes_: bytes):
+]
+
+
+@mark.parametrize('value, bytes_', UNSIGNED_VARINT_TESTS, ids=_test_id)
+def test_unsigned_varint_serializer_dumps(value: int, bytes_: bytes, benchmark):
     UnsignedVarintSerializer().validate(value)
-    assert UnsignedVarintSerializer().dumps(value) == bytes_
-    assert UnsignedVarintSerializer().loads(bytes_) == value
+    assert benchmark(UnsignedVarintSerializer().dumps, value) == bytes_
 
 
-@mark.parametrize('value, bytes_', [
+@mark.parametrize('value, bytes_', UNSIGNED_VARINT_TESTS, ids=_test_id)
+def test_unsigned_varint_serializer_loads(value: int, bytes_: bytes, benchmark):
+    UnsignedVarintSerializer().validate(value)
+    assert benchmark(UnsignedVarintSerializer().loads, bytes_) == value
+
+
+SIGNED_VARINT_TESTS = [
     (0, b'\x00'),
     (-1, b'\x01'),
     (1, b'\x02'),
     (-2, b'\x03'),
-])
-def test_signed_varint_serializer(value: int, bytes_: bytes):
+]
+
+
+@mark.parametrize('value, bytes_', SIGNED_VARINT_TESTS, ids=_test_id)
+def test_signed_varint_serializer_dumps(value: int, bytes_: bytes, benchmark):
     SignedVarintSerializer().validate(value)
-    assert SignedVarintSerializer().dumps(value) == bytes_
-    assert SignedVarintSerializer().loads(bytes_) == value
+    assert benchmark(SignedVarintSerializer().dumps, value) == bytes_
+
+
+@mark.parametrize('value, bytes_', SIGNED_VARINT_TESTS, ids=_test_id)
+def test_signed_varint_serializer_loads(value: int, bytes_: bytes, benchmark):
+    SignedVarintSerializer().validate(value)
+    assert benchmark(SignedVarintSerializer().loads, bytes_) == value
 
 
 @mark.parametrize('value, bytes_', [

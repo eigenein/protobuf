@@ -20,6 +20,7 @@ setup(
             'coveralls',
             'build',
             'twine',
+            'pytest-benchmark',
         ],
     },
     classifiers=[

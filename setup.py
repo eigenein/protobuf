@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 setup(
     name='pure-protobuf',
     version='2.1.0',
-    description='Python implementation of Protocol Buffers data types with dataclasses support',
+    description="Implementation of Protocol Buffers with dataclass-based schemaʼs",
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     author='Pavel Perestoronin',

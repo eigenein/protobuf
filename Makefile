@@ -5,7 +5,7 @@ BIN := venv/bin
 
 .PHONY: venv
 venv:
-	@python3.10 -m venv venv
+	@python3 -m venv venv
 	@$(BIN)/pip install -e.[dev]
 
 .PHONY: test check

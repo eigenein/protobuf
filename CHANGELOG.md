@@ -1,13 +1,13 @@
 ## `2.1.0`
 
-- New: support for `field(..., packed=False)` to serialize unpacked repeated fields (@d70-t)
+- New: support for `field(..., packed=False)` to serialize unpacked repeated fields #90 (@d70-t)
 
 ## `2.0.1`
 
 - Fix: F541 f-string is missing placeholders
 - Chore: refactor Google type serializers registration
-- Chore: #27 integrate mypy checks, fix some of mypy errors
-- Chore: exclude every test package when installing by @shibotto
+- Chore: integrate mypy checks, fix some of mypy errors #27
+- Chore: exclude every test package when installing (@shibotto)
 
 ## `2.0.0`
 
@@ -15,47 +15,47 @@
 
 ## `1.2.0`
 
-- New: #63 convenience method for an optional field
+- New: convenience method for an optional field #63
 
 ## `1.1.0`
 
-- New: #34 support `google.protobuf.Duration`
-- New: #26 support [`google.protobuf.Any`](https://developers.google.com/protocol-buffers/docs/proto3#any)
-- New: #56 provide public API for reading and writing `VarInt`s
-- Chore: #40 move Google well-known types out to a separate namespace
+- New: support `google.protobuf.Duration` #34
+- New: support [`google.protobuf.Any`](https://developers.google.com/protocol-buffers/docs/proto3#any)  #26
+- New: provide public API for reading and writing `VarInt`s #56
+- Chore: move Google well-known types out to a separate namespace #40
 
 ## `1.0.1`
 
-- Fix: #46 accept a bytes-like object as a byte-string field value
+- Fix: accept a bytes-like object as a byte-string field value #46
 
 ## `1.0.0`
 
-- **New**: dataclasses interface for defining types using [Python type hinting](https://www.python.org/dev/peps/pep-0484/)
-- **Change**: legacy interface is available via `pure_protobuf.legacy`
+- New: dataclasses interface for defining types using [Python type hinting](https://www.python.org/dev/peps/pep-0484/)
+- Break: legacy interface is available via `pure_protobuf.legacy`
 
 ## `0.5.0`
 
 - Chore: add initial contribution guide
 - Chore: add `Makefile`
-- Chore: #2 use `pytest`
+- Chore: use `pytest` #2
 - Chore: use `isort`
-- **Change**: Remove `TypeMetadataType`. It is not a part of the standard, and I'd like to focus on maintaining compatibility with the reference implementation
-- Chore: #2 test snippets in `README.md`
-- **Change**: drop `Message.__delattr__` support
-- New: #6 add Python 3 support
-- Change: change license to MIT
+- Break: Remove `TypeMetadataType`. It is not a part of the standard, and I'd like to focus on maintaining compatibility with the reference implementation
+- Chore: test snippets in `README.md` #2
+- Break: drop `Message.__delattr__` support
+- New: add Python 3 support #6
+- Break: change the license to MIT
 
 ## `0.4.1`
 
-- Chore: #4 added style checking with `flake8`
+- Chore: added style checking with `flake8` #4
 
 ## `0.4.0`
 
-- New: #5 add packaging and publish to PyPI
+- New: add packaging and publish to PyPI #5
 
 ## `0.3.1`
 
-- Change: `encoding` module became `protobuf` module
+- Break: rename `encoding` module to `protobuf`
 - Chore: performance tests
 - Opt: `Bool.dump` 2.2 times faster
 - Opt: `Varint` 14% faster
@@ -74,7 +74,7 @@
 
 ## `0.2`
 
-- Fix: `Int32` type name (was `Int32Type`)
+- Break: `Int32` type name (was `Int32Type`)
 - New: add validation of message type
 - New: `Unicode` type
 - New: Python code object type

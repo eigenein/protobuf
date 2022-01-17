@@ -1,7 +1,5 @@
 # `pure-protobuf`
 
-Python implementation of [Protocol Buffers](http://code.google.com/apis/protocolbuffers/docs/encoding.html) data types.
-
 [![Build Status](https://github.com/eigenein/protobuf/workflows/check/badge.svg)](https://github.com/eigenein/protobuf/actions)
 [![Coverage Status](https://coveralls.io/repos/github/eigenein/protobuf/badge.svg?branch=master)](https://coveralls.io/github/eigenein/protobuf?branch=master)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pure-protobuf.svg)](https://pypistats.org/packages/pure-protobuf)

@@ -1,15 +1,15 @@
 """
-`pure-protobuf` contributors © 2011-2019
+`pure-protobuf` contributors © 2011-2022
 """
 
-# noinspection PyCompatibility
+from dataclasses import dataclass
 from typing import Any, ByteString, List, Optional, Tuple
 
 from pytest import mark, raises
 
 from pure_protobuf import types
 # noinspection PyProtectedMember
-from pure_protobuf.dataclasses_ import make_field
+from pure_protobuf.dataclasses_ import field, make_field, message
 
 
 @mark.parametrize('number, name, type_, value, expected', [
@@ -44,3 +44,12 @@ def test_make_field_value_error(number: int, name: str, type_: Any, value: Any):
 def test_make_field_type_error(type_: Any):
     with raises(TypeError):
         make_field(1, 'a', type_)
+
+
+def test_serialize_unpacked_repeated_field():
+    @message
+    @dataclass
+    class Message:
+        foo: List[types.uint32] = field(1, packed=False)
+
+    assert Message(foo=[types.uint32(4), types.uint32(5)]).dumps() == b'\x08\x04\x08\x05'

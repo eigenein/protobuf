@@ -8,7 +8,7 @@ from abc import ABC
 from collections import abc
 from enum import IntEnum
 from io import BytesIO
-from typing import Any, ByteString, ClassVar, Dict, Iterable, List, Tuple, Type, TypeVar, Union, get_type_hints
+from typing import Any, ByteString, ClassVar, Dict, Iterable, List, Tuple, Type, TypeVar, Union, cast, get_type_hints
 
 from pure_protobuf import serializers, types
 from pure_protobuf.enums import WireType
@@ -24,6 +24,7 @@ except ImportError:
 
 
 T = TypeVar('T')
+TMessage = TypeVar('TMessage', bound='Message')
 
 
 @dataclasses.dataclass
@@ -33,6 +34,7 @@ class Message(ABC):
     See also: https://docs.python.org/3/library/abc.html#abc.ABCMeta.register
     """
 
+    __protobuf_fields__: Dict[int, Field]
     serializer: ClassVar[Serializer]
     type_url: ClassVar[str]
 
@@ -54,11 +56,11 @@ class Message(ABC):
             self.dump(io)
             return io.getvalue()
 
-    def merge_from(self: T, other: T):
+    def merge_from(self: TMessage, other: TMessage):
         """
         Merge another message into the current one, as if with the ``Message::MergeFrom`` method.
         """
-        for field_ in self.__protobuf_fields__.values():  # type: Field
+        for field_ in self.__protobuf_fields__.values():
             setattr(self, field_.name, field_.merge(
                 getattr(self, field_.name),
                 getattr(other, field_.name),
@@ -85,14 +87,14 @@ class OneOf:
         return None
 
 
-def load(cls: Type[T], io: IO) -> T:
+def load(cls: Type[TMessage], io: IO) -> TMessage:
     """
     Deserializes a message from a file-like object.
     """
     return cls.serializer.load(io)
 
 
-def loads(cls: Type[T], bytes_: bytes) -> T:
+def loads(cls: Type[TMessage], bytes_: bytes) -> TMessage:
     """
     Deserializes a message from a byte string.
     """
@@ -100,7 +102,7 @@ def loads(cls: Type[T], bytes_: bytes) -> T:
         return load(cls, io)
 
 
-def field(number: int, *args, packed=True, **kwargs) -> dataclasses.Field:
+def field(number: int, *args, packed=True, **kwargs) -> Any:
     """
     Convenience function to assign field numbers.
     Calls the standard ``dataclasses.field`` function with the metadata assigned.
@@ -108,14 +110,14 @@ def field(number: int, *args, packed=True, **kwargs) -> dataclasses.Field:
     return dataclasses.field(*args, metadata={'number': number, 'packed': packed}, **kwargs)
 
 
-def optional_field(number: int, *args, **kwargs) -> dataclasses.Field:
+def optional_field(number: int, *args, **kwargs) -> Any:
     """
     Convenience function to define a field which is assigned `None` by default.
     """
     return field(number, *args, default=None, **kwargs)
 
 
-def message(cls: Type[T]) -> Type[T]:
+def message(cls: Type[T]) -> Type[TMessage]:
     """
     Returns the same class as was passed in, with additional dunder attributes needed for
     serialization and deserialization.
@@ -124,23 +126,22 @@ def message(cls: Type[T]) -> Type[T]:
     type_hints = get_type_hints(cls)
 
     # Used to list all fields and locate fields by field number.
-    cls.__protobuf_fields__: Dict[int, Field] = dict(
+    cast(Type[TMessage], cls).__protobuf_fields__ = dict(
         make_field(field_.metadata['number'], field_.name, type_hints[field_.name], field_.metadata['packed'])
         for field_ in dataclasses.fields(cls)
     )
 
-    # noinspection PyUnresolvedReferences
-    Message.register(cls)
-    cls.serializer = MessageSerializer(cls)
-    cls.type_url = f'type.googleapis.com/{cls.__module__}.{cls.__name__}'
-    cls.validate = Message.validate
-    cls.dump = Message.dump
-    cls.dumps = Message.dumps
-    cls.merge_from = Message.merge_from
-    cls.load = classmethod(load)
-    cls.loads = classmethod(loads)
+    Message.register(cls)  # type: ignore
+    cls.serializer = MessageSerializer(cls)  # type: ignore
+    cls.type_url = f'type.googleapis.com/{cls.__module__}.{cls.__name__}'  # type: ignore
+    cls.validate = Message.validate  # type: ignore
+    cls.dump = Message.dump  # type: ignore
+    cls.dumps = Message.dumps  # type: ignore
+    cls.merge_from = Message.merge_from  # type: ignore
+    cls.load = classmethod(load)  # type: ignore
+    cls.loads = classmethod(loads)  # type: ignore
 
-    return cls
+    return cast(Type[TMessage], cls)
 
 
 def make_field(number: int, name: str, type_: Any, packed: bool = True) -> Tuple[int, Field]:

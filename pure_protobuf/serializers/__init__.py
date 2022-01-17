@@ -1,7 +1,7 @@
 """
 Serializers for the dataclasses interface.
 
-`pure-protobuf` contributors © 2011-2019
+`pure-protobuf` contributors © 2011-2022
 """
 
 import struct
@@ -440,7 +440,7 @@ def read_varint(io: IO) -> types.uint:
         byte, = io.read(1)
         value |= (byte & 0x7F) << shift
         if not byte & 0x80:
-            return value
+            return types.uint(value)
     assert False, 'unreachable code'
 
 
@@ -450,7 +450,7 @@ def write_varint(value: types.uint, io: IO):
     """
     while value > 0x7F:
         io.write(bytes((value & 0x7F | 0x80,)))
-        value >>= 7
+        value >>= 7  # type: ignore
     io.write(bytes((value,)))
 
 

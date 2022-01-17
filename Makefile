@@ -29,4 +29,4 @@ check/isort:
 
 .PHONY: check/mypy
 check/mypy:
-	-@$(BIN)/mypy pure_protobuf tests
+	@$(BIN)/mypy pure_protobuf tests

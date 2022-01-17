@@ -1,3 +1,7 @@
+## `master`
+
+- Break: drop Python 3.6 support as it's reached the end-of-life phase of its release cycle (@eigenein)
+
 ## `2.1.0`
 
 - New: support for `field(..., packed=False)` to serialize unpacked repeated fields #90 (@d70-t)

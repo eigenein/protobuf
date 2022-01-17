@@ -11,9 +11,6 @@ setup(
     url='https://github.com/eigenein/protobuf',
     packages=find_packages(exclude=['tests*']),
     zip_safe=True,
-    install_requires=[
-        'dataclasses>=0.6,<1.0; python_version < "3.7"',
-    ],
     extras_require={
         'dev': [
             'flake8',
@@ -23,7 +20,6 @@ setup(
             'coveralls',
             'build',
             'twine',
-            'types-dataclasses; python_version < "3.7"',
         ],
     },
     classifiers=[

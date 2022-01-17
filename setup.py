@@ -15,7 +15,16 @@ setup(
         'dataclasses>=0.6,<1.0; python_version < "3.7"',
     ],
     extras_require={
-        'dev': ['flake8', 'isort', 'mypy', 'pytest', 'coveralls', 'build', 'twine'],
+        'dev': [
+            'flake8',
+            'isort',
+            'mypy',
+            'pytest',
+            'coveralls',
+            'build',
+            'twine',
+            'types-dataclasses; python_version < "3.7"',
+        ],
     },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -29,6 +38,7 @@ setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'License :: OSI Approved :: MIT License',
     ],
     project_urls={

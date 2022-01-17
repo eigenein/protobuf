@@ -9,12 +9,6 @@ Python implementation of [Protocol Buffers](http://code.google.com/apis/protocol
 [![PyPI – Python](https://img.shields.io/pypi/pyversions/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#files)
 [![License](https://img.shields.io/pypi/l/pure-protobuf.svg)](https://github.com/eigenein/protobuf/blob/master/LICENSE)
 
-## Dataclasses
-
-`pure-protobuf` allows you to take advantages of the standard [`dataclasses`](https://docs.python.org/3/library/dataclasses.html) module to define message types. It is preferred over the legacy interface for new projects. The dataclasses interface is available in Python 3.6 and higher.
-
-The legacy interface is deprecated and still available via `pure_protobuf.legacy`.
-
 This guide describes how to use `pure-protobuf` to structure your data. It tries to follow [the standard developer guide](https://developers.google.com/protocol-buffers/docs/proto3). It also assumes that you're familiar with Protocol Buffers.
 
 ### Defining a message type

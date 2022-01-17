@@ -22,7 +22,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install
-      run: pip install --upgrade -e .[dev]
+      run: make venv
 
     - name: Test
       run: make check/pytest

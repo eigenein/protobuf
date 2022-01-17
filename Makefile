@@ -5,7 +5,7 @@ BIN := venv/bin
 
 .PHONY: venv
 venv:
-	@python3.8 -m venv venv
+	@python3.10 -m venv venv
 	@$(BIN)/pip install isort flake8 pytest pytest-cov mypy
 
 .PHONY: test check
@@ -21,7 +21,7 @@ check/flake8:
 
 .PHONY: check/isort
 check/isort:
-	@$(BIN)/isort -rc -c pure_protobuf tests
+	@$(BIN)/isort -c pure_protobuf tests
 
 .PHONY: check/mypy
 check/mypy:

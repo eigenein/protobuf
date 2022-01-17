@@ -6,14 +6,14 @@ BIN := venv/bin
 .PHONY: venv
 venv:
 	@python3.10 -m venv venv
-	@$(BIN)/pip install isort flake8 pytest pytest-cov mypy
+	@$(BIN)/pip install -e.[dev]
 
 .PHONY: test check
 test check: check/pytest check/flake8 check/isort check/mypy
 
 .PHONY: check/pytest
 check/pytest:
-	@$(BIN)/pytest --cov-report term-missing --cov pure_protobuf
+	@$(BIN)/coverage run --source=pure_protobuf -m pytest tests
 
 .PHONY: check/flake8
 check/flake8:

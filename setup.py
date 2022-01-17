@@ -15,7 +15,7 @@ setup(
         'dataclasses>=0.6,<1.0; python_version < "3.7"',
     ],
     extras_require={
-        'dev': ['flake8', 'isort', 'pytest', 'pytest-cov', 'coveralls'],
+        'dev': ['flake8', 'isort', 'mypy', 'pytest', 'coveralls'],
     },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -27,6 +27,8 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'License :: OSI Approved :: MIT License',
     ],
     project_urls={

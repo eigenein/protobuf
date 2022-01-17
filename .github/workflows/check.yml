@@ -4,33 +4,35 @@ on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+
     strategy:
-      max-parallel: 4
+      max-parallel: 5
+      fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
 
     steps:
     - name: Checkout
       uses: actions/checkout@v1
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install
-      run: |
-        pip install --upgrade -e .[dev]
+      run: make venv
+
     - name: Test
-      run: |
-        pytest --cov-report term-missing --cov pure_protobuf
+      run: make check/pytest
+
     - name: Lint
-      run: |
-        flake8 pure_protobuf tests
-        isort -rc -c --diff pure_protobuf tests
+      run: make check/flake8 check/isort check/mypy
+
     - name: Coveralls
-      if: matrix.python-version == '3.8'
+      if: matrix.python-version == '3.10'
       env:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-      run: |
-        coveralls
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: venv/bin/coveralls

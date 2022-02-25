@@ -8,11 +8,32 @@ from abc import ABC
 from collections import abc
 from enum import IntEnum
 from io import BytesIO
-from typing import Any, ByteString, ClassVar, Dict, Iterable, List, Tuple, Type, TypeVar, Union, cast, get_type_hints
+from typing import (
+    Any,
+    ByteString,
+    ClassVar,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    get_type_hints,
+    _type_check
+)
 
 from pure_protobuf import serializers, types
 from pure_protobuf.enums import WireType
-from pure_protobuf.fields import Field, NonRepeatedField, PackedRepeatedField, UnpackedRepeatedField
+from pure_protobuf.fields import (
+    Field,
+    NonRepeatedField,
+    OneOfField,
+    PackedRepeatedField,
+    UnpackedRepeatedField
+)
 from pure_protobuf.io_ import IO
 from pure_protobuf.serializers import IntEnumSerializer, MessageSerializer, PackingSerializer, Serializer
 from pure_protobuf.types import NoneType
@@ -67,25 +88,79 @@ class Message(ABC):
             ))
 
 
-class OneOf:
+class OneOfType:
+    def __init__(self, *types: type):
+        self.types = types
+
+
+
+class _oneof:
+    def __getitem__(self, index):
+        if isinstance(index, tuple):
+            for type_ in index:
+                type_ = _type_check(type_, "")
+            return OneOfType(*index)
+        else:
+            type_ = _type_check(type_, "")
+            return OneOfType(type_)
+
+OneOf = _oneof()
+
+class OneOf_:
     """
     Defines an oneof field.
     See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
     """
-    def __init__(self, *fields: Field):
-        self.fields = fields
-        # TODO: implement automatic clearing.
+    def __init__(self, **fields: dataclasses.Field):
+        # ugly sets to get round custom setattr
+        super().__setattr__('fields', fields)
+        super().__setattr__('set_value', None)
 
-    def __get__(self, message_: Message, owner: Type = None) -> Any:
-        """
-        Retrieve the currently set value (if any).
-        """
-        for field_ in self.fields:
-            value = getattr(message_, field_.name)
-            if value is not None:
+
+    def __getattr__(self, name):
+        if name not in self.fields:
+            raise AttributeError(f"Field {name} is not found")
+
+
+        if self.set_value is not None:
+            field_name, value = self.set_value
+            if field_name == name:
                 return value
+
         return None
 
+    def __setattr__(self, name, value):
+        if name not in self.fields:
+            raise AttributeError(f"Field {name} is not found")
+
+        super().__setattr__('set_value', (name, value))
+
+    @property
+    def which_one_of(self) -> Optional[str]:
+        if self.set_value is not None:
+            field_name, _ = self.set_value
+            return field_name
+        return None
+
+
+@dataclasses.dataclass
+class OneOfPart:
+    type_: Type
+    number: int
+
+
+class OptionalFieldDescriptor:
+    def __init__(self, number, *args, **kwargs):
+        # do we need field here?
+        self.field_ = field(number, *args, default=None, **kwargs)
+        self.value = None
+        self.number = number
+
+    def __get__(self, instance, owner):
+        return self.value
+
+    def __set__(self, instance, value):
+        self.value = value
 
 def load(cls: Type[TMessage], io: IO) -> TMessage:
     """
@@ -117,6 +192,13 @@ def optional_field(number: int, *args, **kwargs) -> Any:
     return field(number, *args, default=None, **kwargs)
 
 
+def one_of(**parts: OneOfPart) -> OneOf_:
+    return OneOf_(**parts)
+
+
+def one_of_field(type_: Type, number: int) -> Any:
+    return optional_field(number)
+
 def message(cls: Type[T]) -> Type[TMessage]:
     """
     Returns the same class as was passed in, with additional dunder attributes needed for
@@ -126,10 +208,28 @@ def message(cls: Type[T]) -> Type[TMessage]:
     type_hints = get_type_hints(cls)
 
     # Used to list all fields and locate fields by field number.
-    cast(Type[TMessage], cls).__protobuf_fields__ = dict(
+    casted_cls = cast(Type[TMessage], cls)
+    casted_cls.__protobuf_fields__ = dict(
         make_field(field_.metadata['number'], field_.name, type_hints[field_.name], field_.metadata['packed'])
         for field_ in dataclasses.fields(cls)
+        if not isinstance(field_.type, OneOfType)
     )
+
+    # for case when we need to declare fields before one_of
+    # for field_ in one_ofs_:
+    #     first = None
+    #     for part in cast(field_, OneOf_).fields.items():
+    #         part = cast(Field, part)
+    #         cls.__protobuf_fields__.pop(part.number)
+    #         if first is None:
+    #             first = part.number
+    #     cls.__protobuf_fields__[first] = field_
+
+    casted_cls.__protobuf_fields__.update(dict(
+        make_one_of_field(field_.default, type_hints[field_.name], field_.name)
+        for field_ in dataclasses.fields(cls)
+        if isinstance(field_.type, OneOfType)
+    ))
 
     Message.register(cls)  # type: ignore
     cls.serializer = MessageSerializer(cls)  # type: ignore
@@ -142,6 +242,26 @@ def message(cls: Type[T]) -> Type[TMessage]:
     cls.loads = classmethod(loads)  # type: ignore
 
     return cast(Type[TMessage], cls)
+
+
+def make_one_of_field(field: OneOf_, type_: OneOfType, name: str) -> Tuple[int, Field]:
+    """
+    Figure out how to serialize and de-serialize oneof field.
+    Returns the number of first field in oneof and a corresponding ``Field``
+    instance.
+    """
+    fields = {}
+    for (name_, datacls_field), type_ in zip(field.fields.items(), type_.types):
+        fields[name_] = make_field(
+            datacls_field.metadata['number'],
+            datacls_field.name,
+            type_,
+            False
+        )
+    print("Fields ", fields)
+
+    first_field = next(iter(field.fields.values()))
+    return first_field.metadata['number'], OneOfField(name, fields)
 
 
 def make_field(number: int, name: str, type_: Any, packed: bool = True) -> Tuple[int, Field]:

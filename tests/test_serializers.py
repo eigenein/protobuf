@@ -5,11 +5,11 @@
 # noinspection PyCompatibility
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Union, Type
 
 from pytest import fixture, mark, raises
 
-from pure_protobuf.dataclasses_ import field, message
+from pure_protobuf.dataclasses_ import field, message, one_of, OneOf, one_of_field, optional_field
 from pure_protobuf.enums import WireType
 from pure_protobuf.serializers import (
     BooleanSerializer,
@@ -270,3 +270,41 @@ def test_enum():
 
     assert value.dumps() == bytes_
     assert Test.loads(bytes_) == value
+
+
+def test_one_of_field():
+    # message SubMessage {
+    #     string id = 1;
+    #     int32 b = 3;
+    # }
+    # 
+    # message SampleMessage {
+    #   oneof test_oneof {
+    #     string name = 4;
+    #     SubMessage sub_message = 9;
+    #   }
+    # }
+    @message
+    @dataclass
+    class SubMessage:
+        id: str = field(1)
+        b: int32 = field(3)
+
+    @message
+    @dataclass
+    class SampleMessage:
+        test_oneof: OneOf[str, SubMessage] = one_of(
+                name = one_of_field(str, 4), 
+                sub_message = one_of_field(SubMessage, 9)
+        )
+        # name: Optional[str] = optional_field(4)
+        # sub_message: Optional[SubMessage] = optional_field(9)
+
+    value = SampleMessage()
+    value.test_oneof.sub_message = SubMessage(id='123', b=5)
+    bytes_ = b'J\x07\n\x03123\x18\x05'
+    assert value.dumps() == bytes_
+    
+    value.test_oneof.name = "Some string"
+    bytes_ = b'"\x0bSome string'
+    assert value.dumps() == bytes_

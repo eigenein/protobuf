@@ -4,7 +4,7 @@
 
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import Any, Iterable
+from typing import Any, Dict, Iterable, Optional, Tuple
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
@@ -146,3 +146,43 @@ class PackedRepeatedField(RepeatedField):
                 self.serializer.dump(item, inner_io)
             self.dump_key(io)
             bytes_serializer.dump(inner_io.getvalue(), io)
+
+
+class OneOfField(Field):
+    """
+    Handles oneof field
+    See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
+    """
+
+    def __init__(self, name: str, fields: Dict[str, Field]):
+        self.name = name
+        self.fields = fields
+
+    def active_field_and_value(self, value: 'OneOf_') -> Optional[Tuple[Field, Any]]:
+        set_field = value.which_one_of
+        if set_field is not None:
+            number, active_field = self.fields[set_field]
+            value = getattr(value, set_field)
+            return active_field, value
+
+    def validate(self, value: 'OneOf_'):
+        res = self.active_field_and_value(value)
+        if res is not None:
+            field, value = res
+            field.validate(value)
+
+    def dump(self, value: Any, io: IO):
+        res = self.active_field_and_value(value)
+        if res is not None:
+            field, value = res
+            field.dump(value, io)
+
+    def load(self, wire_type: WireType, io: IO) -> Any:
+        raise NotImplementedError()
+        if wire_type != self.serializer.wire_type:
+            raise ValueError(f'expected {self.serializer.wire_type}, got {wire_type}')
+        return self.serializer.load(io)
+
+    def merge(self, old_value: Any, new_value: Any) -> Any:
+        raise NotImplementedError()
+        return self.serializer.merge(old_value, new_value)

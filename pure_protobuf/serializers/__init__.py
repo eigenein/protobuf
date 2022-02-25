@@ -369,11 +369,13 @@ class MessageSerializer(Serializer):
     def validate(self, value: Any):
         if not isinstance(value, self.type_):
             raise ValueError(f'{self.type_} is expected, but got {type(value)}')
+        print(value)
         for field_ in value.__protobuf_fields__.values():
             field_.validate(getattr(value, field_.name))
 
     def dump(self, value: Any, io: IO):
-        for number, field_ in value.__protobuf_fields__.items():
+        # number is not needed here
+        for field_ in value.__protobuf_fields__.values():
             field_value = getattr(value, field_.name)
             try:
                 field_.dump(field_value, io)

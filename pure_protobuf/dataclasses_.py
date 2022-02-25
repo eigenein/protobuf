@@ -93,7 +93,6 @@ class OneOfType:
         self.types = types
 
 
-
 class _oneof:
     def __getitem__(self, index):
         if isinstance(index, tuple):
@@ -143,12 +142,6 @@ class OneOf_:
         return None
 
 
-@dataclasses.dataclass
-class OneOfPart:
-    type_: Type
-    number: int
-
-
 class OptionalFieldDescriptor:
     def __init__(self, number, *args, **kwargs):
         # do we need field here?
@@ -192,7 +185,7 @@ def optional_field(number: int, *args, **kwargs) -> Any:
     return field(number, *args, default=None, **kwargs)
 
 
-def one_of(**parts: OneOfPart) -> OneOf_:
+def one_of(**parts: dataclasses.Field) -> OneOf_:
     return OneOf_(**parts)
 
 
@@ -244,14 +237,14 @@ def message(cls: Type[T]) -> Type[TMessage]:
     return cast(Type[TMessage], cls)
 
 
-def make_one_of_field(field: OneOf_, type_: OneOfType, name: str) -> Tuple[int, Field]:
+def make_one_of_field(field: OneOf_, field_type: OneOfType, name: str) -> Tuple[int, Field]:
     """
     Figure out how to serialize and de-serialize oneof field.
     Returns the number of first field in oneof and a corresponding ``Field``
     instance.
     """
     fields = {}
-    for (name_, datacls_field), type_ in zip(field.fields.items(), type_.types):
+    for (name_, datacls_field), type_ in zip(field.fields.items(), field_type.types):
         fields[name_] = make_field(
             datacls_field.metadata['number'],
             datacls_field.name,

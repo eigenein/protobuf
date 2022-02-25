@@ -4,7 +4,9 @@
 
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import Any, Dict, Iterable, Optional, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple, TYPE_CHECKING
+if TYPE_CHECKING:
+    from pure_protobuf.dataclasses_ import OneOf_
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
@@ -154,18 +156,20 @@ class OneOfField(Field):
     See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
     """
 
-    def __init__(self, name: str, fields: Dict[str, Field]):
+    def __init__(self, name: str, fields: Dict[str, Tuple[int, Field]]):
         self.name = name
         self.fields = fields
 
-    def active_field_and_value(self, value: 'OneOf_') -> Optional[Tuple[Field, Any]]:
+    def active_field_and_value(self, value: OneOf_) -> Optional[Tuple[Field, Any]]:
         set_field = value.which_one_of
         if set_field is not None:
             number, active_field = self.fields[set_field]
             value = getattr(value, set_field)
             return active_field, value
 
-    def validate(self, value: 'OneOf_'):
+        return None
+
+    def validate(self, value: OneOf_):
         res = self.active_field_and_value(value)
         if res is not None:
             field, value = res

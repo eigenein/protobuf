@@ -86,6 +86,7 @@ class Message(ABC):
                 getattr(other, field_.name),
             ))
 
+
 class OneOf_:
     """
     Defines an oneof field.
@@ -96,11 +97,9 @@ class OneOf_:
         super().__setattr__('fields', fields)
         super().__setattr__('set_value', None)
 
-
     def __getattr__(self, name):
         if name not in self.fields:
             raise AttributeError(f"Field {name} is not found")
-
 
         if self.set_value is not None:
             field_name, value = self.set_value
@@ -135,6 +134,7 @@ class OptionalFieldDescriptor:
 
     def __set__(self, instance, value):
         self.value = value
+
 
 def load(cls: Type[TMessage], io: IO) -> TMessage:
     """
@@ -172,6 +172,7 @@ def one_of(**parts: dataclasses.Field) -> OneOf_:
 
 def one_of_field(type_: Type, number: int) -> Any:
     return optional_field(number)
+
 
 def message(cls: Type[T]) -> Type[TMessage]:
     """

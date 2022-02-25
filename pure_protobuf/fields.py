@@ -160,7 +160,7 @@ class OneOfField(Field):
         self.name = name
         self.fields = fields
 
-    def active_field_and_value(self, value: OneOf_) -> Optional[Tuple[Field, Any]]:
+    def active_field_and_value(self, value: 'OneOf_') -> Optional[Tuple[Field, Any]]:
         set_field = value.which_one_of
         if set_field is not None:
             number, active_field = self.fields[set_field]
@@ -169,7 +169,7 @@ class OneOfField(Field):
 
         return None
 
-    def validate(self, value: OneOf_):
+    def validate(self, value: 'OneOf_'):
         res = self.active_field_and_value(value)
         if res is not None:
             field, value = res

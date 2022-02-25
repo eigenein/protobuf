@@ -9,7 +9,7 @@ from typing import Any, List, Optional, Union, Type
 
 from pytest import fixture, mark, raises
 
-from pure_protobuf.dataclasses_ import field, message, one_of, OneOf, one_of_field, optional_field
+from pure_protobuf.dataclasses_ import field, message, one_of, one_of_field, optional_field
 from pure_protobuf.enums import WireType
 from pure_protobuf.serializers import (
     BooleanSerializer,
@@ -293,7 +293,7 @@ def test_one_of_field():
     @message
     @dataclass
     class SampleMessage:
-        test_oneof: OneOf[str, SubMessage] = one_of(
+        test_oneof: Union[str, SubMessage] = one_of(
                 name = one_of_field(str, 4), 
                 sub_message = one_of_field(SubMessage, 9)
         )

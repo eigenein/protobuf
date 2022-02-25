@@ -21,8 +21,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    get_type_hints,
-    _type_check
+    get_type_hints
 )
 
 from pure_protobuf import serializers, types
@@ -86,24 +85,6 @@ class Message(ABC):
                 getattr(self, field_.name),
                 getattr(other, field_.name),
             ))
-
-
-class OneOfType:
-    def __init__(self, *types: type):
-        self.types = types
-
-
-class _oneof:
-    def __getitem__(self, index):
-        if isinstance(index, tuple):
-            for type_ in index:
-                type_ = _type_check(type_, "")
-            return OneOfType(*index)
-        else:
-            type_ = _type_check(type_, "")
-            return OneOfType(type_)
-
-OneOf = _oneof()
 
 class OneOf_:
     """
@@ -205,7 +186,7 @@ def message(cls: Type[T]) -> Type[TMessage]:
     casted_cls.__protobuf_fields__ = dict(
         make_field(field_.metadata['number'], field_.name, type_hints[field_.name], field_.metadata['packed'])
         for field_ in dataclasses.fields(cls)
-        if not isinstance(field_.type, OneOfType)
+        if not isinstance(field_.default, OneOf_)
     )
 
     # for case when we need to declare fields before one_of
@@ -221,7 +202,7 @@ def message(cls: Type[T]) -> Type[TMessage]:
     casted_cls.__protobuf_fields__.update(dict(
         make_one_of_field(field_.default, type_hints[field_.name], field_.name)
         for field_ in dataclasses.fields(cls)
-        if isinstance(field_.type, OneOfType)
+        if isinstance(field_.default, OneOf_)
     ))
 
     Message.register(cls)  # type: ignore
@@ -237,21 +218,25 @@ def message(cls: Type[T]) -> Type[TMessage]:
     return cast(Type[TMessage], cls)
 
 
-def make_one_of_field(field: OneOf_, field_type: OneOfType, name: str) -> Tuple[int, Field]:
+def make_one_of_field(field: OneOf_, field_type: Any, name: str) -> Tuple[int, Field]:
     """
     Figure out how to serialize and de-serialize oneof field.
     Returns the number of first field in oneof and a corresponding ``Field``
     instance.
     """
+    if getattr(field_type, '__origin__', None) is not Union:
+        raise TypeError("Oneof field type should be declared using Union type"
+                        f"not {field_type}")
+
+    args = set(field_type.__args__)
     fields = {}
-    for (name_, datacls_field), type_ in zip(field.fields.items(), field_type.types):
+    for (name_, datacls_field), type_ in zip(field.fields.items(), args):
         fields[name_] = make_field(
             datacls_field.metadata['number'],
             datacls_field.name,
             type_,
             False
         )
-    print("Fields ", fields)
 
     first_field = next(iter(field.fields.values()))
     return first_field.metadata['number'], OneOfField(name, fields)

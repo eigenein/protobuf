@@ -4,7 +4,8 @@
 
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import Any, Dict, Iterable, Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Tuple
+
 if TYPE_CHECKING:
     from pure_protobuf.dataclasses_ import OneOf_
 

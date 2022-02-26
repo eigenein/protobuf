@@ -5,7 +5,7 @@
 # noinspection PyCompatibility
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any, List, Optional, Union, Type
+from typing import Any, List, Optional, Type, Union
 
 from pytest import fixture, mark, raises
 

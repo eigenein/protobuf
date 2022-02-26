@@ -21,18 +21,12 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    get_type_hints
+    get_type_hints,
 )
 
 from pure_protobuf import serializers, types
 from pure_protobuf.enums import WireType
-from pure_protobuf.fields import (
-    Field,
-    NonRepeatedField,
-    OneOfField,
-    PackedRepeatedField,
-    UnpackedRepeatedField
-)
+from pure_protobuf.fields import Field, NonRepeatedField, OneOfField, PackedRepeatedField, UnpackedRepeatedField
 from pure_protobuf.io_ import IO
 from pure_protobuf.serializers import IntEnumSerializer, MessageSerializer, PackingSerializer, Serializer
 from pure_protobuf.types import NoneType
@@ -229,17 +223,13 @@ def make_one_of_field(field: OneOf_, field_type: Any, name: str) -> Tuple[int, F
         raise TypeError("Oneof field type should be declared using Union type"
                         f"not {field_type}")
 
-    args = set(field_type.__args__)
-    fields = {}
-    for (name_, datacls_field), type_ in zip(field.fields.items(), args):
-        fields[name_] = make_field(
-            datacls_field.metadata['number'],
-            datacls_field.name,
-            type_,
-            False
-        )
+    fields = {
+        name_: make_field(part.metadata['number'], name_, type_, False)
+        for (name_, part), type_ in zip(field.fields.items(), field_type.__args__)
+    }
 
     first_field = next(iter(field.fields.values()))
+    # decided to use number of first field, but not sure if it's ok
     return first_field.metadata['number'], OneOfField(name, fields)
 
 

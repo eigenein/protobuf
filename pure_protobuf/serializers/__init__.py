@@ -369,7 +369,6 @@ class MessageSerializer(Serializer):
     def validate(self, value: Any):
         if not isinstance(value, self.type_):
             raise ValueError(f'{self.type_} is expected, but got {type(value)}')
-        print(value)
         for field_ in value.__protobuf_fields__.values():
             field_.validate(getattr(value, field_.name))
 

@@ -4,13 +4,11 @@
 
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional, Tuple
-
-if TYPE_CHECKING:
-    from pure_protobuf.dataclasses_ import OneOf_
+from typing import Any, Dict, Iterable, List
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
+from pure_protobuf.oneof import OneOf_, OneOfPartInfo
 from pure_protobuf.serializers import Serializer, bytes_serializer, unsigned_varint_serializer
 
 
@@ -106,7 +104,8 @@ class RepeatedField(Field, ABC):
             return list(self.load_packed(bytes_serializer.load(io)))
         if wire_type == self.serializer.wire_type:
             return [self.serializer.load(io)]
-        raise ValueError(f'expected {self.serializer.wire_type} or {WireType.BYTES}, got {wire_type}')
+        raise ValueError((f'expected {self.serializer.wire_type} \n'
+                          'or {WireType.BYTES}, got {wire_type}'))
 
     def load_packed(self, bytes_: bytes) -> Iterable[Any]:
         """
@@ -156,38 +155,71 @@ class OneOfField(Field):
     Handles oneof field
     See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
     """
-
-    def __init__(self, name: str, fields: Dict[str, Tuple[int, Field]]):
+    def __init__(self, name: str, parts: List[OneOfPartInfo], fields: Dict[str, 'OneOfPartField']):
+        # ignoring super().__init__(...) on purpose because
+        # there is no particular Serializer for this kind field
+        # and used one of Serializer from OneOf_ parts
         self.name = name
+
+        # probably we should create mock serializer here
+        self.serializer = None  # type: ignore
+        self.wire_type = None  # type: ignore
+
         self.fields = fields
+        self.parts = parts
 
-    def active_field_and_value(self, value: 'OneOf_') -> Optional[Tuple[Field, Any]]:
-        set_field = value.which_one_of
-        if set_field is not None:
-            number, active_field = self.fields[set_field]
-            value = getattr(value, set_field)
-            return active_field, value
+    def validate(self, value: OneOf_):
+        field_name = value.which_one_of
+        if field_name is not None:
+            field_ = self.fields[field_name]
+            field_.validate(getattr(value, field_name))
 
-        return None
-
-    def validate(self, value: 'OneOf_'):
-        res = self.active_field_and_value(value)
-        if res is not None:
-            field, value = res
-            field.validate(value)
-
-    def dump(self, value: Any, io: IO):
-        res = self.active_field_and_value(value)
-        if res is not None:
-            field, value = res
-            field.dump(value, io)
+    def dump(self, value: OneOf_, io: IO):
+        field_name = value.which_one_of
+        if field_name is not None:
+            field_ = self.fields[field_name]
+            field_.origin.dump(getattr(value, field_name), io)
 
     def load(self, wire_type: WireType, io: IO) -> Any:
-        raise NotImplementedError()
-        if wire_type != self.serializer.wire_type:
-            raise ValueError(f'expected {self.serializer.wire_type}, got {wire_type}')
-        return self.serializer.load(io)
+        raise NotImplementedError("OneOfField is not supposed for deserialization")
 
     def merge(self, old_value: Any, new_value: Any) -> Any:
-        raise NotImplementedError()
-        return self.serializer.merge(old_value, new_value)
+        # seems it's enough
+        return new_value
+
+    def create_oneof(self, name, value):
+        result = OneOf_(*self.parts)
+        setattr(result, name, value)
+        return result
+
+
+class OneOfPartField(Field):
+    def __init__(self, number, parent: OneOfField, origin: Field):
+        super().__init__(number, parent.name, origin.serializer)
+
+        self.origin: Field = origin
+        self.parent = parent
+
+    def validate(self, value: Any):
+        if not isinstance(value, OneOf_):
+            return self.serializer.validate(value)
+
+        # check only if this particular field is set
+        which_set = value.which_one_of
+        if which_set is None or which_set != self.origin.name:
+            return
+
+        original_value = getattr(value, self.origin.name)
+        self.serializer.validate(original_value)
+
+    def dump(self, value: OneOf_, io: IO):
+        # this field is not supposed to dump any value
+        # this will be done through its OneOfField parent
+        pass
+
+    def load(self, wire_type: WireType, io: IO) -> Any:
+        field_value = self.origin.load(wire_type, io)
+        return self.parent.create_oneof(self.origin.name, field_value)
+
+    def merge(self, old_value: Any, new_value: Any) -> Any:
+        return self.origin.merge(old_value, new_value)

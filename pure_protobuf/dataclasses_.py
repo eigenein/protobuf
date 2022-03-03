@@ -15,7 +15,7 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Optional,
+    Set,
     Tuple,
     Type,
     TypeVar,
@@ -26,8 +26,16 @@ from typing import (
 
 from pure_protobuf import serializers, types
 from pure_protobuf.enums import WireType
-from pure_protobuf.fields import Field, NonRepeatedField, OneOfField, PackedRepeatedField, UnpackedRepeatedField
+from pure_protobuf.fields import (
+    Field,
+    NonRepeatedField,
+    OneOfField,
+    OneOfPartField,
+    PackedRepeatedField,
+    UnpackedRepeatedField,
+)
 from pure_protobuf.io_ import IO
+from pure_protobuf.oneof import OneOf_, OneOfPartInfo
 from pure_protobuf.serializers import IntEnumSerializer, MessageSerializer, PackingSerializer, Serializer
 from pure_protobuf.types import NoneType
 
@@ -49,10 +57,12 @@ class Message(ABC):
     """
 
     __protobuf_fields__: Dict[int, Field]
+    __one_of_fields__: Set[Field]
     serializer: ClassVar[Serializer]
     type_url: ClassVar[str]
 
     def validate(self):
+        print("Validation: ", self)
         self.serializer.validate(self)
 
     def dump(self, io: IO):
@@ -79,41 +89,6 @@ class Message(ABC):
                 getattr(self, field_.name),
                 getattr(other, field_.name),
             ))
-
-
-class OneOf_:
-    """
-    Defines an oneof field.
-    See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
-    """
-    def __init__(self, **fields: dataclasses.Field):
-        # ugly sets to get round custom setattr
-        super().__setattr__('fields', fields)
-        super().__setattr__('set_value', None)
-
-    def __getattr__(self, name):
-        if name not in self.fields:
-            raise AttributeError(f"Field {name} is not found")
-
-        if self.set_value is not None:
-            field_name, value = self.set_value
-            if field_name == name:
-                return value
-
-        return None
-
-    def __setattr__(self, name, value):
-        if name not in self.fields:
-            raise AttributeError(f"Field {name} is not found")
-
-        super().__setattr__('set_value', (name, value))
-
-    @property
-    def which_one_of(self) -> Optional[str]:
-        if self.set_value is not None:
-            field_name, _ = self.set_value
-            return field_name
-        return None
 
 
 class OptionalFieldDescriptor:
@@ -145,12 +120,22 @@ def loads(cls: Type[TMessage], bytes_: bytes) -> TMessage:
         return load(cls, io)
 
 
-def field(number: int, *args, packed=True, **kwargs) -> Any:
+def _field(number: int, *args, packed=True, isoneof=False, **kwargs) -> Any:
     """
     Convenience function to assign field numbers.
     Calls the standard ``dataclasses.field`` function with the metadata assigned.
     """
-    return dataclasses.field(*args, metadata={'number': number, 'packed': packed}, **kwargs)
+    metadata = {
+        'number': number,
+        'packed': packed,
+        'isoneof': isoneof
+    }
+
+    return dataclasses.field(*args, metadata=metadata, **kwargs)
+
+
+def field(number: int, *args, packed=True, **kwargs) -> Any:
+    return _field(number, *args, packed=packed, **kwargs)
 
 
 def optional_field(number: int, *args, **kwargs) -> Any:
@@ -160,12 +145,19 @@ def optional_field(number: int, *args, **kwargs) -> Any:
     return field(number, *args, default=None, **kwargs)
 
 
-def one_of(**parts: dataclasses.Field) -> OneOf_:
-    return OneOf_(**parts)
+def one_of(**parts: Tuple[type, int]) -> OneOf_:
+    scheme = (
+        OneOfPartInfo(name, type_, number)
+        for name, (type_, number) in parts.items()
+    )
+
+    default = OneOf_(*scheme)
+    return _field(-1, isoneof=True, default=default)
 
 
-def one_of_field(type_: Type, number: int) -> Any:
-    return optional_field(number)
+def part(type_: Type, number: int) -> Tuple[type, int]:
+    # well, yeah
+    return type_, number
 
 
 def message(cls: Type[T]) -> Type[TMessage]:
@@ -176,29 +168,24 @@ def message(cls: Type[T]) -> Type[TMessage]:
 
     type_hints = get_type_hints(cls)
 
-    # Used to list all fields and locate fields by field number.
     casted_cls = cast(Type[TMessage], cls)
+    # Used to list all fields and locate fields by field number.
     casted_cls.__protobuf_fields__ = dict(
         make_field(field_.metadata['number'], field_.name, type_hints[field_.name], field_.metadata['packed'])
         for field_ in dataclasses.fields(cls)
-        if not isinstance(field_.default, OneOf_)
+        if not field_.metadata['isoneof']
     )
+    # Used to handle one of case. Separated from other fields because
+    # OneOf field is not part of message, only sugar
+    casted_cls.__one_of_fields__ = set()
 
-    # for case when we need to declare fields before one_of
-    # for field_ in one_ofs_:
-    #     first = None
-    #     for part in cast(field_, OneOf_).fields.items():
-    #         part = cast(Field, part)
-    #         cls.__protobuf_fields__.pop(part.number)
-    #         if first is None:
-    #             first = part.number
-    #     cls.__protobuf_fields__[first] = field_
+    for field_ in dataclasses.fields(cls):
+        if field_.metadata['isoneof']:
+            parent, children = make_one_of_field(field_.default, field_.name)
+            casted_cls.__one_of_fields__.add(parent)
 
-    casted_cls.__protobuf_fields__.update(dict(
-        make_one_of_field(field_.default, type_hints[field_.name], field_.name)
-        for field_ in dataclasses.fields(cls)
-        if isinstance(field_.default, OneOf_)
-    ))
+            # also add all children so load could work correctly
+            casted_cls.__protobuf_fields__.update(children)
 
     Message.register(cls)  # type: ignore
     cls.serializer = MessageSerializer(cls)  # type: ignore
@@ -213,30 +200,35 @@ def message(cls: Type[T]) -> Type[TMessage]:
     return cast(Type[TMessage], cls)
 
 
-def make_one_of_field(field: OneOf_, field_type: Any, name: str) -> Tuple[int, Field]:
+def make_one_of_field(field_: OneOf_, name: str) -> Tuple[OneOfField, Dict[int, OneOfPartField]]:
     """
     Figure out how to serialize and de-serialize oneof field.
-    Returns the number of first field in oneof and a corresponding ``Field``
-    instance.
+
+    Returns the corresponding ``Field`` instance.
     """
-    if getattr(field_type, '__origin__', None) is not Union:
-        raise TypeError("Oneof field type should be declared using Union type"
-                        f"not {field_type}")
+    # not good at all that this dict is changed later but somehow needed
+    # to make cyclic reference from child to parent and from parent to children
+    # better to change later I think
+    name_to_field: Dict[str, OneOfPartField] = {}
 
-    fields = {
-        name_: make_field(part.metadata['number'], name_, type_, False)
-        for (name_, part), type_ in zip(field.fields.items(), field_type.__args__)
-    }
+    parent = OneOfField(name, field_.parts, name_to_field)
 
-    first_field = next(iter(field.fields.values()))
-    # decided to use number of first field, but not sure if it's ok
-    return first_field.metadata['number'], OneOfField(name, fields)
+    child_fields = {}
+    for part in field_.parts:
+        num, child_ = make_field(part.number, part.name, part.type_, False)
+        child_fields[num] = OneOfPartField(num, parent, child_)
+        name_to_field[part.name] = child_fields[num]
+
+    return parent, child_fields
 
 
 def make_field(number: int, name: str, type_: Any, packed: bool = True) -> Tuple[int, Field]:
     """
     Figure out how to serialize and de-serialize the field.
+
     Returns the field number and a corresponding ``Field`` instance.
+    If field is OneOf, then -1 is returned. This is valid because OneOf is just
+    a sugar and doesn't have it's own number.
     """
     is_optional, type_ = get_optional(type_)
     is_repeated, type_ = get_repeated(type_)

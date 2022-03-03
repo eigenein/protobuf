@@ -5,11 +5,11 @@
 # noinspection PyCompatibility
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Any, List, Optional, Type, Union
+from typing import Any, List, Optional, Type
 
 from pytest import fixture, mark, raises
 
-from pure_protobuf.dataclasses_ import field, message, one_of, one_of_field
+from pure_protobuf.dataclasses_ import OneOf_, field, message, one_of, part
 from pure_protobuf.enums import WireType
 from pure_protobuf.serializers import (
     BooleanSerializer,
@@ -284,6 +284,7 @@ def test_one_of_field():
     #     SubMessage sub_message = 9;
     #   }
     # }
+
     @message
     @dataclass
     class SubMessage:
@@ -293,18 +294,27 @@ def test_one_of_field():
     @message
     @dataclass
     class SampleMessage:
-        test_oneof: Union[str, SubMessage] = one_of(
-            name=one_of_field(str, 4),
-            sub_message=one_of_field(SubMessage, 9)
+        test_oneof: OneOf_ = one_of(
+            name=part(str, 4),
+            sub_message=part(SubMessage, 9)
         )
-        # name: Optional[str] = optional_field(4)
-        # sub_message: Optional[SubMessage] = optional_field(9)
 
     value = SampleMessage()
     value.test_oneof.sub_message = SubMessage(id='123', b=5)
+
+    # assert with original message from proto lib
+    # here could be
     bytes_ = b'J\x07\n\x03123\x18\x05'
     assert value.dumps() == bytes_
+    print("+++!+" * 25)
+    print(SampleMessage.loads(bytes_))
+    print(value)
+    assert SampleMessage.loads(bytes_) == value
+    assert SampleMessage.loads(value.dumps()) == value
 
+    # change field and check the same
     value.test_oneof.name = "Some string"
     bytes_ = b'"\x0bSome string'
     assert value.dumps() == bytes_
+    assert SampleMessage.loads(bytes_) == value
+    assert SampleMessage.loads(value.dumps()) == value

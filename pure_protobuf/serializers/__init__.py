@@ -7,7 +7,7 @@ Serializers for the dataclasses interface.
 import struct
 from abc import ABC
 from enum import IntEnum
-from itertools import count
+from itertools import chain, count
 from struct import pack, unpack
 from typing import Any, Dict, Type
 
@@ -369,12 +369,12 @@ class MessageSerializer(Serializer):
     def validate(self, value: Any):
         if not isinstance(value, self.type_):
             raise ValueError(f'{self.type_} is expected, but got {type(value)}')
-        for field_ in value.__protobuf_fields__.values():
+        for field_ in chain(value.__protobuf_fields__.values(), value.__one_of_fields__):
             field_.validate(getattr(value, field_.name))
 
     def dump(self, value: Any, io: IO):
         # number is not needed here
-        for field_ in value.__protobuf_fields__.values():
+        for field_ in chain(value.__protobuf_fields__.values(), value.__one_of_fields__):
             field_value = getattr(value, field_.name)
             try:
                 field_.dump(field_value, io)
@@ -388,6 +388,7 @@ class MessageSerializer(Serializer):
                 key = unsigned_varint_serializer.load(io)
             except ValueError:
                 break
+
             wire_type = WireType(key & 0b111)
             field = self.type_.__protobuf_fields__.get(key >> 3)
             if field is not None:

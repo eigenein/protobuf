@@ -306,9 +306,6 @@ def test_one_of_field():
     # here could be
     bytes_ = b'J\x07\n\x03123\x18\x05'
     assert value.dumps() == bytes_
-    print("+++!+" * 25)
-    print(SampleMessage.loads(bytes_))
-    print(value)
     assert SampleMessage.loads(bytes_) == value
     assert SampleMessage.loads(value.dumps()) == value
 

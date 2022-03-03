@@ -62,7 +62,6 @@ class Message(ABC):
     type_url: ClassVar[str]
 
     def validate(self):
-        print("Validation: ", self)
         self.serializer.validate(self)
 
     def dump(self, io: IO):

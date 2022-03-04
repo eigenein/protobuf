@@ -32,10 +32,10 @@ class OneOf_:
         super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
 
     def __getattr__(self, name):
-        if name not in getattr(self, _OneOfAttrs.FIELDS.value):
+        if name not in self.__fields__:
             raise AttributeError(f"Field {name} is not found")
 
-        set_value = getattr(self, _OneOfAttrs.SET_VALUE.value)
+        set_value = self.__set_value__
         if set_value is not None:
             field_name, real_value = set_value
             if field_name == name:
@@ -44,14 +44,14 @@ class OneOf_:
         return None
 
     def __setattr__(self, name, value):
-        if name not in getattr(self, _OneOfAttrs.FIELDS.value):
+        if name not in self.__fields__:
             raise AttributeError(f"Field {name} is not found")
 
         super().__setattr__(_OneOfAttrs.SET_VALUE.value, (name, value))
 
     @property
     def which_one_of(self) -> Optional[str]:
-        set_value = getattr(self, _OneOfAttrs.SET_VALUE.value)
+        set_value = self.__set_value__
         if set_value is None:
             return None
 
@@ -60,9 +60,7 @@ class OneOf_:
 
     @property
     def __internals(self) -> Tuple[Any, Any, Any]:
-        return (getattr(self, _OneOfAttrs.FIELDS.value),
-                getattr(self, _OneOfAttrs.PARTS.value),
-                getattr(self, _OneOfAttrs.SET_VALUE.value))
+        return (self.__fields__, self.__parts__, self.__set_value__)
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, OneOf_):

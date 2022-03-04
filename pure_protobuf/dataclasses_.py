@@ -154,10 +154,13 @@ def message(cls: Type[T]) -> Type[TMessage]:
     type_hints = get_type_hints(cls)
 
     casted_cls = cast(Type[TMessage], cls)
+
     # Used to list all fields and locate fields by field number.
     casted_cls.__protobuf_fields__ = {}
+
     # Used to handle one of case. Separated from other fields because
-    # OneOf field is not part of message, only sugar
+    # OneOf field is not part of message, only sugar.
+    # As a consequence OneOf field doesn't have any number in message.
     casted_cls.__one_of_fields__ = set()
 
     for field_ in dataclasses.fields(cls):
@@ -193,21 +196,20 @@ def make_one_of_field(field_: OneOf_, name: str) -> Tuple[OneOfField, Dict[int, 
 
     Returns the corresponding ``Field`` instance.
     """
-    # not good at all that this dict is changed later but somehow needed
-    # to make cyclic reference from child to parent and from parent to children
-    # better to change later I think
-    name_to_field: Dict[str, OneOfPartField] = {}
+    children: Dict[int, OneOfPartField] = {}
 
-    parts = scheme(field_)
-    parent = OneOfField(name, parts, name_to_field)
-    child_fields = {}
-    for part_ in parts:
-        num, child_ = make_field(part_.number, part_.name, part_.type_, False)
+    scheme_ = scheme(field_)
+    # create dangling part fields
+    for part_ in scheme_:
+        num, child_field = make_field(part_.number, part_.name, part_.type_, False)
+        children[num] = OneOfPartField(num, name, child_field)
 
-        child_fields[num] = OneOfPartField(num, parent, child_)
-        name_to_field[part_.name] = child_fields[num]
+    parent = OneOfField(name, scheme_, children)
+    # make cyclic reference to parent, it will be needed later
+    for child in children.values():
+        child.set_parent(parent)
 
-    return parent, child_fields
+    return parent, children
 
 
 def make_field(number: int, name: str, type_: Any, packed: bool = True) -> Tuple[int, Field]:

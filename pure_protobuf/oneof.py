@@ -75,5 +75,5 @@ class OneOf_:
     def __repr__(self) -> str:
         fields, parts, set_value = self.__internals
         return (f"{fields} \n"
-                f"set: {parts} \n"
-                f"parts: {set_value}")
+                f"parts: {set_value} \n"
+                f"set: {set_value} \n")

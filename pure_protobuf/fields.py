@@ -155,8 +155,8 @@ class OneOfField(Field):
     Handles oneof field
     See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
     """
-    def __init__(self, name: str, parts: Tuple[OneOfPartInfo, ...],
-                 fields: Dict[str, 'OneOfPartField']):
+    def __init__(self, name: str, scheme: Tuple[OneOfPartInfo, ...],
+                 children: Dict[int, 'OneOfPartField']):
         # ignoring super().__init__(...) on purpose because
         # there is no particular Serializer for this kind field
         # and used one of Serializer from OneOf_ parts
@@ -166,19 +166,19 @@ class OneOfField(Field):
         self.serializer = None  # type: ignore
         self.wire_type = None  # type: ignore
 
-        self.fields = fields
-        self.parts = parts
+        self.children = {field_.origin.name: field_ for field_ in children.values()}
+        self.scheme = scheme
 
     def validate(self, value: OneOf_):
         field_name = value.which_one_of
         if field_name is not None:
-            field_ = self.fields[field_name]
+            field_ = self.children[field_name]
             field_.validate(getattr(value, field_name))
 
     def dump(self, value: OneOf_, io: IO):
         field_name = value.which_one_of
         if field_name is not None:
-            field_ = self.fields[field_name]
+            field_ = self.children[field_name]
             field_.origin.dump(getattr(value, field_name), io)
 
     def load(self, wire_type: WireType, io: IO) -> Any:
@@ -189,17 +189,19 @@ class OneOfField(Field):
         return new_value
 
     def create_oneof(self, name, value):
-        result = OneOf_(*self.parts)
+        result = OneOf_(*self.scheme)
         setattr(result, name, value)
         return result
 
 
 class OneOfPartField(Field):
-    def __init__(self, number, parent: OneOfField, origin: Field):
-        super().__init__(number, parent.name, origin.serializer)
+    def __init__(self, number: int, name: str, origin: Field):
+        super().__init__(number, name, origin.serializer)
 
         self.origin: Field = origin
-        self.parent = parent
+
+    def set_parent(self, parent: OneOfField):
+        self.parent: OneOfField = parent
 
     def validate(self, value: Any):
         if not isinstance(value, OneOf_):

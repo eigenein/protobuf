@@ -207,10 +207,10 @@ class OneOfPartField(Field):
 
         # check only if this particular field is set
         which_set = value.which_one_of
-        if which_set is None or which_set != self.origin.name:
+        if which_set != self.origin.name:
             return
 
-        original_value = getattr(value, self.origin.name)
+        original_value = getattr(value, which_set)
         self.serializer.validate(original_value)
 
     def dump(self, value: OneOf_, io: IO):

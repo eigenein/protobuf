@@ -68,15 +68,10 @@ class OneOf_:
         if not isinstance(other, OneOf_):
             return NotImplemented
 
-        self_fields, self_parts, self_setvalue = self.__internals
-        other_fields, other_parts, other_setvalue = other.__internals
-        return self_fields == other_fields and \
-            self_parts == other_parts and \
-            self_setvalue == other_setvalue
+        return self.__internals == other.__internals
 
     def __hash__(self) -> int:
-        fields, parts, set_value = self.__internals
-        return hash((fields, parts, set_value))
+        return hash(self.__internals)
 
     # for debug purposes I guess
     def __repr__(self) -> str:

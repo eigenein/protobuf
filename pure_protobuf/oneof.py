@@ -17,7 +17,7 @@ class _OneOfAttrs(Enum):
 
 
 def scheme(obj: 'OneOf_') -> Tuple[OneOfPartInfo, ...]:
-    return getattr(obj, _OneOfAttrs.PARTS.value)
+    return obj.__parts__
 
 
 class OneOf_:

@@ -4,7 +4,7 @@
 
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, Tuple
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
@@ -155,7 +155,8 @@ class OneOfField(Field):
     Handles oneof field
     See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
     """
-    def __init__(self, name: str, parts: List[OneOfPartInfo], fields: Dict[str, 'OneOfPartField']):
+    def __init__(self, name: str, parts: Tuple[OneOfPartInfo, ...],
+                 fields: Dict[str, 'OneOfPartField']):
         # ignoring super().__init__(...) on purpose because
         # there is no particular Serializer for this kind field
         # and used one of Serializer from OneOf_ parts

@@ -35,7 +35,7 @@ from pure_protobuf.fields import (
     UnpackedRepeatedField,
 )
 from pure_protobuf.io_ import IO
-from pure_protobuf.oneof import OneOf_, OneOfPartInfo
+from pure_protobuf.oneof import OneOf_, OneOfPartInfo, scheme
 from pure_protobuf.serializers import IntEnumSerializer, MessageSerializer, PackingSerializer, Serializer
 from pure_protobuf.types import NoneType
 
@@ -197,9 +197,11 @@ def make_one_of_field(field_: OneOf_, name: str) -> Tuple[OneOfField, Dict[int, 
     # to make cyclic reference from child to parent and from parent to children
     # better to change later I think
     name_to_field: Dict[str, OneOfPartField] = {}
-    parent = OneOfField(name, field_.parts, name_to_field)
+
+    parts = scheme(field_)
+    parent = OneOfField(name, parts, name_to_field)
     child_fields = {}
-    for part_ in field_.parts:
+    for part_ in parts:
         num, child_ = make_field(part_.number, part_.name, part_.type_, False)
 
         child_fields[num] = OneOfPartField(num, parent, child_)

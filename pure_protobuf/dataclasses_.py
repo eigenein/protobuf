@@ -90,20 +90,6 @@ class Message(ABC):
             ))
 
 
-class OptionalFieldDescriptor:
-    def __init__(self, number, *args, **kwargs):
-        # do we need field here?
-        self.field_ = field(number, *args, default=None, **kwargs)
-        self.value = None
-        self.number = number
-
-    def __get__(self, instance, owner):
-        return self.value
-
-    def __set__(self, instance, value):
-        self.value = value
-
-
 def load(cls: Type[TMessage], io: IO) -> TMessage:
     """
     Deserializes a message from a file-like object.
@@ -169,11 +155,7 @@ def message(cls: Type[T]) -> Type[TMessage]:
 
     casted_cls = cast(Type[TMessage], cls)
     # Used to list all fields and locate fields by field number.
-    casted_cls.__protobuf_fields__ = dict(
-        make_field(field_.metadata['number'], field_.name, type_hints[field_.name], field_.metadata['packed'])
-        for field_ in dataclasses.fields(cls)
-        if not field_.metadata['isoneof']
-    )
+    casted_cls.__protobuf_fields__ = {}
     # Used to handle one of case. Separated from other fields because
     # OneOf field is not part of message, only sugar
     casted_cls.__one_of_fields__ = set()
@@ -185,6 +167,12 @@ def message(cls: Type[T]) -> Type[TMessage]:
 
             # also add all children so load could work correctly
             casted_cls.__protobuf_fields__.update(children)
+        else:
+            num, proto_field = make_field(field_.metadata['number'],
+                                          field_.name,
+                                          type_hints[field_.name],
+                                          field_.metadata['packed'])
+            casted_cls.__protobuf_fields__[num] = proto_field
 
     Message.register(cls)  # type: ignore
     cls.serializer = MessageSerializer(cls)  # type: ignore
@@ -209,14 +197,13 @@ def make_one_of_field(field_: OneOf_, name: str) -> Tuple[OneOfField, Dict[int, 
     # to make cyclic reference from child to parent and from parent to children
     # better to change later I think
     name_to_field: Dict[str, OneOfPartField] = {}
-
     parent = OneOfField(name, field_.parts, name_to_field)
-
     child_fields = {}
-    for part in field_.parts:
-        num, child_ = make_field(part.number, part.name, part.type_, False)
+    for part_ in field_.parts:
+        num, child_ = make_field(part_.number, part_.name, part_.type_, False)
+
         child_fields[num] = OneOfPartField(num, parent, child_)
-        name_to_field[part.name] = child_fields[num]
+        name_to_field[part_.name] = child_fields[num]
 
     return parent, child_fields
 
@@ -226,8 +213,6 @@ def make_field(number: int, name: str, type_: Any, packed: bool = True) -> Tuple
     Figure out how to serialize and de-serialize the field.
 
     Returns the field number and a corresponding ``Field`` instance.
-    If field is OneOf, then -1 is returned. This is valid because OneOf is just
-    a sugar and doesn't have it's own number.
     """
     is_optional, type_ = get_optional(type_)
     is_repeated, type_ = get_repeated(type_)

@@ -40,10 +40,11 @@ class OneOf_:
 
     @property
     def which_one_of(self) -> Optional[str]:
-        if self.set_value is not None:
-            field_name, _ = self.set_value
-            return field_name
-        return None
+        if self.set_value is None:
+            return None
+
+        field_name, _ = self.set_value
+        return field_name
 
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, OneOf_) and \

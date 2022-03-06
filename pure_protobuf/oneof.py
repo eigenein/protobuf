@@ -49,6 +49,12 @@ class OneOf_:
 
         super().__setattr__(_OneOfAttrs.SET_VALUE.value, (name, value))
 
+    def __delattr__(self, name):
+        if name not in self.__fields__:
+            raise AttributeError(f"Field {name} is not found")
+
+        super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
+
     @property
     def which_one_of(self) -> Optional[str]:
         set_value = self.__set_value__

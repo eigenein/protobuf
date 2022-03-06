@@ -202,3 +202,8 @@ def test_class_sets_one_set():
     expected, expected_name = [1, 2, 3, 4], 'f2'
     obj.oneof_msg.f2 = expected
     class_assertions(expected_name, expected, obj.oneof_msg)
+
+    # unset
+    del obj.oneof_msg.f2
+    assert obj.oneof_msg.f2 is None
+    assert obj.oneof_msg.which_one_of is None

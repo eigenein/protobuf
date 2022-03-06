@@ -21,6 +21,19 @@ def scheme(obj: 'OneOf_') -> Tuple[OneOfPartInfo, ...]:
     return obj.__parts__
 
 
+def internals(self) -> Tuple[Any, Any, Any]:
+    return (self.__fields__, self.__parts__, self.__set_value__)
+
+
+def _name_in_attrs_check(func: Callable[..., Any]) -> Callable[..., Any]:  # type: ignore
+    @functools.wraps(func)
+    def inner(self, name, *args):
+        if name not in self.__fields__:
+            raise AttributeError(f"Field {name} is not found")
+        return func(self, name, *args)
+    return inner
+
+
 class OneOf_:
     """
     Defines an oneof field.
@@ -32,15 +45,7 @@ class OneOf_:
         super().__setattr__(_OneOfAttrs.PARTS.value, parts)
         super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
 
-    def __name_in_attrs_check(func: Callable[..., Any]) -> Callable[..., Any]:  # type: ignore
-        @functools.wraps(func)
-        def inner(self, name, *args):
-            if name not in self.__fields__:
-                raise AttributeError(f"Field {name} is not found")
-            return func(self, name, *args)
-        return inner
-
-    @__name_in_attrs_check
+    @_name_in_attrs_check
     def __getattr__(self, name):
         if self.which_one_of == name:
             _, value = self.__set_value__
@@ -48,7 +53,7 @@ class OneOf_:
 
         return None
 
-    @__name_in_attrs_check
+    @_name_in_attrs_check
     def __delattr__(self, name):
         if self.which_one_of == name:
             return super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
@@ -56,7 +61,7 @@ class OneOf_:
         raise AttributeError(f"Field {name} is not set, "
                              f"{self.which_one_of} is set")
 
-    @__name_in_attrs_check
+    @_name_in_attrs_check
     def __setattr__(self, name, value):
         super().__setattr__(_OneOfAttrs.SET_VALUE.value, (name, value))
 
@@ -69,22 +74,18 @@ class OneOf_:
         field_name, _ = set_value
         return field_name
 
-    @property
-    def __internals(self) -> Tuple[Any, Any, Any]:
-        return (self.__fields__, self.__parts__, self.__set_value__)
-
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, OneOf_):
             return NotImplemented
 
-        return self.__internals == other.__internals
+        return internals(self) == internals(other)
 
     def __hash__(self) -> int:
-        return hash(self.__internals)
+        return hash(internals(self))
 
     # for debug purposes I guess
     def __repr__(self) -> str:
-        fields, parts, set_value = self.__internals
+        fields, parts, set_value = internals(self)
         return (f"{fields} \n"
                 f"parts: {parts} \n"
                 f"set: {set_value}")

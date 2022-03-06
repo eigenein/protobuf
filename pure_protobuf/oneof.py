@@ -53,6 +53,10 @@ class OneOf_:
         if name not in self.__fields__:
             raise AttributeError(f"Field {name} is not found")
 
+        if self.which_one_of != name:
+            raise AttributeError(f"Field {name} is not set,"
+                                 f"{self.which_one_of} is set")
+
         super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
 
     @property

@@ -207,3 +207,7 @@ def test_class_sets_one_set():
     del obj.oneof_msg.f2
     assert obj.oneof_msg.f2 is None
     assert obj.oneof_msg.which_one_of is None
+
+    with raises(AttributeError):
+        # trying to delete unset method
+        del obj.oneof_msg.f1

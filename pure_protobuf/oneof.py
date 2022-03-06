@@ -76,4 +76,4 @@ class OneOf_:
         fields, parts, set_value = self.__internals
         return (f"{fields} \n"
                 f"parts: {parts} \n"
-                f"set: {set_value} \n")
+                f"set: {set_value}")

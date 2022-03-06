@@ -2,9 +2,10 @@
 `pure-protobuf` contributors © 2011-2019
 """
 
+import functools
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Callable, Iterable, Tuple
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
@@ -150,79 +151,42 @@ class PackedRepeatedField(RepeatedField):
             bytes_serializer.dump(inner_io.getvalue(), io)
 
 
-class OneOfField(Field):
-    """
-    Handles oneof field
-    See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
-    """
-    def __init__(self, name: str, scheme: Tuple[OneOfPartInfo, ...],
-                 children: Dict[int, 'OneOfPartField']):
-        # ignoring super().__init__(...) on purpose because
-        # there is no particular Serializer for this kind field
-        # and used one of Serializer from OneOf_ parts
-        self.name = name
-
-        # probably we should create mock serializer here
-        self.serializer = None  # type: ignore
-        self.wire_type = None  # type: ignore
-
-        self.children = {field_.origin.name: field_ for field_ in children.values()}
-        self.scheme = scheme
-
-    def validate(self, value: OneOf_):
-        field_name = value.which_one_of
-        if field_name is not None:
-            field_ = self.children[field_name]
-            field_.validate(getattr(value, field_name))
-
-    def dump(self, value: OneOf_, io: IO):
-        field_name = value.which_one_of
-        if field_name is not None:
-            field_ = self.children[field_name]
-            field_.origin.dump(getattr(value, field_name), io)
-
-    def load(self, wire_type: WireType, io: IO) -> Any:
-        raise NotImplementedError("OneOfField is not supposed for deserialization")
-
-    def merge(self, old_value: Any, new_value: Any) -> Any:
-        # seems it's enough
-        return new_value
-
-    def create_oneof(self, name, value):
-        result = OneOf_(*self.scheme)
-        setattr(result, name, value)
-        return result
-
-
 class OneOfPartField(Field):
-    def __init__(self, number: int, name: str, origin: Field):
+    def __init__(self, number: int, name: str, origin: Field,
+                 scheme_: Tuple[OneOfPartInfo, ...]):
         super().__init__(number, name, origin.serializer)
 
         self.origin: Field = origin
+        self.scheme: Tuple[OneOfPartInfo, ...] = scheme_
 
-    def set_parent(self, parent: OneOfField):
-        self.parent: OneOfField = parent
+    def do_if_current_set(func: Callable[..., Any]):  # type: ignore
+        @functools.wraps(func)
+        def inner(self, value, *args) -> Any:
+            if not isinstance(value, OneOf_):
+                return func(self, value, *args)
 
-    def validate(self, value: Any):
-        if not isinstance(value, OneOf_):
-            return self.serializer.validate(value)
+            which_set = value.which_one_of
+            if which_set != self.origin.name:
+                return None
 
-        # check only if this particular field is set
-        which_set = value.which_one_of
-        if which_set != self.origin.name:
-            return
+            original_value = getattr(value, which_set)
+            return func(self, original_value, *args)
 
-        original_value = getattr(value, which_set)
-        self.serializer.validate(original_value)
+        return inner
 
+    @do_if_current_set
+    def validate(self, value: OneOf_):
+        self.origin.validate(value)
+
+    @do_if_current_set
     def dump(self, value: OneOf_, io: IO):
-        # this field is not supposed to dump any value
-        # this will be done through its OneOfField parent
-        pass
+        self.origin.dump(value, io)
+
+    def merge(self, old_value: OneOf_, new_value: OneOf_) -> Any:
+        return new_value
 
     def load(self, wire_type: WireType, io: IO) -> Any:
         field_value = self.origin.load(wire_type, io)
-        return self.parent.create_oneof(self.origin.name, field_value)
-
-    def merge(self, old_value: Any, new_value: Any) -> Any:
-        return self.origin.merge(old_value, new_value)
+        result = OneOf_(*self.scheme)
+        setattr(result, self.origin.name, field_value)
+        return result

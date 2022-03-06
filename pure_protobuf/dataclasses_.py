@@ -26,14 +26,7 @@ from typing import (
 
 from pure_protobuf import serializers, types
 from pure_protobuf.enums import WireType
-from pure_protobuf.fields import (
-    Field,
-    NonRepeatedField,
-    OneOfField,
-    OneOfPartField,
-    PackedRepeatedField,
-    UnpackedRepeatedField,
-)
+from pure_protobuf.fields import Field, NonRepeatedField, OneOfPartField, PackedRepeatedField, UnpackedRepeatedField
 from pure_protobuf.io_ import IO
 from pure_protobuf.oneof import OneOf_, OneOfPartInfo, scheme
 from pure_protobuf.serializers import IntEnumSerializer, MessageSerializer, PackingSerializer, Serializer
@@ -165,10 +158,7 @@ def message(cls: Type[T]) -> Type[TMessage]:
 
     for field_ in dataclasses.fields(cls):
         if field_.metadata['isoneof']:
-            parent, children = make_one_of_field(field_.default, field_.name)
-            casted_cls.__one_of_fields__.add(parent)
-
-            # also add all children so load could work correctly
+            children = make_one_of_field(field_.default, field_.name)
             casted_cls.__protobuf_fields__.update(children)
         else:
             num, proto_field = make_field(field_.metadata['number'],
@@ -190,26 +180,25 @@ def message(cls: Type[T]) -> Type[TMessage]:
     return cast(Type[TMessage], cls)
 
 
-def make_one_of_field(field_: OneOf_, name: str) -> Tuple[OneOfField, Dict[int, OneOfPartField]]:
+def make_one_of_field(field_: OneOf_, name: str) -> Dict[int, OneOfPartField]:
     """
     Figure out how to serialize and de-serialize oneof field.
 
     Returns the corresponding ``Field`` instance.
     """
-    children: Dict[int, OneOfPartField] = {}
-
     scheme_ = scheme(field_)
-    # create dangling part fields
-    for part_ in scheme_:
-        num, child_field = make_field(part_.number, part_.name, part_.type_, False)
-        children[num] = OneOfPartField(num, name, child_field)
+    child_fields = (
+        # TODO: what to do with packed?
+        make_field(part_.number, part_.name, part_.type_, False)
+        for part_ in scheme_
+    )
 
-    parent = OneOfField(name, scheme_, children)
-    # make cyclic reference to parent, it will be needed later
-    for child in children.values():
-        child.set_parent(parent)
+    children: Dict[int, OneOfPartField] = {
+        num: OneOfPartField(num, name, child_field, scheme_)
+        for num, child_field in child_fields
+    }
 
-    return parent, children
+    return children
 
 
 def make_field(number: int, name: str, type_: Any, packed: bool = True) -> Tuple[int, Field]:

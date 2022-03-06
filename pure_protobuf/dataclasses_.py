@@ -165,15 +165,14 @@ def make_one_of_field(field_: OneOf_, name: str) -> Dict[int, OneOfPartField]:
 
     Returns the corresponding ``Field`` instance.
     """
-    scheme_ = scheme(field_)
     child_fields = (
         # TODO: what to do with packed?
         make_field(part_.number, part_.name, part_.type_, False)
-        for part_ in scheme_
+        for part_ in scheme(field_)
     )
 
     children: Dict[int, OneOfPartField] = {
-        num: OneOfPartField(num, name, child_field, scheme_)
+        num: OneOfPartField(num, name, field_, child_field)
         for num, child_field in child_fields
     }
 

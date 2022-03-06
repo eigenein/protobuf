@@ -5,11 +5,11 @@
 import functools
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import Any, Callable, Iterable, Tuple
+from typing import Any, Callable, Iterable
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
-from pure_protobuf.oneof import OneOf_, OneOfPartInfo
+from pure_protobuf.oneof import OneOf_
 from pure_protobuf.serializers import Serializer, bytes_serializer, unsigned_varint_serializer
 
 
@@ -152,18 +152,22 @@ class PackedRepeatedField(RepeatedField):
 
 
 class OneOfPartField(Field):
-    def __init__(self, number: int, name: str, origin: Field,
-                 scheme_: Tuple[OneOfPartInfo, ...]):
+    def __init__(self, number: int, name: str,
+                 oneof_: OneOf_, origin: Field):
         super().__init__(number, name, origin.serializer)
 
+        self.oneof: OneOf_ = oneof_
         self.origin: Field = origin
-        self.scheme: Tuple[OneOfPartInfo, ...] = scheme_
 
     def do_if_current_set(func: Callable[..., Any]):  # type: ignore
         @functools.wraps(func)
         def inner(self, value, *args) -> Any:
             if not isinstance(value, OneOf_):
                 return func(self, value, *args)
+
+            # value: OneOf_
+            if value is not self.oneof:
+                return None
 
             which_set = value.which_one_of
             if which_set != self.origin.name:
@@ -187,6 +191,5 @@ class OneOfPartField(Field):
 
     def load(self, wire_type: WireType, io: IO) -> Any:
         field_value = self.origin.load(wire_type, io)
-        result = OneOf_(self.scheme)
-        setattr(result, self.origin.name, field_value)
-        return result
+        setattr(self.oneof, self.origin.name, field_value)
+        return self.oneof

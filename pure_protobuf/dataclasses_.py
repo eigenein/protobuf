@@ -50,7 +50,6 @@ class Message(ABC):
     """
 
     __protobuf_fields__: Dict[int, Field]
-    __one_of_fields__: Set[Field]
     serializer: ClassVar[Serializer]
     type_url: ClassVar[str]
 

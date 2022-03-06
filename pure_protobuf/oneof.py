@@ -1,6 +1,7 @@
 import dataclasses
+import functools
 from enum import Enum
-from typing import Any, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple
 
 
 @dataclasses.dataclass(frozen=True)
@@ -31,10 +32,16 @@ class OneOf_:
         super().__setattr__(_OneOfAttrs.PARTS.value, parts)
         super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
 
-    def __getattr__(self, name):
-        if name not in self.__fields__:
-            raise AttributeError(f"Field {name} is not found")
+    def __name_in_attrs_check(func: Callable[..., Any]) -> Callable[..., Any]:  # type: ignore
+        @functools.wraps(func)
+        def inner(self, name, *args):
+            if name not in self.__fields__:
+                raise AttributeError(f"Field {name} is not found")
+            return func(self, name, *args)
+        return inner
 
+    @__name_in_attrs_check
+    def __getattr__(self, name):
         set_value = self.__set_value__
         if set_value is not None:
             field_name, real_value = set_value
@@ -43,21 +50,20 @@ class OneOf_:
 
         return None
 
-    def __setattr__(self, name, value):
-        if name not in self.__fields__:
-            raise AttributeError(f"Field {name} is not found")
-
-        super().__setattr__(_OneOfAttrs.SET_VALUE.value, (name, value))
-
+    @__name_in_attrs_check
     def __delattr__(self, name):
-        if name not in self.__fields__:
-            raise AttributeError(f"Field {name} is not found")
+        set_value = self.__set_value__
+        if set_value is not None:
+            field_name, _ = set_value
+            if field_name == name:
+                return super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
 
-        if self.which_one_of != name:
-            raise AttributeError(f"Field {name} is not set,"
-                                 f"{self.which_one_of} is set")
+        raise AttributeError(f"Field {name} is not set,"
+                             f"{self.which_one_of} is set")
 
-        super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
+    @__name_in_attrs_check
+    def __setattr__(self, name, value):
+        super().__setattr__(_OneOfAttrs.SET_VALUE.value, (name, value))
 
     @property
     def which_one_of(self) -> Optional[str]:

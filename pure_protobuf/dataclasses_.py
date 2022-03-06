@@ -8,21 +8,7 @@ from abc import ABC
 from collections import abc
 from enum import IntEnum
 from io import BytesIO
-from typing import (
-    Any,
-    ByteString,
-    ClassVar,
-    Dict,
-    Iterable,
-    List,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-    get_type_hints,
-)
+from typing import Any, ByteString, ClassVar, Dict, Iterable, List, Tuple, Type, TypeVar, Union, cast, get_type_hints
 
 from pure_protobuf import serializers, types
 from pure_protobuf.enums import WireType

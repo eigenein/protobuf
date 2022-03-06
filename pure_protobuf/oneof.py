@@ -42,23 +42,18 @@ class OneOf_:
 
     @__name_in_attrs_check
     def __getattr__(self, name):
-        set_value = self.__set_value__
-        if set_value is not None:
-            field_name, real_value = set_value
-            if field_name == name:
-                return real_value
+        if self.which_one_of == name:
+            _, value = self.__set_value__
+            return value
 
         return None
 
     @__name_in_attrs_check
     def __delattr__(self, name):
-        set_value = self.__set_value__
-        if set_value is not None:
-            field_name, _ = set_value
-            if field_name == name:
-                return super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
+        if self.which_one_of == name:
+            return super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
 
-        raise AttributeError(f"Field {name} is not set,"
+        raise AttributeError(f"Field {name} is not set, "
                              f"{self.which_one_of} is set")
 
     @__name_in_attrs_check

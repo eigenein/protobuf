@@ -147,14 +147,8 @@ def message(cls: Type[T]) -> Type[TMessage]:
     type_hints = get_type_hints(cls)
 
     casted_cls = cast(Type[TMessage], cls)
-
     # Used to list all fields and locate fields by field number.
     casted_cls.__protobuf_fields__ = {}
-
-    # Used to handle one of case. Separated from other fields because
-    # OneOf field is not part of message, only sugar.
-    # As a consequence OneOf field doesn't have any number in message.
-    casted_cls.__one_of_fields__ = set()
 
     for field_ in dataclasses.fields(cls):
         if field_.metadata['isoneof']:

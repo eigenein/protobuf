@@ -109,12 +109,12 @@ def optional_field(number: int, *args, **kwargs) -> Any:
 
 
 def one_of(**parts: Tuple[type, int]) -> OneOf_:
-    scheme = (
+    scheme_ = tuple(
         OneOfPartInfo(name, type_, number)
         for name, (type_, number) in parts.items()
     )
 
-    default = OneOf_(*scheme)
+    default = OneOf_(scheme_)
     return _field(-1, isoneof=True, default=default)
 
 

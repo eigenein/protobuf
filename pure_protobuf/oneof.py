@@ -39,7 +39,7 @@ class OneOf_:
     Defines an oneof field.
     See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
     """
-    def __init__(self, *parts: OneOfPartInfo):
+    def __init__(self, parts: Tuple[OneOfPartInfo, ...]):
         # ugly sets to get round custom setattr
         super().__setattr__(_OneOfAttrs.FIELDS.value, frozenset(part.name for part in parts))
         super().__setattr__(_OneOfAttrs.PARTS.value, parts)

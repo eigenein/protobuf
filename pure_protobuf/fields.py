@@ -187,6 +187,6 @@ class OneOfPartField(Field):
 
     def load(self, wire_type: WireType, io: IO) -> Any:
         field_value = self.origin.load(wire_type, io)
-        result = OneOf_(*self.scheme)
+        result = OneOf_(self.scheme)
         setattr(result, self.origin.name, field_value)
         return result

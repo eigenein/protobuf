@@ -1,7 +1,7 @@
 import dataclasses
 import functools
 from enum import Enum
-from typing import Any, Callable, Optional, Tuple, Type
+from typing import Any, Callable, Optional, Tuple
 
 
 @dataclasses.dataclass(frozen=True)
@@ -22,12 +22,8 @@ def scheme(obj: 'OneOf_') -> Tuple[OneOfPartInfo, ...]:
     return obj.__parts__
 
 
-def internals(self) -> Tuple[Any, Any, Any]:
+def _internals(self) -> Tuple[Any, Any, Any]:
     return (self.__fields__, self.__parts__, self.__set_value__)
-
-
-def origin_class(self) -> Type[Any]:
-    return self.__origin_class__
 
 
 def _name_in_attrs_check(func: Callable[..., Any]) -> Callable[..., Any]:  # type: ignore
@@ -83,14 +79,14 @@ class OneOf_:
         if not isinstance(other, OneOf_):
             return NotImplemented
 
-        return internals(self) == internals(other)
+        return _internals(self) == _internals(other)
 
     def __hash__(self) -> int:
-        return hash(internals(self))
+        return hash(_internals(self))
 
     # for debug purposes I guess
     def __repr__(self) -> str:
-        fields, parts, set_value = internals(self)
+        fields, parts, set_value = _internals(self)
         return (f"{fields} \n"
                 f"parts: {parts} \n"
                 f"set: {set_value}")

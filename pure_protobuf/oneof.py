@@ -1,7 +1,7 @@
 import dataclasses
 import functools
 from enum import Enum
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Optional, Tuple, Type
 
 
 @dataclasses.dataclass(frozen=True)
@@ -9,6 +9,7 @@ class OneOfPartInfo:
     name: str
     type_: type
     number: int
+    packed: bool = True
 
 
 class _OneOfAttrs(Enum):
@@ -25,6 +26,10 @@ def internals(self) -> Tuple[Any, Any, Any]:
     return (self.__fields__, self.__parts__, self.__set_value__)
 
 
+def origin_class(self) -> Type[Any]:
+    return self.__origin_class__
+
+
 def _name_in_attrs_check(func: Callable[..., Any]) -> Callable[..., Any]:  # type: ignore
     @functools.wraps(func)
     def inner(self, name, *args):
@@ -39,10 +44,10 @@ class OneOf_:
     Defines an oneof field.
     See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
     """
-    def __init__(self, parts: Tuple[OneOfPartInfo, ...]):
+    def __init__(self, scheme_: Tuple[OneOfPartInfo, ...]):
         # ugly sets to get round custom setattr
-        super().__setattr__(_OneOfAttrs.FIELDS.value, frozenset(part.name for part in parts))
-        super().__setattr__(_OneOfAttrs.PARTS.value, parts)
+        super().__setattr__(_OneOfAttrs.FIELDS.value, frozenset(part.name for part in scheme_))
+        super().__setattr__(_OneOfAttrs.PARTS.value, scheme_)
         super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
 
     @_name_in_attrs_check

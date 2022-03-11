@@ -108,19 +108,19 @@ def optional_field(number: int, *args, **kwargs) -> Any:
     return field(number, *args, default=None, **kwargs)
 
 
-def one_of(**parts: Tuple[type, int]) -> OneOf_:
+def one_of(**parts: Tuple[type, int, bool]) -> OneOf_:
     scheme_ = tuple(
-        OneOfPartInfo(name, type_, number)
-        for name, (type_, number) in parts.items()
+        OneOfPartInfo(name, type_, number, packed)
+        for name, (type_, number, packed) in parts.items()
     )
 
-    default = OneOf_(scheme_)
-    return _field(-1, isoneof=True, default=default)
+    default = lambda: OneOf_(scheme_)
+    return _field(-1, isoneof=True, default_factory=default)
 
 
-def part(type_: Type, number: int) -> Tuple[type, int]:
+def part(type_: Type, number: int, *, packed: bool = False) -> Tuple[type, int, bool]:
     # well, yeah
-    return type_, number
+    return type_, number, packed
 
 
 def message(cls: Type[T]) -> Type[TMessage]:
@@ -137,7 +137,7 @@ def message(cls: Type[T]) -> Type[TMessage]:
 
     for field_ in dataclasses.fields(cls):
         if field_.metadata['isoneof']:
-            children = make_one_of_field(field_.default, field_.name)
+            children = make_one_of_field(field_.default_factory(), field_.name)
             casted_cls.__protobuf_fields__.update(children)
         else:
             num, proto_field = make_field(field_.metadata['number'],
@@ -167,12 +167,12 @@ def make_one_of_field(field_: OneOf_, name: str) -> Dict[int, OneOfPartField]:
     """
     child_fields = (
         # TODO: what to do with packed?
-        make_field(part_.number, part_.name, part_.type_, False)
+        make_field(part_.number, part_.name, part_.type_, part_.packed)
         for part_ in scheme(field_)
     )
 
     children: Dict[int, OneOfPartField] = {
-        num: OneOfPartField(num, name, field_, child_field)
+        num: OneOfPartField(num, name, scheme(field_), child_field)
         for num, child_field in child_fields
     }
 

@@ -70,9 +70,9 @@ def test_hash_doesnt_work_with_unhashable_type():
         a: int
         b: float
 
+    one_of_value = OneOf_((OneOfPartInfo('complex', ComplexObj, 1), ))
+    one_of_value.complex = ComplexObj(a=5, b=1.)
     with raises(TypeError):
-        one_of_value = OneOf_((OneOfPartInfo('complex', ComplexObj, 1), ))
-        one_of_value.complex = ComplexObj(a=5, b=1.)
         hash(one_of_value)
 
 
@@ -211,3 +211,22 @@ def test_class_sets_one_set():
     with raises(AttributeError):
         # trying to delete unset method
         del obj.oneof_msg.f1
+
+
+def test_many_one_of():
+    @message
+    @dataclasses.dataclass
+    class A:
+        msg: OneOf_ = one_of(
+            a=part(int32, 1),
+            b=part(str, 2),
+            c=part(bool, 3)
+        )
+
+    a = A()
+    a.a = 42
+    b = A()
+    b.b = "42"
+
+    assert a.a == 42
+    assert b.b == "42"

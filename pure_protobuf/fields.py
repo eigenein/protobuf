@@ -5,11 +5,11 @@
 import functools
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Tuple
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
-from pure_protobuf.oneof import OneOf_
+from pure_protobuf.oneof import OneOf_, OneOfPartInfo, scheme
 from pure_protobuf.serializers import Serializer, bytes_serializer, unsigned_varint_serializer
 
 
@@ -153,24 +153,27 @@ class PackedRepeatedField(RepeatedField):
 
 class OneOfPartField(Field):
     def __init__(self, number: int, name: str,
-                 oneof_: OneOf_, origin: Field):
+                 scheme_: Tuple[OneOfPartInfo, ...], origin: Field):
         super().__init__(number, name, origin.serializer)
 
-        self.oneof: OneOf_ = oneof_
+        self.scheme = scheme_
         self.origin: Field = origin
 
-    def do_if_current_set(func: Callable[..., Any]):  # type: ignore
+    def do_if_current_set(func: Callable[..., Any]) -> Callable[..., Any]:  # type: ignore
         @functools.wraps(func)
         def inner(self, value, *args) -> Any:
             if not isinstance(value, OneOf_):
                 return func(self, value, *args)
 
+            # Further checks matter only if passed OneOf_ is from the same class
+            # as this field and if set field of passed OneOf_ is same as name
+            # of saved origin Field.
+            #
+            # Tricky scheme refs comparison, but seems to work.
+            #
             # value: OneOf_
-            if value is not self.oneof:
-                return None
-
             which_set = value.which_one_of
-            if which_set != self.origin.name:
+            if self.scheme != scheme(value) or which_set != self.origin.name:
                 return None
 
             original_value = getattr(value, which_set)
@@ -190,6 +193,6 @@ class OneOfPartField(Field):
         return new_value
 
     def load(self, wire_type: WireType, io: IO) -> Any:
-        field_value = self.origin.load(wire_type, io)
-        setattr(self.oneof, self.origin.name, field_value)
-        return self.oneof
+        val = OneOf_(self.scheme)
+        setattr(val, self.origin.name, self.origin.load(wire_type, io))
+        return val

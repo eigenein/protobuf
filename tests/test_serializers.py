@@ -341,19 +341,12 @@ def test_many_messages_with_one_of_field():
     value2.msg.b = "42"
     bytes_2 = b'\x12\x0242'
 
-    print("++!+" * 25)
-    print(value)
-    print("++!+" * 25)
     assert value.dumps() == bytes_
     assert A.loads(bytes_) == value
     assert A.loads(value.dumps()) == value
-    print("++!+" * 25)
-    print(A.loads(bytes_))
 
     assert value2.dumps() == bytes_2
     assert A.loads(bytes_2) == value2
     assert A.loads(value2.dumps()) == value2
-    print("++!+" * 25)
-    print(A.loads(bytes_2))
 
     assert value.msg.a == 42

@@ -12,8 +12,9 @@ from typing import Any, ByteString, ClassVar, Dict, Iterable, List, Tuple, Type,
 
 from pure_protobuf import serializers, types
 from pure_protobuf.enums import WireType
-from pure_protobuf.fields import Field, NonRepeatedField, PackedRepeatedField, UnpackedRepeatedField
+from pure_protobuf.fields import Field, NonRepeatedField, OneOfPartField, PackedRepeatedField, UnpackedRepeatedField
 from pure_protobuf.io_ import IO
+from pure_protobuf.oneof import OneOf_, OneOfPartInfo, scheme
 from pure_protobuf.serializers import IntEnumSerializer, MessageSerializer, PackingSerializer, Serializer
 from pure_protobuf.types import NoneType
 
@@ -67,26 +68,6 @@ class Message(ABC):
             ))
 
 
-class OneOf:
-    """
-    Defines an oneof field.
-    See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
-    """
-    def __init__(self, *fields: Field):
-        self.fields = fields
-        # TODO: implement automatic clearing.
-
-    def __get__(self, message_: Message, owner: Type = None) -> Any:
-        """
-        Retrieve the currently set value (if any).
-        """
-        for field_ in self.fields:
-            value = getattr(message_, field_.name)
-            if value is not None:
-                return value
-        return None
-
-
 def load(cls: Type[TMessage], io: IO) -> TMessage:
     """
     Deserializes a message from a file-like object.
@@ -102,12 +83,22 @@ def loads(cls: Type[TMessage], bytes_: bytes) -> TMessage:
         return load(cls, io)
 
 
-def field(number: int, *args, packed=True, **kwargs) -> Any:
+def _field(number: int, *args, packed=True, isoneof=False, **kwargs) -> Any:
     """
     Convenience function to assign field numbers.
     Calls the standard ``dataclasses.field`` function with the metadata assigned.
     """
-    return dataclasses.field(*args, metadata={'number': number, 'packed': packed}, **kwargs)
+    metadata = {
+        'number': number,
+        'packed': packed,
+        'isoneof': isoneof
+    }
+
+    return dataclasses.field(*args, metadata=metadata, **kwargs)
+
+
+def field(number: int, *args, packed=True, **kwargs) -> Any:
+    return _field(number, *args, packed=packed, **kwargs)
 
 
 def optional_field(number: int, *args, **kwargs) -> Any:
@@ -115,6 +106,21 @@ def optional_field(number: int, *args, **kwargs) -> Any:
     Convenience function to define a field which is assigned `None` by default.
     """
     return field(number, *args, default=None, **kwargs)
+
+
+def one_of(**parts: Tuple[type, int, bool]) -> OneOf_:
+    scheme_ = tuple(
+        OneOfPartInfo(name, type_, number, packed)
+        for name, (type_, number, packed) in parts.items()
+    )
+
+    default = lambda: OneOf_(scheme_)
+    return _field(-1, isoneof=True, default_factory=default)
+
+
+def part(type_: Type, number: int, *, packed: bool = False) -> Tuple[type, int, bool]:
+    # well, yeah
+    return type_, number, packed
 
 
 def message(cls: Type[T]) -> Type[TMessage]:
@@ -125,11 +131,20 @@ def message(cls: Type[T]) -> Type[TMessage]:
 
     type_hints = get_type_hints(cls)
 
+    casted_cls = cast(Type[TMessage], cls)
     # Used to list all fields and locate fields by field number.
-    cast(Type[TMessage], cls).__protobuf_fields__ = dict(
-        make_field(field_.metadata['number'], field_.name, type_hints[field_.name], field_.metadata['packed'])
-        for field_ in dataclasses.fields(cls)
-    )
+    casted_cls.__protobuf_fields__ = {}
+
+    for field_ in dataclasses.fields(cls):
+        if field_.metadata['isoneof']:
+            children = make_one_of_field(field_.default_factory(), field_.name)
+            casted_cls.__protobuf_fields__.update(children)
+        else:
+            num, proto_field = make_field(field_.metadata['number'],
+                                          field_.name,
+                                          type_hints[field_.name],
+                                          field_.metadata['packed'])
+            casted_cls.__protobuf_fields__[num] = proto_field
 
     Message.register(cls)  # type: ignore
     cls.serializer = MessageSerializer(cls)  # type: ignore
@@ -144,9 +159,30 @@ def message(cls: Type[T]) -> Type[TMessage]:
     return cast(Type[TMessage], cls)
 
 
+def make_one_of_field(field_: OneOf_, name: str) -> Dict[int, OneOfPartField]:
+    """
+    Figure out how to serialize and de-serialize oneof field.
+
+    Returns the corresponding ``Field`` instance.
+    """
+    child_fields = (
+        # TODO: what to do with packed?
+        make_field(part_.number, part_.name, part_.type_, part_.packed)
+        for part_ in scheme(field_)
+    )
+
+    children: Dict[int, OneOfPartField] = {
+        num: OneOfPartField(num, name, scheme(field_), child_field)
+        for num, child_field in child_fields
+    }
+
+    return children
+
+
 def make_field(number: int, name: str, type_: Any, packed: bool = True) -> Tuple[int, Field]:
     """
     Figure out how to serialize and de-serialize the field.
+
     Returns the field number and a corresponding ``Field`` instance.
     """
     is_optional, type_ = get_optional(type_)

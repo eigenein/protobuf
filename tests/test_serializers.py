@@ -9,7 +9,7 @@ from typing import Any, List, Optional, Type
 
 from pytest import fixture, mark, raises
 
-from pure_protobuf.dataclasses_ import field, message
+from pure_protobuf.dataclasses_ import OneOf_, field, message, one_of, part
 from pure_protobuf.enums import WireType
 from pure_protobuf.serializers import (
     BooleanSerializer,
@@ -270,3 +270,83 @@ def test_enum():
 
     assert value.dumps() == bytes_
     assert Test.loads(bytes_) == value
+
+
+def test_one_of_field():
+    # message SubMessage {
+    #     string id = 1;
+    #     int32 b = 3;
+    # }
+    #
+    # message SampleMessage {
+    #   oneof test_oneof {
+    #     string name = 4;
+    #     SubMessage sub_message = 9;
+    #   }
+    # }
+
+    @message
+    @dataclass
+    class SubMessage:
+        id: str = field(1)
+        b: int32 = field(3)
+
+    @message
+    @dataclass
+    class SampleMessage:
+        test_oneof: OneOf_ = one_of(
+            name=part(str, 4),
+            sub_message=part(SubMessage, 9)
+        )
+
+    value = SampleMessage()
+    value.test_oneof.sub_message = SubMessage(id='123', b=5)
+
+    # assert with original message from proto lib
+    # here could be
+    bytes_ = b'J\x07\n\x03123\x18\x05'
+    assert value.dumps() == bytes_
+    assert SampleMessage.loads(bytes_) == value
+    assert SampleMessage.loads(value.dumps()) == value
+
+    # change field and check the same
+    value.test_oneof.name = "Some string"
+    bytes_ = b'"\x0bSome string'
+    assert value.dumps() == bytes_
+    assert SampleMessage.loads(bytes_) == value
+    assert SampleMessage.loads(value.dumps()) == value
+
+
+def test_many_messages_with_one_of_field():
+    # message A {
+    #   oneof msg {
+    #     int32 a = 1;
+    #     strin b = 2;
+    #   }
+    # }
+
+    @message
+    @dataclass
+    class A:
+        msg: OneOf_ = one_of(
+            a=part(int32, 1),
+            b=part(str, 2)
+        )
+
+    value = A()
+    value.msg.a = 42
+    bytes_ = b'\x08*'
+
+    value2 = A()
+    value2.msg.b = "42"
+    bytes_2 = b'\x12\x0242'
+
+    assert value.dumps() == bytes_
+    assert A.loads(bytes_) == value
+    assert A.loads(value.dumps()) == value
+
+    assert value2.dumps() == bytes_2
+    assert A.loads(bytes_2) == value2
+    assert A.loads(value2.dumps()) == value2
+
+    assert value.msg.a == 42

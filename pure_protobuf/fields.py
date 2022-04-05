@@ -2,12 +2,14 @@
 `pure-protobuf` contributors © 2011-2019
 """
 
+import functools
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable, Tuple
 
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
+from pure_protobuf.oneof import OneOf_, OneOfPartInfo, scheme
 from pure_protobuf.serializers import Serializer, bytes_serializer, unsigned_varint_serializer
 
 
@@ -103,7 +105,8 @@ class RepeatedField(Field, ABC):
             return list(self.load_packed(bytes_serializer.load(io)))
         if wire_type == self.serializer.wire_type:
             return [self.serializer.load(io)]
-        raise ValueError(f'expected {self.serializer.wire_type} or {WireType.BYTES}, got {wire_type}')
+        raise ValueError((f'expected {self.serializer.wire_type} \n'
+                          'or {WireType.BYTES}, got {wire_type}'))
 
     def load_packed(self, bytes_: bytes) -> Iterable[Any]:
         """
@@ -146,3 +149,50 @@ class PackedRepeatedField(RepeatedField):
                 self.serializer.dump(item, inner_io)
             self.dump_key(io)
             bytes_serializer.dump(inner_io.getvalue(), io)
+
+
+class OneOfPartField(Field):
+    def __init__(self, number: int, name: str,
+                 scheme_: Tuple[OneOfPartInfo, ...], origin: Field):
+        super().__init__(number, name, origin.serializer)
+
+        self.scheme = scheme_
+        self.origin: Field = origin
+
+    def do_if_current_set(func: Callable[..., Any]) -> Callable[..., Any]:  # type: ignore
+        @functools.wraps(func)
+        def inner(self, value, *args) -> Any:
+            if not isinstance(value, OneOf_):
+                return func(self, value, *args)
+
+            # Further checks matter only if passed OneOf_ is from the same class
+            # as this field and if set field of passed OneOf_ is same as name
+            # of saved origin Field.
+            #
+            # Tricky scheme refs comparison, but seems to work.
+            #
+            # value: OneOf_
+            which_set = value.which_one_of
+            if self.scheme != scheme(value) or which_set != self.origin.name:
+                return None
+
+            original_value = getattr(value, which_set)
+            return func(self, original_value, *args)
+
+        return inner
+
+    @do_if_current_set
+    def validate(self, value: OneOf_):
+        self.origin.validate(value)
+
+    @do_if_current_set
+    def dump(self, value: OneOf_, io: IO):
+        self.origin.dump(value, io)
+
+    def merge(self, old_value: OneOf_, new_value: OneOf_) -> Any:
+        return new_value
+
+    def load(self, wire_type: WireType, io: IO) -> Any:
+        val = OneOf_(self.scheme)
+        setattr(val, self.origin.name, self.origin.load(wire_type, io))
+        return val

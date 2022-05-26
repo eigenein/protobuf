@@ -137,7 +137,7 @@ def message(cls: Type[T]) -> Type[TMessage]:
 
     for field_ in dataclasses.fields(cls):
         if field_.metadata['isoneof']:
-            children = make_one_of_field(field_.default_factory(), field_.name)
+            children = make_one_of_field(field_.default_factory(), field_.name)  # type: ignore
             casted_cls.__protobuf_fields__.update(children)
         else:
             num, proto_field = make_field(field_.metadata['number'],

@@ -129,12 +129,20 @@ def message(cls: Type[T]) -> Type[TMessage]:
     serialization and deserialization.
     """
 
+    Message.register(cls)  # type: ignore
+    cls.serializer = MessageSerializer(cls)  # type: ignore
+    cls.type_url = f'type.googleapis.com/{cls.__module__}.{cls.__name__}'  # type: ignore
+    cls.validate = Message.validate  # type: ignore
+    cls.dump = Message.dump  # type: ignore
+    cls.dumps = Message.dumps  # type: ignore
+    cls.merge_from = Message.merge_from  # type: ignore
+    cls.load = classmethod(load)  # type: ignore
+    cls.loads = classmethod(loads)  # type: ignore
+
     type_hints = get_type_hints(cls)
 
     casted_cls = cast(Type[TMessage], cls)
-    # Used to list all fields and locate fields by field number.
-    casted_cls.__protobuf_fields__ = {}
-
+    casted_cls.__protobuf_fields__ = {}  # used to list all fields and locate fields by field number
     for field_ in dataclasses.fields(cls):
         if field_.metadata['isoneof']:
             children = make_one_of_field(field_.default_factory(), field_.name)  # type: ignore
@@ -146,17 +154,7 @@ def message(cls: Type[T]) -> Type[TMessage]:
                                           field_.metadata['packed'])
             casted_cls.__protobuf_fields__[num] = proto_field
 
-    Message.register(cls)  # type: ignore
-    cls.serializer = MessageSerializer(cls)  # type: ignore
-    cls.type_url = f'type.googleapis.com/{cls.__module__}.{cls.__name__}'  # type: ignore
-    cls.validate = Message.validate  # type: ignore
-    cls.dump = Message.dump  # type: ignore
-    cls.dumps = Message.dumps  # type: ignore
-    cls.merge_from = Message.merge_from  # type: ignore
-    cls.load = classmethod(load)  # type: ignore
-    cls.loads = classmethod(loads)  # type: ignore
-
-    return cast(Type[TMessage], cls)
+    return casted_cls
 
 
 def make_one_of_field(field_: OneOf_, name: str) -> Dict[int, OneOfPartField]:

@@ -3,13 +3,13 @@
 """
 
 from dataclasses import dataclass
-from typing import Any, ByteString, List, Optional, Tuple
+from typing import Any, ByteString, List, Optional, Tuple, cast
 
 from pytest import mark, raises
 
 from pure_protobuf import types
 # noinspection PyProtectedMember
-from pure_protobuf.dataclasses_ import field, make_field, message
+from pure_protobuf.dataclasses_ import Message, field, make_field, message
 
 
 @mark.parametrize('number, name, type_, value, expected', [
@@ -53,3 +53,17 @@ def test_serialize_unpacked_repeated_field():
         foo: List[types.uint32] = field(1, packed=False)
 
     assert Message(foo=[types.uint32(4), types.uint32(5)]).dumps() == b'\x08\x04\x08\x05'
+
+
+@dataclass
+class Box:
+    value: int = field(1)
+    box: Optional['Box'] = field(2, default=None)
+
+
+# https://github.com/python/typing/issues/797
+Box = message(Box)  # type: ignore
+
+
+def test_recursive_dataclass():
+    assert cast(Message, Box(value=1, box=Box(value=2))).dumps() == b'\x08\x02\x12\x02\x08\x04'

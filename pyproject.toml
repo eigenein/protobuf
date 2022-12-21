@@ -1,10 +1,13 @@
 [project]
 name = "pure-protobuf"
-description = "Implementation of Protocol Buffers with dataclass-based schemaʼs"
+description = "Protocol Buffers using Python type annotations"
 readme = "README.md"
 requires-python = ">=3.7"
 dynamic = ["version"]
 keywords = ["protobuf", "protocol-buffers"]
+dependencies = [
+    "typing-extensions>=4.4.0,<5.0.0",
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -28,7 +31,8 @@ dev = [
     "flake8>=5.0.0,<6.0.0; python_version == '3.7'",
     "flake8>=6.0.0,<7.0.0; python_version >= '3.8'",
     "isort>=5.11.3,<6.0.0",
-    "mypy>=0.991,<1.0",
+    "mypy @ git+https://github.com/python/mypy@2514610",
+    "pydantic>=1.10.4,<2.0.0",
     "pytest>=7.2.0,<8.0.0",
     "pytest-benchmark>=4.0.0,<5.0.0",
     "twine>=4.0.2,<5.0.0",
@@ -62,10 +66,13 @@ packages = [
     "pure_protobuf",
 ]
 
+[tool.hatch.metadata]
+allow-direct-references = true # for mypy
+
 [tool.mypy]
 ignore_missing_imports = true
 allow_untyped_globals = true
-check_untyped_defs = false # set to `true` later
+check_untyped_defs = true
 allow_redefinition = true
 pretty = true
 
@@ -77,7 +84,6 @@ omit = ["tests/*"]
 exclude_lines = [
     "pragma: no cover",
     "raise NotImplementedError",
-    "raise ImportError",
     "except ImportError",
     "if TYPE_CHECKING:",
 ]

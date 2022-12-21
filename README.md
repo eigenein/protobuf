@@ -7,13 +7,13 @@
 [![PyPI – Python](https://img.shields.io/pypi/pyversions/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#files)
 [![License](https://img.shields.io/pypi/l/pure-protobuf.svg)](https://github.com/eigenein/protobuf/blob/master/LICENSE)
 
-This guide describes how to use `pure-protobuf` to structure your data. It tries to follow [the standard developer guide](https://developers.google.com/protocol-buffers/docs/proto3). It also assumes that you're familiar with Protocol Buffers.
+**Wow! Such annotated! Very buffers!**
 
-### Defining a message type
+## Quickstart
 
-Let's look at [the simple example](https://developers.google.com/protocol-buffers/docs/proto3#simple). Here's how it looks like in `proto3` syntax:
+### `.proto` definition
 
-```proto
+```protobuf
 syntax = "proto3";
 
 message SearchRequest {
@@ -23,132 +23,178 @@ message SearchRequest {
 }
 ```
 
-And this is how you define it with `pure-protobuf`:
+### With [data classes](https://docs.python.org/3/library/dataclasses.html)
 
 ```python
 from dataclasses import dataclass
+from io import BytesIO
 
-from pure_protobuf.dataclasses_ import field, message
-from pure_protobuf.types import int32
+from pure_protobuf.annotations import Field, uint
+from pure_protobuf.message import BaseMessage
+from typing_extensions import Annotated
 
 
-@message
 @dataclass
-class SearchRequest:
-    query: str = field(1, default='')
-    page_number: int32 = field(2, default=int32(0))
-    result_per_page: int32 = field(3, default=int32(0))
-   
+class SearchRequest(BaseMessage):
+    query: Annotated[str, Field(1)] = ""
+    page_number: Annotated[uint, Field(2)] = 0
+    result_per_page: Annotated[uint, Field(3)] = 0
 
-assert SearchRequest(
-    query='hello',
-    page_number=int32(1),
-    result_per_page=int32(10),
-).dumps() == b'\x0A\x05hello\x10\x01\x18\x0A'
+
+request = SearchRequest(query="hello", page_number=uint(1), result_per_page=uint(10))
+buffer = bytes(request)
+assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
+assert SearchRequest.read_from(BytesIO(buffer))
 ```
 
-Keep in mind that `@message` decorator **must** stay on top of [`@dataclass`](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass).
-
-### Serializing
-
-Each class wrapped with `@message` gets two methods attached:
-- `dumps() -> bytes` to serialize message into a byte string
-- `dump(io: IO)` to serialize message into a file-like object
-
-### Deserializing
-
-Each classes wrapped with `@message` gets two class methods attached:
-- `loads(bytes_: bytes) -> TMessage` to deserialize a message from a byte string
-- `load(io: IO) -> TMessage` to deserialize a message from a file-like object
-
-These methods are also available as standalone functions in `pure_protobuf.dataclasses_`:
-- `load(cls: Type[T], io: IO) -> T`
-- `loads(cls: Type[T], bytes_: bytes) -> T`
-
-### Specifying field types
-
-In `pure-protobuf` types are specified with [type hints](https://www.python.org/dev/peps/pep-0484/). Native Python `float`, `str`, `bytes` and `bool` types are supported. Since other Protocol Buffers types don't exist as native Python types, the package uses [`NewType`](https://docs.python.org/3/library/typing.html#newtype) to define them. They're available via `pure_protobuf.types` and named in the same way.
-
-### Assigning field numbers
-
-Field numbers are provided via the `metadata` parameter of the [`field`](https://docs.python.org/3/library/dataclasses.html#dataclasses.field) function: `field(..., metadata={'number': number})`. However, to improve readability and save some characters, `pure-protobuf` provides a helper function `pure_protobuf.dataclasses_.field` which accepts field number as the first positional parameter and just passes it to the standard `field` function.
-
-### Specifying field rules
-
-[`typing.List`](https://docs.python.org/3/library/typing.html#typing.List) and [`typing.Iterable`](https://docs.python.org/3/library/typing.html#typing.Iterable) annotations are automatically converted to [repeated fields](https://developers.google.com/protocol-buffers/docs/proto3#specifying-field-rules). Repeated fields of scalar numeric types use packed encoding by default:
+### With [`pydantic`](https://docs.pydantic.dev/)
 
 ```python
-from dataclasses import dataclass
+from io import BytesIO
+
+from pure_protobuf.annotations import Field, uint
+from pure_protobuf.message import BaseMessage
+from pydantic import BaseModel
+from typing_extensions import Annotated
+
+
+class SearchRequest(BaseMessage, BaseModel):
+    query: Annotated[str, Field(1)] = ""
+    page_number: Annotated[uint, Field(2)] = 0
+    result_per_page: Annotated[uint, Field(3)] = 0
+
+
+request = SearchRequest(query="hello", page_number=uint(1), result_per_page=uint(10))
+buffer = bytes(request)
+assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
+assert SearchRequest.read_from(BytesIO(buffer))
+```
+
+## Available methods in `BaseMessage`
+
+### `write_to`
+
+```python
+from typing import IO
+
+def write_to(self, io: IO[bytes]) -> None:
+    ...
+```
+
+Serializes the message into the file-like object.
+
+### `__bytes__`
+
+```python
+def __bytes__(self) -> bytes:
+    ...
+```
+
+Wraps `write_to` to allow serializing a message into a byte string via `bytes(message)`.
+
+### `read_from`
+
+```python
+from typing import IO
+from typing_extensions import Self
+
+def read_from(cls, io: IO[bytes]) -> Self:
+    ...
+```
+
+Deserializes a message from the file-like object.
+
+## Limitations
+
+`BaseMessage` requires a subclass to be dataclass-like and accept field values via keyword parameters in its `__init__` method. For most cases, one should use something like the built-in `dataclasses` or a third-party package like `pydantic`.
+
+## Defining fields
+
+Field types are specified via [Annotated](https://docs.python.org/3/library/typing.html#typing.Annotated) [type hints](https://www.python.org/dev/peps/pep-0484/). Each field may include a `pure_protobuf.annotations.Field` annotation, otherwise it gets ignored by `BaseMessage`. For older Python versions one can use `typing_extensions.Annotated`.
+
+The following types are supported:
+
+| Type                                                    | .proto Type                | Notes                                                     |
+|---------------------------------------------------------|----------------------------|-----------------------------------------------------------|
+| `bool`                                                  | `bool`                     |                                                           |
+| `bytes`, `bytearray`, `memoryview`, `typing.ByteString` | `bytes`                    | Always deserialized as `bytes`                            |
+| `float`                                                 | `float`                    | 32-bit floating-point number                              |
+| `int`                                                   | `sint32`, `sint64`         | **Signed** variable-length integer                        |
+| `enum.IntEnum`                                          | `enum`, `uint32`, `uint64` | Supported subclasses of `IntEnum` (see the section below) |
+| `pure_protobuf.annotations.double`                      | `double`                   | 64-bit floating-point number                              |
+| `pure_protobuf.annotations.fixed32`                     | `fixed32`                  |                                                           |
+| `pure_protobuf.annotations.fixed64`                     | `fixed64`                  |                                                           |
+| `pure_protobuf.annotations.uint`                        | `uint32`, `uint64`         | **Unsigned** variable-length integer                      |
+| `pure_protobuf.annotations.sfixed32`                    | `sfixed32`                 |                                                           |
+| `pure_protobuf.annotations.sfixed64`                    | `sfixed64`                 |                                                           |
+| `str`                                                   | `string`                   |                                                           |
+| `urllib.parse.ParseResult`                              | `string`                   | Parsed URL, represented as a string                       |
+
+### Repeated fields
+
+[`typing.List`](https://docs.python.org/3/library/typing.html#typing.List) annotations are automatically converted to [repeated fields](https://developers.google.com/protocol-buffers/docs/proto3#specifying-field-rules). Repeated fields of scalar numeric types use packed encoding by default:
+
+```python
+from dataclasses import dataclass, field
 from typing import List
+from typing_extensions import Annotated
 
-from pure_protobuf.dataclasses_ import field, message
-from pure_protobuf.types import int32
+from pure_protobuf.annotations import Field, uint
+from pure_protobuf.message import BaseMessage
 
 
-@message
 @dataclass
-class Message:
-    foo: List[int32] = field(1, default_factory=list)
+class Message(BaseMessage):
+    foo: Annotated[List[uint], Field(1)] = field(default_factory=list)
+
+
+assert bytes(Message(foo=[uint(1), uint(2)])) == b"\x0A\x02\x01\x02"
 ```
 
-In case, unpacked encoding is explicitly wanted, the `packed`-argument of `field` can be used as in:
+In case, unpacked encoding is explicitly wanted, you can specify `packed=False`:
 
 ```python
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
+from typing_extensions import Annotated
 
-from pure_protobuf.dataclasses_ import field, message
-from pure_protobuf.types import int32
+from pure_protobuf.annotations import Field, uint
+from pure_protobuf.message import BaseMessage
 
-@message
 @dataclass
-class Message:
-    foo: List[int32] = field(1, default_factory=list, packed=False)
+class Message(BaseMessage):
+    foo: Annotated[List[uint], Field(1, packed=False)] = field(default_factory=list)
+
+
+assert bytes(Message(foo=[uint(1), uint(2)])) == b"\x08\x01\x08\x02"
 ```
 
-It's also possible to wrap a field type with [`typing.Optional`](https://docs.python.org/3/library/typing.html#typing.Optional). If `None` is assigned to an `Optional` field, then the field will be skipped during serialization.
+### Required fields
+
+Required fields are [deprecated](https://developers.google.com/protocol-buffers/docs/style#things_to_avoid) in `proto2` and not supported in `proto3`, thus in `pure-protobuf` fields are always optional. `Optional` annotation is accepted for type hinting, but ignored by `BaseMessage`.
 
 ### Default values
 
-In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unassigned. It means that the standard `default` and `default_factory` parameters of the `field` function work as usual:
+In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unprovided:
 
 ```python
 from dataclasses import dataclass
+from io import BytesIO
 from typing import Optional
+from typing_extensions import Annotated
 
-from pure_protobuf.dataclasses_ import field, message
-from pure_protobuf.types import int32
+from pure_protobuf.annotations import Field, uint
+from pure_protobuf.message import BaseMessage
 
 
-@message
 @dataclass
-class Foo:
-    bar: int32 = field(1, default=42)
-    qux: Optional[int32] = field(2, default=None)
+class Foo(BaseMessage):
+    bar: Annotated[uint, Field(1)] = 42
+    qux: Annotated[Optional[uint], Field(2)] = None
 
 
-assert Foo().dumps() == b'\x08\x2A'
-assert Foo.loads(b'') == Foo(bar=42)
-```
-
-In fact, the pattern `qux: Optional[int32] = field(2, default=None)` is so common that there's a convenience function `optional_field` to define an `Optional` field with `None` value by default:
-
-```python
-from dataclasses import dataclass
-from typing import Optional
-
-from pure_protobuf.dataclasses_ import optional_field, message
-from pure_protobuf.types import int32
-
-
-@message
-@dataclass
-class Foo:
-    qux: Optional[int32] = optional_field(2)
-
-
-assert Foo().dumps() == b''
-assert Foo.loads(b'') == Foo(qux=None)
+assert bytes(Foo()) == b"\x08\x2A"
+assert Foo.read_from(BytesIO()) == Foo(bar=uint(42))
 ```
 
 ### Enumerations
@@ -158,95 +204,111 @@ Subclasses of the standard [`IntEnum`](https://docs.python.org/3/library/enum.ht
 ```python
 from dataclasses import dataclass
 from enum import IntEnum
+from io import BytesIO
+from typing_extensions import Annotated
 
-from pure_protobuf.dataclasses_ import field, message
+from pure_protobuf.annotations import Field
+from pure_protobuf.message import BaseMessage
 
 
 class TestEnum(IntEnum):
     BAR = 1
 
 
-@message
 @dataclass
-class Test:
-    foo: TestEnum = field(1)
+class Test(BaseMessage):
+    foo: Annotated[TestEnum, Field(1)]
 
 
-assert Test(foo=TestEnum.BAR).dumps() == b'\x08\x01'
-assert Test.loads(b'\x08\x01') == Test(foo=TestEnum.BAR)
+assert bytes(Test(foo=TestEnum.BAR)) == b"\x08\x01"
+assert Test.read_from(BytesIO(b"\x08\x01")) == Test(foo=TestEnum.BAR)
 ```
 
-### Using other message types
-
-Embedded messages are defined the same way as normal dataclasses:
+### Embedded messages
 
 ```python
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing_extensions import Annotated
 
-from pure_protobuf.dataclasses_ import field, message
-from pure_protobuf.types import int32
+from pure_protobuf.annotations import Field, uint
+from pure_protobuf.message import BaseMessage
 
 
-@message
 @dataclass
-class Test1:
-    a: int32 = field(1, default=0)
+class Test1(BaseMessage):
+    a: Annotated[uint, Field(1)] = 0
 
 
-@message
 @dataclass
-class Test3:
-    c: Test1 = field(3, default_factory=Test1)
+class Test3(BaseMessage):
+    c: Annotated[Test1, Field(3)] = field(default_factory=Test1)
 
 
-assert Test3(c=Test1(a=int32(150))).dumps() == b'\x1A\x03\x08\x96\x01'
+assert bytes(Test3(c=Test1(a=150))) == b"\x1A\x03\x08\x96\x01"
 ```
 
-### Well-known message types
-
-`pure_protobuf.google` also provides built-in definitions for the following [well-known message types](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf):
-
-| Annotation   | `pure_protobuf.types.google` | `.proto`    |
-| ------------ | ---------------------------- | ----------- |
-| `datetime`   | `Timestamp`                  | `Timestamp` |
-| `timedelta`  | `Duration`                   | `Duration`  |
-| `typing.Any` | `Any_`                       | `Any`       |
-
-They're handled automatically, you have nothing to do but use them normally in type hints:
+## [`Oneof`](https://developers.google.com/protocol-buffers/docs/proto3#oneof)
 
 ```python
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Optional
+from typing import ClassVar, Optional
 
-from pure_protobuf.dataclasses_ import field, message
+from pydantic import BaseModel
+from pure_protobuf.annotations import Field
+from pure_protobuf.message import BaseMessage
+from pure_protobuf.one_of import OneOf
+from typing_extensions import Annotated
+
+class Message(BaseMessage, BaseModel):
+    # `ClassVar` is needed because this is a descriptor and not a real attribute.
+    foo_or_bar: ClassVar[OneOf] = OneOf()
+
+    foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
+    bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
 
 
-@message
-@dataclass
-class Test:
-    timestamp: Optional[datetime] = field(1, default=None)
+message = Message()
+message.foo = 42
+message.bar = 43
+
+assert message.foo_or_bar == 43
+assert message.foo is None
+assert message.bar == 43
 ```
 
-#### [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any)
+### Limitations
 
-Since `pure-protobuf` is not able to download or parse `.proto` definitions, it provides a limited implementation of the [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any) message type. That is, you still have to define all message classes in the usual way. Then, `pure-protobuf` will be able to import and instantiate an encoded value:
+- When assigning a one-of member, `BaseMessage` resets the other fields to `None`, regardless of any defaults defined by, for example, `dataclasses.field`.
+- The `OneOf` descriptor simply iterates over its members in order to return a `Oneof` value.
+- It's impossible to set a value via a `OneOf` descriptor, one needs to assign the value to a specific field.
+
+## Well-known message types
+
+### [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any)
+
+Since `pure-protobuf` is not able to download or parse `.proto` definitions, it provides a limited implementation of the [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any) message type. That is, you still have to conventionally define message classes and make them importable:
 
 ```python
-from dataclasses import dataclass
-from typing import Any, Optional
+from urllib.parse import urlunparse
 
-from pure_protobuf.dataclasses_ import field, message
-from pure_protobuf.types.google import Timestamp
+from pure_protobuf.well_known import Any_
 
-
-@message
-@dataclass
-class Message:
-    value: Optional[Any] = field(1)
+# The class must be importable:
+from tests.test_well_known import ChildMessage
+# @dataclass
+# class ChildMessage(BaseMessage):
+#     foo: Annotated[int, Field(1)]
 
 
-# Here `Timestamp` is used just as an example, in principle any importable user type works.
-message = Message(value=Timestamp(seconds=42))
-assert Message.loads(message.dumps()) == message
+child = ChildMessage(foo=42)
+any_ = Any_.from_message(child)
+assert urlunparse(any_.type_url) == "import://tests.test_well_known/ChildMessage"
+assert any_.into_message() == child
 ```
+
+### `pure_protobuf.well_known.Timestamp`
+
+Implements the [`Timestamp`](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#timestamp) well-known type and supports conversion from and to `datetime` via `from_datetime` and `into_datetime`.
+
+### `pure_protobuf.well_known.Duration`
+
+Implements the [`Duration`](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#duration) well-known type and supports conversion from and to `timedelta` via `from_timedelta` and `into_timedelta`.

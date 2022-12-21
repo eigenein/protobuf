@@ -1,10 +1,4 @@
-# coding: utf-8
-
-"""
-Tests code snippets in ``README.md``.
-
-`pure-protobuf` contributors © 2011-2019
-"""
+"""Tests code snippets in the `README.md`."""
 
 import re
 from os.path import dirname, join

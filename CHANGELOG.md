@@ -1,5 +1,6 @@
 ## `master`
 
+- Opt: apply `black` formatting
 - Opt: move project configuration to `pyproject.toml`
 - Break: drop Python 3.6 support as it's reached the end-of-life phase of its release cycle (@eigenein)
 

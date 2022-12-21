@@ -7,7 +7,11 @@ from typing import Any, List, Optional
 from pytest import mark, raises
 
 from pure_protobuf.enums import WireType
-from pure_protobuf.fields import NonRepeatedField, PackedRepeatedField, UnpackedRepeatedField
+from pure_protobuf.fields import (
+    NonRepeatedField,
+    PackedRepeatedField,
+    UnpackedRepeatedField,
+)
 from pure_protobuf.serializers import (
     BytesSerializer,
     Serializer,

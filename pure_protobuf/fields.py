@@ -10,7 +10,11 @@ from typing import Any, Callable, Iterable, Tuple
 from pure_protobuf.enums import WireType
 from pure_protobuf.io_ import IO, Dumps
 from pure_protobuf.oneof import OneOf_, OneOfPartInfo, scheme
-from pure_protobuf.serializers import Serializer, bytes_serializer, unsigned_varint_serializer
+from pure_protobuf.serializers import (
+    Serializer,
+    bytes_serializer,
+    unsigned_varint_serializer,
+)
 
 
 # TODO: perhaps it's good to add a type parameter:

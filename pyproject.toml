@@ -22,15 +22,15 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-    "build",
-    "coverage[toml]",
-    "coveralls",
-    "flake8",
-    "isort",
-    "mypy",
-    "pytest",
-    "pytest-benchmark",
-    "twine",
+    "build>=0.9.0,<1.0.0",
+    "coverage[toml]>=6.5.0,<7.0.0",
+    "coveralls>=3.3.1,<4.0.0",
+    "flake8>=6.0.0,<7.0.0",
+    "isort>=5.11.3,<6.0.0",
+    "mypy>=0.991,<1.0",
+    "pytest>=7.2.0,<8.0.0",
+    "pytest-benchmark>=4.0.0,<5.0.0",
+    "twine>=4.0.2,<5.0.0",
 ]
 
 [project.license]

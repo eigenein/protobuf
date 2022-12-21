@@ -16,6 +16,7 @@ class TimeSpan:
     """
     Base class to represent timespan as whole seconds plus its nanoseconds part.
     """
+
     seconds: int64 = field(1, default=0)
     nanos: int32 = field(2, default=0)
 
@@ -44,5 +45,6 @@ class Any_:
     """
     See also: https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/any.proto
     """
-    type_url: str = field(1, default='')
-    value: bytes = field(2, default=b'')
+
+    type_url: str = field(1, default="")
+    value: bytes = field(2, default=b"")

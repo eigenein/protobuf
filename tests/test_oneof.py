@@ -20,8 +20,9 @@ class ComplexObj:
     d: bool
 
 
-def create_one_of_pair(scheme_: Tuple[OneOfPartInfo, ...], field_name: str,
-                       value1: Any, value2: Any) -> Tuple[OneOf_, OneOf_]:
+def create_one_of_pair(
+    scheme_: Tuple[OneOfPartInfo, ...], field_name: str, value1: Any, value2: Any
+) -> Tuple[OneOf_, OneOf_]:
     oneof_value1 = OneOf_(scheme_)
     oneof_value2 = OneOf_(scheme_)
 
@@ -30,16 +31,19 @@ def create_one_of_pair(scheme_: Tuple[OneOfPartInfo, ...], field_name: str,
     return oneof_value1, oneof_value2
 
 
-@mark.parametrize('field_name, value1, value2', [
-    ('abc', "foo", "foo"),
-    ('foo', 5, 5),
-    ('f1', ComplexObj(1, 1., 1j, True), ComplexObj(1, 1., 1j, True))
-])
+@mark.parametrize(
+    "field_name, value1, value2",
+    [
+        ("abc", "foo", "foo"),
+        ("foo", 5, 5),
+        ("f1", ComplexObj(1, 1.0, 1j, True), ComplexObj(1, 1.0, 1j, True)),
+    ],
+)
 def test_one_of_field_eq_hash(field_name: str, value1: Any, value2: Any):
     parts = (
-        OneOfPartInfo('abc', str, 5),
-        OneOfPartInfo('foo', int, 10),
-        OneOfPartInfo('f1', ComplexObj, 11)
+        OneOfPartInfo("abc", str, 5),
+        OneOfPartInfo("foo", int, 10),
+        OneOfPartInfo("f1", ComplexObj, 11),
     )
     oneof_value1, oneof_value2 = create_one_of_pair(parts, field_name, value1, value2)
 
@@ -47,16 +51,19 @@ def test_one_of_field_eq_hash(field_name: str, value1: Any, value2: Any):
     assert hash(oneof_value1) == hash(oneof_value2)
 
 
-@mark.parametrize('field_name, value1, value2', [
-    ('abc', "foo", "abudu"),
-    ('foo', 5, -1),
-    ('f1', ComplexObj(1, 1., 1j, True), ComplexObj(2, 2., 2j, False))
-])
+@mark.parametrize(
+    "field_name, value1, value2",
+    [
+        ("abc", "foo", "abudu"),
+        ("foo", 5, -1),
+        ("f1", ComplexObj(1, 1.0, 1j, True), ComplexObj(2, 2.0, 2j, False)),
+    ],
+)
 def test_one_of_field_not_eq_hash(field_name: str, value1: Any, value2: Any):
     parts = (
-        OneOfPartInfo('abc', str, 5),
-        OneOfPartInfo('foo', int, 10),
-        OneOfPartInfo('f1', ComplexObj, 10)
+        OneOfPartInfo("abc", str, 5),
+        OneOfPartInfo("foo", int, 10),
+        OneOfPartInfo("f1", ComplexObj, 10),
     )
     oneof_value1, oneof_value2 = create_one_of_pair(parts, field_name, value1, value2)
 
@@ -70,25 +77,20 @@ def test_hash_doesnt_work_with_unhashable_type():
         a: int
         b: float
 
-    one_of_value = OneOf_((OneOfPartInfo('complex', ComplexObj, 1), ))
-    one_of_value.complex = ComplexObj(a=5, b=1.)
+    one_of_value = OneOf_((OneOfPartInfo("complex", ComplexObj, 1),))
+    one_of_value.complex = ComplexObj(a=5, b=1.0)
     with raises(TypeError):
         hash(one_of_value)
 
 
 def test_which_one_of():
     parts = (
-        OneOfPartInfo('abc', str, 5),
-        OneOfPartInfo('foo', int, 10),
-        OneOfPartInfo('f1', ComplexObj, 10),
-        OneOfPartInfo('f2', List[int], 9)
+        OneOfPartInfo("abc", str, 5),
+        OneOfPartInfo("foo", int, 10),
+        OneOfPartInfo("f1", ComplexObj, 10),
+        OneOfPartInfo("f2", List[int], 9),
     )
-    values = (
-        "foo",
-        5,
-        ComplexObj(1, 1., 1j, False),
-        [1, 2, 3, 4, 5]
-    )
+    values = ("foo", 5, ComplexObj(1, 1.0, 1j, False), [1, 2, 3, 4, 5])
 
     oneof_msg = OneOf_(parts)
 
@@ -105,32 +107,32 @@ def name_and_value(oneof_msg: OneOf_) -> Tuple[str, Any]:
 
 def test_usual_message_sets_work():
     parts = (
-        OneOfPartInfo('abc', str, 5),
-        OneOfPartInfo('foo', int, 10),
-        OneOfPartInfo('f1', ComplexObj, 10),
-        OneOfPartInfo('f2', List[int], 9)
+        OneOfPartInfo("abc", str, 5),
+        OneOfPartInfo("foo", int, 10),
+        OneOfPartInfo("f1", ComplexObj, 10),
+        OneOfPartInfo("f2", List[int], 9),
     )
     oneof_msg = OneOf_(parts)
 
-    expected, expected_name = 5, 'foo'
+    expected, expected_name = 5, "foo"
     oneof_msg.foo = expected  # every set actually overrides
     field_name, val = name_and_value(oneof_msg)
     assert field_name == expected_name
     assert val == expected
 
-    expected, expected_name = "aaa", 'abc'
+    expected, expected_name = "aaa", "abc"
     oneof_msg.abc = expected
     field_name, val = name_and_value(oneof_msg)
     assert field_name == expected_name
     assert val == expected
 
-    expected, expected_name = ComplexObj(1, 1., 1j, True), 'f1'
+    expected, expected_name = ComplexObj(1, 1.0, 1j, True), "f1"
     oneof_msg.f1 = expected
     field_name, val = name_and_value(oneof_msg)
     assert field_name == expected_name
     assert val == expected
 
-    expected, expected_name = [1, 2, 3, 4], 'f2'
+    expected, expected_name = [1, 2, 3, 4], "f2"
     oneof_msg.f2 = expected
     field_name, val = name_and_value(oneof_msg)
     assert field_name == expected_name
@@ -151,10 +153,7 @@ class Example:
     another_one: str = field(4)
 
     oneof_msg: OneOf_ = one_of(
-        abc=part(str, 5),
-        foo=part(int32, 10),
-        f1=part(SomeObj, 7),
-        f2=part(List[int32], 9)
+        abc=part(str, 5), foo=part(int32, 10), f1=part(SomeObj, 7), f2=part(List[int32], 9)
     )
 
 
@@ -181,25 +180,25 @@ def class_assertions(expected_name: str, expected_val: Any, oneof_msg: OneOf_):
 
 
 def test_class_sets_one_set():
-    obj = Example(usual_value=5, another_one='111')
+    obj = Example(usual_value=5, another_one="111")
 
     # foo
-    expected, expected_name = 5, 'foo'
+    expected, expected_name = 5, "foo"
     obj.oneof_msg.foo = expected  # every set actually overrides previous value
     class_assertions(expected_name, expected, obj.oneof_msg)
 
     # abc
-    expected, expected_name = "aaa", 'abc'
+    expected, expected_name = "aaa", "abc"
     obj.oneof_msg.abc = expected
     class_assertions(expected_name, expected, obj.oneof_msg)
 
     # f1
-    expected, expected_name = SomeObj(1, "aaa"), 'f1'
+    expected, expected_name = SomeObj(1, "aaa"), "f1"
     obj.oneof_msg.f1 = expected
     class_assertions(expected_name, expected, obj.oneof_msg)
 
     # f2
-    expected, expected_name = [1, 2, 3, 4], 'f2'
+    expected, expected_name = [1, 2, 3, 4], "f2"
     obj.oneof_msg.f2 = expected
     class_assertions(expected_name, expected, obj.oneof_msg)
 
@@ -217,11 +216,7 @@ def test_many_one_of():
     @message
     @dataclasses.dataclass
     class A:
-        msg: OneOf_ = one_of(
-            a=part(int32, 1),
-            b=part(str, 2),
-            c=part(bool, 3)
-        )
+        msg: OneOf_ = one_of(a=part(int32, 1), b=part(str, 2), c=part(bool, 3))
 
     a = A()
     a.a = 42

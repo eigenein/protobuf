@@ -13,11 +13,14 @@ from pure_protobuf.dataclasses_ import field, message
 from pure_protobuf.types.google import Any_, Duration, Timestamp
 
 
-@mark.parametrize('type_, expected', [
-    (Any_, 'type.googleapis.com/pure_protobuf.types.google.Any_'),
-    (Duration, 'type.googleapis.com/pure_protobuf.types.google.Duration'),
-    (Timestamp, 'type.googleapis.com/pure_protobuf.types.google.Timestamp'),
-])
+@mark.parametrize(
+    "type_, expected",
+    [
+        (Any_, "type.googleapis.com/pure_protobuf.types.google.Any_"),
+        (Duration, "type.googleapis.com/pure_protobuf.types.google.Duration"),
+        (Timestamp, "type.googleapis.com/pure_protobuf.types.google.Timestamp"),
+    ],
+)
 def test_type_url(type_: Any, expected: str):
     assert type_.type_url == expected
 

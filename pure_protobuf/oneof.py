@@ -18,7 +18,7 @@ class _OneOfAttrs(Enum):
     FIELDS = "__fields__"
 
 
-def scheme(obj: 'OneOf_') -> Tuple[OneOfPartInfo, ...]:
+def scheme(obj: "OneOf_") -> Tuple[OneOfPartInfo, ...]:
     return obj.__parts__
 
 
@@ -32,6 +32,7 @@ def _name_in_attrs_check(func: Callable[..., Any]) -> Callable[..., Any]:  # typ
         if name not in self.__fields__:
             raise AttributeError(f"Field {name} is not found")
         return func(self, name, *args)
+
     return inner
 
 
@@ -40,6 +41,7 @@ class OneOf_:
     Defines an oneof field.
     See also: https://developers.google.com/protocol-buffers/docs/proto3#oneof
     """
+
     def __init__(self, scheme_: Tuple[OneOfPartInfo, ...]):
         # ugly sets to get round custom setattr
         super().__setattr__(_OneOfAttrs.FIELDS.value, frozenset(part.name for part in scheme_))
@@ -59,8 +61,7 @@ class OneOf_:
         if self.which_one_of == name:
             return super().__setattr__(_OneOfAttrs.SET_VALUE.value, None)
 
-        raise AttributeError(f"Field {name} is not set, "
-                             f"{self.which_one_of} is set")
+        raise AttributeError(f"Field {name} is not set, " f"{self.which_one_of} is set")
 
     @_name_in_attrs_check
     def __setattr__(self, name, value):
@@ -87,6 +88,4 @@ class OneOf_:
     # for debug purposes I guess
     def __repr__(self) -> str:
         fields, parts, set_value = _internals(self)
-        return (f"{fields} \n"
-                f"parts: {parts} \n"
-                f"set: {set_value}")
+        return f"{fields} \n" f"parts: {parts} \n" f"set: {set_value}"

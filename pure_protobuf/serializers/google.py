@@ -24,14 +24,16 @@ class TimestampSerializer(MessageSerializer):
 
     def validate(self, value: Any):
         if not isinstance(value, datetime):
-            raise ValueError(f'`datetime` expected, got `{type(value)}`')
+            raise ValueError(f"`datetime` expected, got `{type(value)}`")
 
     def dump(self, value: Any, io: IO):
         super().dump(Timestamp(*split_seconds(value.timestamp())), io)
 
     def load(self, io: IO) -> Any:
         timestamp: Timestamp = super().load(io)
-        return datetime.fromtimestamp(unsplit_seconds(timestamp.seconds, timestamp.nanos), tz=timezone.utc)
+        return datetime.fromtimestamp(
+            unsplit_seconds(timestamp.seconds, timestamp.nanos), tz=timezone.utc
+        )
 
 
 class DurationSerializer(MessageSerializer):
@@ -44,7 +46,7 @@ class DurationSerializer(MessageSerializer):
 
     def validate(self, value: Any):
         if not isinstance(value, timedelta):
-            raise ValueError(f'`timedelta` expected, got `{type(value)}`')
+            raise ValueError(f"`timedelta` expected, got `{type(value)}`")
 
     def dump(self, value: Any, io: IO):
         super().dump(Duration(*split_seconds(value.total_seconds())), io)
@@ -66,7 +68,7 @@ class AnySerializer(MessageSerializer):
 
     def validate(self, value: Any):
         if not isinstance(value, Message):
-            raise ValueError(f'message type is expected, got `{type(value)}`')
+            raise ValueError(f"message type is expected, got `{type(value)}`")
 
     def dump(self, value: Any, io: IO):
         super().dump(Any_(type_url=value.type_url, value=value.dumps()), io)
@@ -75,8 +77,8 @@ class AnySerializer(MessageSerializer):
         # Load instance of `Any` message type.
         any_ = super().load(io)
         # Get module name and class name from the type URL.
-        *_, fqn = any_.type_url.rsplit('/', 1)
-        module_name, class_name = fqn.rsplit('.', 1)
+        *_, fqn = any_.type_url.rsplit("/", 1)
+        module_name, class_name = fqn.rsplit(".", 1)
         # Get the message type and load underlying message.
         type_ = getattr(import_module(module_name), class_name)
         return type_.loads(any_.value)

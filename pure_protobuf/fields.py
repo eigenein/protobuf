@@ -80,7 +80,7 @@ class NonRepeatedField(Field):
 
     def load(self, wire_type: WireType, io: IO) -> Any:
         if wire_type != self.serializer.wire_type:
-            raise ValueError(f'expected {self.serializer.wire_type}, got {wire_type}')
+            raise ValueError(f"expected {self.serializer.wire_type}, got {wire_type}")
         return self.serializer.load(io)
 
     def merge(self, old_value: Any, new_value: Any) -> Any:
@@ -105,8 +105,9 @@ class RepeatedField(Field, ABC):
             return list(self.load_packed(bytes_serializer.load(io)))
         if wire_type == self.serializer.wire_type:
             return [self.serializer.load(io)]
-        raise ValueError((f'expected {self.serializer.wire_type} \n'
-                          'or {WireType.BYTES}, got {wire_type}'))
+        raise ValueError(
+            (f"expected {self.serializer.wire_type} \n" "or {WireType.BYTES}, got {wire_type}")
+        )
 
     def load_packed(self, bytes_: bytes) -> Iterable[Any]:
         """
@@ -152,8 +153,7 @@ class PackedRepeatedField(RepeatedField):
 
 
 class OneOfPartField(Field):
-    def __init__(self, number: int, name: str,
-                 scheme_: Tuple[OneOfPartInfo, ...], origin: Field):
+    def __init__(self, number: int, name: str, scheme_: Tuple[OneOfPartInfo, ...], origin: Field):
         super().__init__(number, name, origin.serializer)
 
         self.scheme = scheme_

@@ -22,9 +22,6 @@ venv:
 	$(BIN)/pip install --upgrade pip wheel
 	$(BIN)/pip install -e.[dev]
 
-.PHONY: lint
-lint: lint/flake8 lint/isort lint/mypy
-
 .PHONY: test check
 test check: unittests lint
 
@@ -36,14 +33,32 @@ unittests:
 benchmark:
 	$(BIN)/pytest --benchmark-only --benchmark-columns=mean,stddev,median,ops --benchmark-warmup=on tests
 
+.PHONY: format
+format: format/isort format/black
+
+.PHONY: format/isort
+format/isort:
+	$(BIN)/isort pure_protobuf tests
+
+.PHONY: format/black
+format/black:
+	$(BIN)/black pure_protobuf tests
+
+.PHONY: lint
+lint: lint/flake8 lint/isort lint/mypy lint/format
+
 .PHONY: lint/flake8
 lint/flake8:
 	$(BIN)/flake8 pure_protobuf tests
 
 .PHONY: lint/isort
 lint/isort:
-	$(BIN)/isort -c pure_protobuf tests
+	$(BIN)/isort -c --diff pure_protobuf tests
 
 .PHONY: lint/mypy
 lint/mypy:
 	$(BIN)/mypy pure_protobuf tests
+
+.PHONY: lint/format
+lint/format:
+	$(BIN)/black --check --diff pure_protobuf tests

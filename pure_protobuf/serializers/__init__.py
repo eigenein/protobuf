@@ -45,7 +45,7 @@ class UnsignedVarintSerializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, int) or value < 0:
-            raise ValueError('a non-negative integer is expected')
+            raise ValueError("a non-negative integer is expected")
 
     def dump(self, value: Any, io: IO):
         write_varint(value, io)
@@ -67,7 +67,7 @@ class SignedVarintSerializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, int):
-            raise ValueError('an integer is expected')
+            raise ValueError("an integer is expected")
 
     def dump(self, value: Any, io: IO):
         return unsigned_varint_serializer.dump(abs(value) * 2 - (value < 0), io)
@@ -93,7 +93,7 @@ class BytesSerializer(Serializer):
         try:
             memoryview(value)
         except TypeError:
-            raise ValueError(f'a bytes-like object is required, not `{type(value)}`')
+            raise ValueError(f"a bytes-like object is required, not `{type(value)}`")
 
     def dump(self, value: Any, io: IO):
         unsigned_varint_serializer.dump(len(value), io)
@@ -116,13 +116,13 @@ class StringSerializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, str):
-            raise ValueError('a string is expected')
+            raise ValueError("a string is expected")
 
     def dump(self, value: Any, io: IO):
-        bytes_serializer.dump(value.encode('utf-8'), io)
+        bytes_serializer.dump(value.encode("utf-8"), io)
 
     def load(self, io: IO) -> Any:
-        return bytes_serializer.load(io).decode('utf-8')
+        return bytes_serializer.load(io).decode("utf-8")
 
 
 class UnsignedInt32Serializer(Serializer):
@@ -135,7 +135,7 @@ class UnsignedInt32Serializer(Serializer):
     def validate(self, value: Any):
         unsigned_varint_serializer.validate(value)
         if not 0 <= value <= 0xFFFFFFFF:
-            raise ValueError('value is out of 32-bit unsigned integer range')
+            raise ValueError("value is out of 32-bit unsigned integer range")
 
     def dump(self, value: Any, io: IO):
         unsigned_varint_serializer.dump(value, io)
@@ -154,7 +154,7 @@ class UnsignedInt64Serializer(Serializer):
     def validate(self, value: Any):
         unsigned_varint_serializer.validate(value)
         if not 0 <= value <= 0xFFFFFFFF_FFFFFFFF:
-            raise ValueError('value is out of 64-bit unsigned integer range')
+            raise ValueError("value is out of 64-bit unsigned integer range")
 
     def dump(self, value: Any, io: IO):
         unsigned_varint_serializer.dump(value, io)
@@ -173,7 +173,7 @@ class SignedInt32Serializer(Serializer):
     def validate(self, value: Any):
         signed_varint_serializer.validate(value)
         if not -0x7FFFFFFF <= value <= 0x7FFFFFFF:
-            raise ValueError('value is out of 32-bit signed integer range')
+            raise ValueError("value is out of 32-bit signed integer range")
 
     def dump(self, value: Any, io: IO):
         signed_varint_serializer.dump(value, io)
@@ -192,7 +192,7 @@ class SignedInt64Serializer(Serializer):
     def validate(self, value: Any):
         signed_varint_serializer.validate(value)
         if not -0x7FFFFFFF_FFFFFFFF <= value <= 0x7FFFFFFF_FFFFFFFF:
-            raise ValueError('value is out of 64-bit signed integer range')
+            raise ValueError("value is out of 64-bit signed integer range")
 
     def dump(self, value: Any, io: IO):
         signed_varint_serializer.dump(value, io)
@@ -211,10 +211,10 @@ class BooleanSerializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, bool):
-            raise ValueError('a boolean is expected')
+            raise ValueError("a boolean is expected")
 
     def dump(self, value: Any, io: IO):
-        io.write(b'\x01' if value else b'\x00')
+        io.write(b"\x01" if value else b"\x00")
 
     def load(self, io: IO) -> Any:
         return bool(unsigned_varint_serializer.load(io))
@@ -230,13 +230,13 @@ class SignedFixed32Serializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, int):
-            raise ValueError('an integer is expected')
+            raise ValueError("an integer is expected")
 
     def dump(self, value: Any, io: IO):
-        io.write(pack('<i', value))
+        io.write(pack("<i", value))
 
     def load(self, io: IO) -> Any:
-        return unpack('<i', io.read(4))[0]
+        return unpack("<i", io.read(4))[0]
 
 
 class UnsignedFixed32Serializer(Serializer):
@@ -249,13 +249,13 @@ class UnsignedFixed32Serializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, int):
-            raise ValueError('an integer is expected')
+            raise ValueError("an integer is expected")
 
     def dump(self, value: Any, io: IO):
-        io.write(pack('<I', value))
+        io.write(pack("<I", value))
 
     def load(self, io: IO) -> Any:
-        return unpack('<I', io.read(4))[0]
+        return unpack("<I", io.read(4))[0]
 
 
 class SignedFixed64Serializer(Serializer):
@@ -268,13 +268,13 @@ class SignedFixed64Serializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, int):
-            raise ValueError('an integer is expected')
+            raise ValueError("an integer is expected")
 
     def dump(self, value: Any, io: IO):
-        io.write(pack('<q', value))
+        io.write(pack("<q", value))
 
     def load(self, io: IO) -> Any:
-        return unpack('<q', io.read(8))[0]
+        return unpack("<q", io.read(8))[0]
 
 
 class UnsignedFixed64Serializer(Serializer):
@@ -287,13 +287,13 @@ class UnsignedFixed64Serializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, int):
-            raise ValueError('an integer is expected')
+            raise ValueError("an integer is expected")
 
     def dump(self, value: Any, io: IO):
-        io.write(pack('<Q', value))
+        io.write(pack("<Q", value))
 
     def load(self, io: IO) -> Any:
-        return unpack('<Q', io.read(8))[0]
+        return unpack("<Q", io.read(8))[0]
 
 
 class FloatSerializer(Serializer):
@@ -306,13 +306,13 @@ class FloatSerializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, float):
-            raise ValueError('a floating-point value is expected')
+            raise ValueError("a floating-point value is expected")
 
     def dump(self, value: Any, io: IO):
-        io.write(pack('<f', value))
+        io.write(pack("<f", value))
 
     def load(self, io: IO) -> Any:
-        return unpack('<f', io.read(4))[0]
+        return unpack("<f", io.read(4))[0]
 
 
 class DoubleSerializer(Serializer):
@@ -325,13 +325,13 @@ class DoubleSerializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, float):
-            raise ValueError('a floating-point value is expected')
+            raise ValueError("a floating-point value is expected")
 
     def dump(self, value: Any, io: IO):
-        io.write(pack('<d', value))
+        io.write(pack("<d", value))
 
     def load(self, io: IO) -> Any:
-        return unpack('<d', io.read(8))[0]
+        return unpack("<d", io.read(8))[0]
 
 
 class IntEnumSerializer(Serializer):
@@ -347,7 +347,7 @@ class IntEnumSerializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, self.type_):
-            raise ValueError(f'{self.type_} instance is expected, got {type(value)}')
+            raise ValueError(f"{self.type_} instance is expected, got {type(value)}")
 
     def dump(self, value: Any, io: IO):
         unsigned_varint_serializer.dump(value, io)
@@ -368,7 +368,7 @@ class MessageSerializer(Serializer):
 
     def validate(self, value: Any):
         if not isinstance(value, self.type_):
-            raise ValueError(f'{self.type_} is expected, but got {type(value)}')
+            raise ValueError(f"{self.type_} is expected, but got {type(value)}")
         for field_ in value.__protobuf_fields__.values():
             field_.validate(getattr(value, field_.name))
 
@@ -379,7 +379,7 @@ class MessageSerializer(Serializer):
             try:
                 field_.dump(field_value, io)
             except (ValueError, struct.error) as e:
-                raise ValueError(f'field `{field_.name}`: {e}, got `{field_value}`') from e
+                raise ValueError(f"field `{field_.name}`: {e}, got `{field_value}`") from e
 
     def load(self, io: IO) -> Any:
         values: Dict[str, Any] = {}
@@ -438,11 +438,11 @@ def read_varint(io: IO) -> types.uint:
     """
     value = 0
     for shift in count(0, 7):
-        byte, = io.read(1)
+        (byte,) = io.read(1)
         value |= (byte & 0x7F) << shift
         if not byte & 0x80:
             return types.uint(value)
-    assert False, 'unreachable code'
+    assert False, "unreachable code"
 
 
 def write_varint(value: types.uint, io: IO):

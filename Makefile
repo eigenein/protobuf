@@ -7,6 +7,10 @@ BIN := venv/bin
 build:
 	$(BIN)/python -m build --sdist --wheel
 
+.PHONY: publish
+publish:
+	$(BIN)/python -m twine upload dist/*
+
 .PHONY: clean
 clean:
 	find . -type d -name __pycache__ -delete

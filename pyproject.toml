@@ -30,6 +30,7 @@ dev = [
     "mypy",
     "pytest",
     "pytest-benchmark",
+    "twine",
 ]
 
 [project.license]

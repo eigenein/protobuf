@@ -25,7 +25,6 @@ dev = [
     "black>=22.12.0,<23.0.0",
     "build>=0.9.0,<1.0.0",
     "coverage[toml]>=6.5.0,<7.0.0",
-    "coveralls>=3.3.1,<4.0.0",
     "flake8>=5.0.0,<6.0.0; python_version == '3.7'",
     "flake8>=6.0.0,<7.0.0; python_version >= '3.8'",
     "isort>=5.11.3,<6.0.0",
@@ -61,6 +60,7 @@ ignore_missing_imports = true
 allow_untyped_globals = true
 
 [tool.coverage.run]
+relative_files = true
 omit = [
     "pure_protobuf/six.py",
     "pure_protobuf/legacy.py",

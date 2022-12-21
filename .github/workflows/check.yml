@@ -3,7 +3,7 @@ name: check
 on: [push, pull_request]
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
 
     strategy:
@@ -31,7 +31,18 @@ jobs:
       run: make lint
 
     - name: Coveralls
-      if: matrix.python-version == '3.11'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: venv/bin/coveralls --service=github
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        flag-name: ${{ matrix.python_version }}
+        parallel: true
+
+  finish:
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true

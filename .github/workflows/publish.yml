@@ -8,22 +8,22 @@ jobs:
   build-n-publish:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: 🔖 Checkout
-      uses: actions/checkout@v3
+    steps:
+      - name: 🔖 Checkout
+        uses: actions/checkout@v3
 
-    - name: 🐍 Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
-    - name: ⚙️ Install
-      run: pip install build
+      - name: ⚙️ Install
+        run: pip install build
 
-    - name: 🏗 Build
-      run: python -m build --sdist --wheel --outdir dist/ .
+      - name: 🏗 Build
+        run: python -m build --sdist --wheel --outdir dist/ .
 
-    - name: 📦 Publish
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: 📦 Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}

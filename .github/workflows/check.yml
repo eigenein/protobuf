@@ -58,6 +58,7 @@ jobs:
 
   finish:
     needs: check
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished

@@ -28,6 +28,7 @@ test check: unittests lint
 .PHONY: unittests
 unittests:
 	$(BIN)/coverage run --source=pure_protobuf -m pytest --benchmark-disable tests
+	$(BIN)/coverage lcov -o .coverage.lcov
 
 .PHONY: benchmark
 benchmark:

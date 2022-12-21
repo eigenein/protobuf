@@ -10,7 +10,7 @@ jobs:
       max-parallel: 6
       fail-fast: false
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11.0-alpha - 3.11']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
 
     steps:
     - name: Checkout
@@ -25,13 +25,13 @@ jobs:
       run: make venv
 
     - name: Test
-      run: make check/pytest
+      run: make unittests
 
     - name: Lint
-      run: make check/flake8 check/isort check/mypy
+      run: make lint
 
     - name: Coveralls
-      if: matrix.python-version == '3.10'
+      if: matrix.python-version == '3.11'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: venv/bin/coveralls --service=github

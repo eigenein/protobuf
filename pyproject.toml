@@ -1,0 +1,72 @@
+[project]
+name = "pure-protobuf"
+version = "2.1.1"
+description = "Implementation of Protocol Buffers with dataclass-based schemaʼs"
+readme = "README.md"
+requires-python = ">=3.7"
+keywords = ["protobuf", "protocol-buffers"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "coverage[toml]",
+    "coveralls",
+    "flake8",
+    "isort",
+    "mypy",
+    "pytest",
+    "pytest-benchmark",
+]
+
+[project.license]
+file = "LICENSE"
+
+[project.urls]
+"Homepage" = "https://github.com/eigenein/protobuf"
+"Issues" = "https://github.com/eigenein/protobuf/issues"
+"Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"
+
+[[project.authors]]
+name = "Pavel Perestoronin"
+email = "eigenein@gmail.com"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = [
+    "pure_protobuf",
+]
+
+[tool.mypy]
+ignore_missing_imports = true
+allow_untyped_globals = true
+
+[tool.coverage.run]
+omit = [
+    "pure_protobuf/six.py",
+    "pure_protobuf/legacy.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "raise ImportError",
+    "except ImportError",
+]

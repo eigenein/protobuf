@@ -1,6 +1,8 @@
-name: "📦 Publish"
+name: publish
 
-on: [published]
+on:
+  release:
+    types: [published]
 
 jobs:
   build-n-publish:

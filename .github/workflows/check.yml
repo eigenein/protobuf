@@ -13,6 +13,24 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
 
     steps:
+    - uses: actions/cache@v3
+      name: Cache pip
+      with:
+        path: "~/.cache/pip"
+        key: pip-${{ runner.os }}-${{ matrix.python-version }}
+
+    - uses: actions/cache@v3
+      name: Cache mypy
+      with:
+        path: ".mypy_cache"
+        key: mypy-${{ runner.os }}-${{ matrix.python-version }}
+
+    - uses: actions/cache@v3
+      name: Cache pytest
+      with:
+        path: ".pytest_cache"
+        key: pytest-${{ runner.os }}-${{ matrix.python-version }}
+
     - name: Checkout
       uses: actions/checkout@v3
 
@@ -37,24 +55,6 @@ jobs:
         flag-name: ${{ matrix.python-version }}
         parallel: true
         path-to-lcov: .coverage.lcov
-
-    - uses: actions/cache@v3
-      name: Cache pip
-      with:
-        path: "~/.cache/pip"
-        key: pip-${{ runner.os }}-${{ matrix.python-version }}
-
-    - uses: actions/cache@v3
-      name: Cache mypy
-      with:
-        path: ".mypy_cache"
-        key: mypy-${{ runner.os }}-${{ matrix.python-version }}
-
-    - uses: actions/cache@v3
-      name: Cache pytest
-      with:
-        path: ".pytest_cache"
-        key: pytest-${{ runner.os }}-${{ matrix.python-version }}
 
   finish:
     needs: check

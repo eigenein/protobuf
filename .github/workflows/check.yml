@@ -34,14 +34,14 @@ jobs:
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: ${{ matrix.python_version }}
+        flag-name: ${{ matrix.python-version }}
         parallel: true
         path-to-lcov: .coverage.lcov
 
     - uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: pip-${{ runner.os }}-${{ matrix.python_version }}
+        key: pip-${{ runner.os }}-${{ matrix.python-version }}
 
   finish:
     needs: check

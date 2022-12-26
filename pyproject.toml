@@ -65,13 +65,13 @@ packages = [
 [tool.mypy]
 ignore_missing_imports = true
 allow_untyped_globals = true
+check_untyped_defs = false # set to `true` later
+allow_redefinition = true
+pretty = true
 
 [tool.coverage.run]
-relative_files = true
-omit = [
-    "pure_protobuf/six.py",
-    "pure_protobuf/legacy.py",
-]
+source = ["pure_protobuf"]
+omit = ["tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -79,6 +79,7 @@ exclude_lines = [
     "raise NotImplementedError",
     "raise ImportError",
     "except ImportError",
+    "if TYPE_CHECKING:",
 ]
 
 [tool.black]

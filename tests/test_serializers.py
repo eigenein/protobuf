@@ -156,7 +156,7 @@ def test_twos_compliment_64_serializer_loads(value: int, bytes_: bytes, benchmar
 TWOS_COMPLEMENT_32_TESTS = [
     (-2, b"\xFE\xFF\xFF\xFF\x0F"),
     (1, b"\x01"),
-    (-30, b"\xE2\xFF\xFF\xFF\x0F")
+    (-30, b"\xE2\xFF\xFF\xFF\x0F"),
 ]
 
 

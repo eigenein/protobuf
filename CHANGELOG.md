@@ -1,3 +1,7 @@
+## `2.2.1`
+
+- Fix: implement two's compliment varint encoding for `int32` and `int64` #103
+
 ## `2.2.0`
 
 - Opt: publish to PyPI from GitHub Actionsπ

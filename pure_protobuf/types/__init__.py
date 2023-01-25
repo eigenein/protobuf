@@ -18,8 +18,8 @@ sint64 = NewType("sint64", int)
 uint = NewType("uint", int)  # is not a part of the standard
 uint32 = NewType("uint32", int)
 uint64 = NewType("uint64", int)
-int32 = uint32  # TODO: is it actually the same?
-int64 = uint64  # TODO: is it actually the same?
+int32 = NewType("int32", int)
+int64 = NewType("int64", int)
 
 # Not available in `typing`.
 NoneType = type(None)

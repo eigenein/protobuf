@@ -25,6 +25,8 @@ from pure_protobuf.serializers import (
     SignedInt64Serializer,
     SignedVarintSerializer,
     StringSerializer,
+    TwosComplimentInt32Serializer,
+    TwosComplimentInt64Serializer,
     UnsignedFixed32Serializer,
     UnsignedFixed64Serializer,
     UnsignedInt32Serializer,
@@ -82,6 +84,10 @@ def class_3(class_1: Type) -> Type:
         (UnsignedFixed64Serializer, "hello"),
         (FloatSerializer, "hello"),
         (DoubleSerializer, "hello"),
+        (TwosComplimentInt32Serializer, 1 << 31),
+        (TwosComplimentInt64Serializer, 1 << 63),
+        (TwosComplimentInt32Serializer, -(1 << 31) - 1),
+        (TwosComplimentInt64Serializer, -(1 << 63) - 1),
     ],
 )
 def test_serializer_value_error(serializer_class: Type[Serializer], value: Any):
@@ -127,6 +133,43 @@ def test_signed_varint_serializer_dumps(value: int, bytes_: bytes, benchmark):
 def test_signed_varint_serializer_loads(value: int, bytes_: bytes, benchmark):
     SignedVarintSerializer().validate(value)
     assert benchmark(SignedVarintSerializer().loads, bytes_) == value
+
+
+TWOS_COMPLEMENT_64_TESTS = [
+    (-2, b"\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"),
+    (1, b"\x01"),
+]
+
+
+@mark.parametrize("value, bytes_", TWOS_COMPLEMENT_64_TESTS, ids=_test_id)
+def test_twos_compliment_64_serializer_dumps(value: int, bytes_: bytes, benchmark):
+    TwosComplimentInt64Serializer().validate(value)
+    assert benchmark(TwosComplimentInt64Serializer().dumps, value) == bytes_
+
+
+@mark.parametrize("value, bytes_", TWOS_COMPLEMENT_64_TESTS, ids=_test_id)
+def test_twos_compliment_64_serializer_loads(value: int, bytes_: bytes, benchmark):
+    TwosComplimentInt64Serializer().validate(value)
+    assert benchmark(TwosComplimentInt64Serializer().loads, bytes_) == value
+
+
+TWOS_COMPLEMENT_32_TESTS = [
+    (-2, b"\xFE\xFF\xFF\xFF\x0F"),
+    (1, b"\x01"),
+    (-30, b"\xE2\xFF\xFF\xFF\x0F")
+]
+
+
+@mark.parametrize("value, bytes_", TWOS_COMPLEMENT_32_TESTS, ids=_test_id)
+def test_twos_compliment_32_serializer_dumps(value: int, bytes_: bytes, benchmark):
+    TwosComplimentInt32Serializer().validate(value)
+    assert benchmark(TwosComplimentInt32Serializer().dumps, value) == bytes_
+
+
+@mark.parametrize("value, bytes_", TWOS_COMPLEMENT_32_TESTS, ids=_test_id)
+def test_twos_compliment_32_serializer_loads(value: int, bytes_: bytes, benchmark):
+    TwosComplimentInt32Serializer().validate(value)
+    assert benchmark(TwosComplimentInt32Serializer().loads, bytes_) == value
 
 
 @mark.parametrize(

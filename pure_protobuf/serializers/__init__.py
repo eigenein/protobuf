@@ -9,6 +9,7 @@ from abc import ABC
 from enum import IntEnum
 from itertools import count
 from struct import pack, unpack
+from sys import byteorder
 from typing import Any, Dict, Type
 
 from pure_protobuf import types
@@ -79,6 +80,50 @@ class SignedVarintSerializer(Serializer):
 
 
 signed_varint_serializer = SignedVarintSerializer()
+
+
+class TwosComplimentVarintSerializer(Serializer, ABC):
+    """
+    Serializes a signed integer as two's compliment varint.
+
+    See Also:
+        - https://developers.google.com/protocol-buffers/docs/encoding#signed-ints
+    """
+
+    wire_type = unsigned_varint_serializer.wire_type
+    min_value: int
+    max_value: int
+    length: int
+
+    def validate(self, value: Any):
+        if not isinstance(value, int):
+            raise ValueError("an integer is expected")
+        if not self.min_value <= value <= self.max_value:
+            raise ValueError("the integer is outside the allowed range")
+
+    def dump(self, value: Any, io: IO):
+        compliment = int.from_bytes(
+            value.to_bytes(self.length, byteorder, signed=True), byteorder, signed=False
+        )
+        return unsigned_varint_serializer.dump(compliment, io)
+
+    def load(self, io: IO) -> Any:
+        n = unsigned_varint_serializer.load(io)
+        return int.from_bytes(
+            n.to_bytes(self.length, byteorder, signed=False), byteorder, signed=True
+        )
+
+
+class TwosComplimentInt32Serializer(TwosComplimentVarintSerializer):
+    min_value = -(1 << 31)
+    max_value = (1 << 31) - 1
+    length = 4
+
+
+class TwosComplimentInt64Serializer(TwosComplimentVarintSerializer):
+    min_value = -(1 << 63)
+    max_value = (1 << 63) - 1
+    length = 8
 
 
 class BytesSerializer(Serializer):

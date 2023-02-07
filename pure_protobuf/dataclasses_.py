@@ -279,7 +279,7 @@ SERIALIZERS: Dict[Any, Serializer] = {
     types.fixed64: serializers.UnsignedFixed64Serializer(),
     types.sfixed32: serializers.SignedFixed32Serializer(),
     types.sfixed64: serializers.SignedFixed64Serializer(),
-    types.int32: serializers.TwosComplimentInt32Serializer(),
+    types.int32: serializers.TwosComplimentInt64Serializer(),
     types.int64: serializers.TwosComplimentInt64Serializer(),
     types.sint32: serializers.SignedInt32Serializer(),
     types.sint64: serializers.SignedInt64Serializer(),

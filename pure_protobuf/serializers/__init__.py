@@ -114,12 +114,6 @@ class TwosComplimentVarintSerializer(Serializer, ABC):
         )
 
 
-class TwosComplimentInt32Serializer(TwosComplimentVarintSerializer):
-    min_value = -(1 << 31)
-    max_value = (1 << 31) - 1
-    length = 4
-
-
 class TwosComplimentInt64Serializer(TwosComplimentVarintSerializer):
     min_value = -(1 << 63)
     max_value = (1 << 63) - 1

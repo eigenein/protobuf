@@ -1,3 +1,7 @@
+## `2.2.2`
+
+- Fix: `int32` and `int64` should use the same encoder #103
+
 ## `2.2.1`
 
 - Fix: implement two's compliment varint encoding for `int32` and `int64` #103

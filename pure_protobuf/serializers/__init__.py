@@ -344,7 +344,7 @@ class FloatSerializer(Serializer):
     wire_type = WireType.LONG
 
     def validate(self, value: Any):
-        if not isinstance(value, float):
+        if not isinstance(value, float) and not isinstance(value, int):
             raise ValueError("a floating-point value is expected")
 
     def dump(self, value: Any, io: IO):
@@ -363,7 +363,7 @@ class DoubleSerializer(Serializer):
     wire_type = WireType.LONG_LONG
 
     def validate(self, value: Any):
-        if not isinstance(value, float):
+        if not isinstance(value, float) and not isinstance(value, int):
             raise ValueError("a floating-point value is expected")
 
     def dump(self, value: Any, io: IO):

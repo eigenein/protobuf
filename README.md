@@ -7,6 +7,10 @@
 [![PyPI – Python](https://img.shields.io/pypi/pyversions/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#files)
 [![License](https://img.shields.io/pypi/l/pure-protobuf.svg)](https://github.com/eigenein/protobuf/blob/master/LICENSE)
 
+<a href="https://eigenein.github.io/protobuf/">
+    <img alt="Documentation" height="25em" src="https://img.shields.io/github/actions/workflow/status/eigenein/protobuf/docs.yml?label=documentation&logo=github">
+</a>
+
 **Wow! Such annotated! Very buffers!**
 
 | ⚠️ Note                                                                                                                                   |

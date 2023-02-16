@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from io import BytesIO
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
-from typing_extensions import Annotated, Unpack
+from typing_extensions import Annotated
 
 from pure_protobuf.annotations import Field, uint
 from pure_protobuf.message import BaseMessage
@@ -234,7 +234,7 @@ def test_one_of_assignment_dataclass() -> None:
     @dataclass
     class Message(BaseMessage):
         # FIXME: Mypy does not understand `OneOf[int, None]`: https://github.com/python/mypy/issues/12280.
-        foo_or_bar = OneOf[Unpack[Tuple[int, None]]]()
+        foo_or_bar = OneOf[Optional[int]]()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -251,7 +251,7 @@ def test_one_of_assignment_dataclass() -> None:
 def test_one_of_read_from() -> None:
     @dataclass
     class Message(BaseMessage):
-        foo_or_bar = OneOf[Unpack[Tuple[int, None]]]()
+        foo_or_bar = OneOf[Optional[int]]()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -265,7 +265,7 @@ def test_one_of_read_from() -> None:
 def test_one_of_merged() -> None:
     @dataclass
     class Child(BaseMessage):
-        foo_or_bar = OneOf[Unpack[Tuple[int, None]]]()
+        foo_or_bar = OneOf[Optional[int]]()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None

@@ -1,13 +1,11 @@
-from typing import Any, Generic, List, MutableMapping, Tuple, Type
-
-from typing_extensions import TypeVarTuple, Unpack
+from typing import Any, Generic, List, MutableMapping, Optional, Tuple, Type, TypeVar
 
 from pure_protobuf.message import BaseMessage
 
-OneOfTs = TypeVarTuple("OneOfTs")
+OneOfT = TypeVar("OneOfT")
 
 
-class OneOf(Generic[Unpack[OneOfTs]]):
+class OneOf(Generic[OneOfT]):
     """
     See Also:
         - https://developers.google.com/protocol-buffers/docs/proto3#oneof.
@@ -35,8 +33,7 @@ class OneOf(Generic[Unpack[OneOfTs]]):
             if other_number != keep_number:
                 super(BaseMessage, message).__setattr__(other_name, None)
 
-    # FIXME: it actually returns `Union[None, Unpack[OneOfTs]]`, but that one just crashes Mypy (1.0.0).
-    def __get__(self, instance: Any, type_: Type[Any]) -> Any:
+    def __get__(self, instance: Any, type_: Type[Any]) -> Optional[OneOfT]:
         if not isinstance(instance, BaseMessage):
             # Allows passing the descriptor by reference, and we need to move the descriptor from
             # the corresponding annotation.

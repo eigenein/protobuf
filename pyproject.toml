@@ -1,13 +1,19 @@
-[project]
-name = "pure-protobuf"
-description = "Protocol Buffers using Python type annotations"
-readme = "README.md"
-requires-python = ">=3.7"
-dynamic = ["version"]
-keywords = ["protobuf", "protocol-buffers"]
-dependencies = [
-    "typing-extensions>=4.4.0,<5.0.0",
+[tool.poetry]
+authors = [
+    "Pavel Perestoronin <eigenein@gmail.com>",
+    "Bo Bayles",
+    "Théo Mathieu",
+    "Aleksey Zubakov",
+    "Tobias Kölling",
+    "Shiba",
 ]
+description = "Protocol Buffers using Python type annotations"
+keywords = ["protobuf", "protocol-buffers"]
+license = "MIT"
+name = "pure-protobuf"
+readme = "README.md"
+repository = "https://github.com/eigenein/protobuf"
+version = "0.0.0"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -21,53 +27,41 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: MIT License",
+    "Typing :: Typed",
 ]
-
-[project.optional-dependencies]
-dev = [
-    "black>=22.12.0,<23.0.0",
-    "build>=0.9.0,<1.0.0",
-    "coverage[toml]>=7.0.0,<8.0.0",
-    "flake8>=5.0.0,<6.0.0; python_version == '3.7'",
-    "flake8>=6.0.0,<7.0.0; python_version >= '3.8'",
-    "isort>=5.11.3,<6.0.0",
-    "mypy @ git+https://github.com/python/mypy@2514610",
-    "pydantic>=1.10.4,<2.0.0",
-    "pytest>=7.2.0,<8.0.0",
-    "pytest-benchmark>=4.0.0,<5.0.0",
-    "twine>=4.0.2,<5.0.0",
-]
-
-[project.license]
-file = "LICENSE"
-
-[project.urls]
-"Homepage" = "https://github.com/eigenein/protobuf"
-"Issues" = "https://github.com/eigenein/protobuf/issues"
-"Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"
-
-[[project.authors]]
-name = "Pavel Perestoronin"
-email = "eigenein@gmail.com"
 
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
-build-backend = "hatchling.build"
+requires = ["poetry-core", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
 
-[tool.hatch.version]
-source = "vcs"
+[tool.poetry.dependencies]
+python = "^3.7.0"
+"typing-extensions" = "^4.4.0"
 
-[tool.hatch.version.raw-options]
-version_scheme = "post-release"
-local_scheme = "no-local-version"
+[tool.poetry.group.dev]
+optional = true
 
-[tool.hatch.build]
-packages = [
-    "pure_protobuf",
-]
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+mypy = "^1.0.0"
+pydantic = "^1.10.4"
+pytest = "^7.2.0"
+pytest-benchmark = "^4.0.0"
+pytest-cov = "^4.0.0"
+ruff = "^0.0.247"
 
-[tool.hatch.metadata]
-allow-direct-references = true # for mypy
+[tool.poetry.urls]
+"Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"
+"Homepage" = "https://github.com/eigenein/protobuf"
+"Issues" = "https://github.com/eigenein/protobuf/issues"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+vcs = "git"
+pattern = "default-unprefixed"
+style = "semver"
+strict = true
+latest-tag = true
 
 [tool.mypy]
 ignore_missing_imports = true
@@ -82,15 +76,73 @@ omit = ["tests/*"]
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
-    "raise NotImplementedError",
     "except ImportError",
     "if TYPE_CHECKING:",
+    "pragma: no cover",
+    "raise AssertionError",
+    "raise NotImplementedError",
 ]
 
 [tool.black]
-line-length = 100
+line-length = 120
 target-version = ["py37", "py38", "py39", "py310", "py311"]
 
-[tool.isort]
-profile = "black"
+[tool.ruff]
+line-length = 120
+target-version = "py37"
+select = [
+    "A",
+    "ANN",
+    "B",
+    "C4",
+    "COM",
+    "D",
+    "E",
+    "F",
+    "I",
+    "N",
+    "PIE",
+    "PT",
+    "PTH",
+    "RET",
+    "SIM",
+    "T20",
+    "TRY",
+    "UP",
+    "W",
+    "YTT",
+]
+ignore = [
+    "ANN101",
+    "ANN102",
+    "ANN401",
+    "D100",
+    "D101",  # TODO
+    "D102",  # TODO
+    "D103",
+    "D104",
+    "D105",  # TODO
+    "D107",  # TODO
+    "D202",
+    "D203",
+    "D205",  # TODO
+    "D212",  # alternative of D213
+    "D406",
+    "D407",
+    "E501",  # prevents black from running
+    "PT001",
+    "PT011",
+    "PT013",
+    "RET505",
+    "TRY003",
+    "UP006",  # 3.9
+    "UP007",  # 3.10
+    "UP033",  # 3.9
+]
+unfixable = ["B"]
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["D101", "D102", "D106", "D205"]
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double"

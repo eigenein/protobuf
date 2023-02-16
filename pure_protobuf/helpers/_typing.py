@@ -22,7 +22,7 @@ DEFAULT = Sentinel()
 
 
 def extract_repeated(hint: Any) -> Tuple[Any, TypeGuard[List]]:
-    """Extracts a possible repeated flag."""
+    """Extract a possible repeated flag."""
     origin = get_origin(hint)
     # TODO: support `Iterable`.
     if isinstance(origin, type) and issubclass(origin, list):
@@ -31,7 +31,7 @@ def extract_repeated(hint: Any) -> Tuple[Any, TypeGuard[List]]:
 
 
 def extract_optional(hint: Any) -> Tuple[Any, bool]:
-    """Extracts a possible optional flag."""
+    """Extract a possible optional flag."""
     if get_origin(hint) is Union:
         cleaned_args = tuple(arg for arg in get_args(hint) if arg is not NoneType)
         return Union[cleaned_args], True

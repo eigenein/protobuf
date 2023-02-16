@@ -21,26 +21,26 @@ from pure_protobuf.message import BaseMessage
         Tuple[int, str],
     ],
 )
-def test_from_inner_hint_unsupported(inner_hint: Any):
+def test_from_inner_hint_unsupported(inner_hint: Any) -> None:
     with raises(UnsupportedAnnotationError):
         RecordDescriptor.from_inner_type_hint(BaseMessage, inner_hint)
 
 
 @mark.parametrize(
-    "value, encoded",
+    ("value", "encoded"),
     [
         (0.0, b"\x00\x00\x00\x00"),
         (1.0, b"\x00\x00\x80\x3F"),
     ],
 )
-def test_struct(value: float, encoded: bytes):
+def test_struct(value: float, encoded: bytes) -> None:
     assert to_bytes(FLOAT_DESCRIPTOR.write, value) == encoded
     assert next(FLOAT_DESCRIPTOR.read(BytesIO(encoded), WireType.I32)) == value
 
 
 # noinspection PyArgumentList
 @mark.parametrize(
-    "url, encoded",
+    ("url", "encoded"),
     [
         (
             ParseResult(
@@ -55,6 +55,6 @@ def test_struct(value: float, encoded: bytes):
         ),
     ],
 )
-def test_url(url: ParseResult, encoded: bytes):
+def test_url(url: ParseResult, encoded: bytes) -> None:
     assert to_bytes(URL_DESCRIPTOR.write, url) == encoded
     assert next(URL_DESCRIPTOR.read(BytesIO(encoded), WireType.LEN)) == url

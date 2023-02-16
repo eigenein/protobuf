@@ -26,6 +26,8 @@ message SearchRequest {
 ### With [data classes](https://docs.python.org/3/library/dataclasses.html)
 
 ```python
+# test_id=dataclass
+
 from dataclasses import dataclass
 from io import BytesIO
 
@@ -50,6 +52,8 @@ assert SearchRequest.read_from(BytesIO(buffer))
 ### With [`pydantic`](https://docs.pydantic.dev/)
 
 ```python
+# test_id=pydantic
+
 from io import BytesIO
 
 from pure_protobuf.annotations import Field, uint
@@ -135,6 +139,8 @@ The following types are supported:
 [`typing.List`](https://docs.python.org/3/library/typing.html#typing.List) annotations are automatically converted to [repeated fields](https://developers.google.com/protocol-buffers/docs/proto3#specifying-field-rules). Repeated fields of scalar numeric types use packed encoding by default:
 
 ```python
+# test_id=repeated
+
 from dataclasses import dataclass, field
 from typing import List
 from typing_extensions import Annotated
@@ -154,12 +160,15 @@ assert bytes(Message(foo=[uint(1), uint(2)])) == b"\x0A\x02\x01\x02"
 In case, unpacked encoding is explicitly wanted, you can specify `packed=False`:
 
 ```python
+# test_id=repeated-unpacked
+
 from dataclasses import dataclass, field
 from typing import List
 from typing_extensions import Annotated
 
 from pure_protobuf.annotations import Field, uint
 from pure_protobuf.message import BaseMessage
+
 
 @dataclass
 class Message(BaseMessage):
@@ -178,6 +187,8 @@ Required fields are [deprecated](https://developers.google.com/protocol-buffers/
 In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unprovided:
 
 ```python
+# test_id=default-values
+
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Optional
@@ -202,6 +213,8 @@ assert Foo.read_from(BytesIO()) == Foo(bar=uint(42))
 Subclasses of the standard [`IntEnum`](https://docs.python.org/3/library/enum.html#intenum) class are supported:
 
 ```python
+# test_id=enums
+
 from dataclasses import dataclass
 from enum import IntEnum
 from io import BytesIO
@@ -227,6 +240,8 @@ assert Test.read_from(BytesIO(b"\x08\x01")) == Test(foo=TestEnum.BAR)
 ### Embedded messages
 
 ```python
+# test_id=embedded-messages
+
 from dataclasses import dataclass, field
 from typing_extensions import Annotated
 
@@ -250,6 +265,8 @@ assert bytes(Test3(c=Test1(a=150))) == b"\x1A\x03\x08\x96\x01"
 ## [`Oneof`](https://developers.google.com/protocol-buffers/docs/proto3#oneof)
 
 ```python
+# test_id=one-of
+
 from typing import ClassVar, Optional
 
 from pydantic import BaseModel
@@ -288,6 +305,8 @@ assert message.bar == 43
 Since `pure-protobuf` is not able to download or parse `.proto` definitions, it provides a limited implementation of the [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any) message type. That is, you still have to conventionally define message classes and make them importable:
 
 ```python
+# test_id=well-known-any
+
 from urllib.parse import urlunparse
 
 from pure_protobuf.well_known import Any_

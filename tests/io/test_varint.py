@@ -25,13 +25,13 @@ UVARINT_CASES = [
 ]
 
 
-@mark.parametrize("value, bytes_", UVARINT_CASES, ids=pytest_test_id)
-def test_write_unsigned_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture):
+@mark.parametrize(("value", "bytes_"), UVARINT_CASES, ids=pytest_test_id)
+def test_write_unsigned_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
     assert benchmark(to_bytes, write_unsigned_varint, value) == bytes_
 
 
-@mark.parametrize("value, bytes_", UVARINT_CASES, ids=pytest_test_id)
-def test_read_unsigned_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture, bytes_io):
+@mark.parametrize(("value", "bytes_"), UVARINT_CASES, ids=pytest_test_id)
+def test_read_unsigned_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture, bytes_io) -> None:  # noqa: ANN001
     assert benchmark.pedantic(read_unsigned_varint, setup=bytes_io(bytes_)) == value
 
 
@@ -43,13 +43,18 @@ SIGNED_VARINT_TESTS = [
 ]
 
 
-@mark.parametrize("value, bytes_", SIGNED_VARINT_TESTS, ids=pytest_test_id)
-def test_signed_varint_serializer_dumps(value: int, bytes_: bytes, benchmark):
+@mark.parametrize(("value", "bytes_"), SIGNED_VARINT_TESTS, ids=pytest_test_id)
+def test_signed_varint_serializer_dumps(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
     assert benchmark(to_bytes, write_signed_varint, value) == bytes_
 
 
-@mark.parametrize("value, bytes_", SIGNED_VARINT_TESTS, ids=pytest_test_id)
-def test_signed_varint_serializer_loads(value: int, bytes_: bytes, benchmark, bytes_io):
+@mark.parametrize(("value", "bytes_"), SIGNED_VARINT_TESTS, ids=pytest_test_id)
+def test_signed_varint_serializer_loads(
+    value: int,
+    bytes_: bytes,
+    benchmark: BenchmarkFixture,
+    bytes_io,  # noqa: ANN001
+) -> None:
     assert benchmark.pedantic(read_signed_varint, setup=bytes_io(bytes_)) == value
 
 
@@ -59,17 +64,17 @@ ENUM_CASES = [
 ]
 
 
-@mark.parametrize("value, bytes_", ENUM_CASES)
-def test_read_enum(value: IntEnum, bytes_: bytes):
+@mark.parametrize(("value", "bytes_"), ENUM_CASES)
+def test_read_enum(value: IntEnum, bytes_: bytes) -> None:
     assert next(ReadEnum(ExampleEnum)(BytesIO(bytes_))) == value
 
 
 @mark.parametrize("bytes_", [b"\x03"])
-def test_read_enum_error(bytes_: bytes):
+def test_read_enum_error(bytes_: bytes) -> None:
     with raises(IncorrectValueError):
         next(ReadEnum(ExampleEnum)(BytesIO(bytes_)))
 
 
-@mark.parametrize("value, bytes_", ENUM_CASES)
-def test_write_enum(value: ExampleEnum, bytes_: bytes):
+@mark.parametrize(("value", "bytes_"), ENUM_CASES)
+def test_write_enum(value: ExampleEnum, bytes_: bytes) -> None:
     assert to_bytes(WriteEnum[ExampleEnum](), value) == bytes_

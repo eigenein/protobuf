@@ -28,12 +28,12 @@ class Field:
     packed: Union[bool, Sentinel] = DEFAULT
     """Specifies whether the field should be packed in its serialized representation."""
 
-    one_of: Optional["OneOf"] = None
+    one_of: Optional[OneOf] = None
     """Specifies a one-of group for this field."""
 
     @classmethod
     def _from_annotated_args(cls, *args: Any) -> Optional[Field]:
-        """Extracts itself from the `Annotated[_, *args]` type hint, if present."""
+        """Extract itself from the `Annotated[_, *args]` type hint, if present."""
         for arg in args:
             if isinstance(arg, Field):
                 arg._validate()
@@ -43,7 +43,7 @@ class Field:
     def _validate(self) -> None:
         if not 1 <= self.number <= 536_870_911:
             raise IncorrectAnnotationError(
-                f"field number {self.number} is outside the allowed range"
+                f"field number {self.number} is outside the allowed range",
             )
         if 19000 <= self.number <= 19999:
             raise IncorrectAnnotationError(f"field number {self.number} is reserved")

@@ -59,7 +59,7 @@ class BaseMessage(ABC):
 
     @classmethod
     def read_from(cls, io: IO[bytes]) -> Self:
-        """Reads a message from the file."""
+        """Read a message from the file."""
 
         values: Dict[str, Any] = {}
         while True:
@@ -83,13 +83,13 @@ class BaseMessage(ABC):
                 # Possibly update the one-of field.
                 one_of = descriptor.one_of
                 if one_of is not None:
-                    one_of._keep_values(cls, values, descriptor.number)
+                    one_of._keep_values(values, descriptor.number)
 
         return cls(**values)
 
     def write_to(self, io: IO[bytes]) -> None:
-        """Writes the message to the file."""
-        for number, (name, descriptor) in self.__PROTOBUF_FIELDS_BY_NUMBER__.items():
+        """Write the message to the file."""
+        for _, (name, descriptor) in self.__PROTOBUF_FIELDS_BY_NUMBER__.items():
             descriptor.write(getattr(self, name), io)
 
     def __bytes__(self) -> bytes:

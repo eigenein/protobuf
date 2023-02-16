@@ -4,7 +4,7 @@ from enum import IntEnum
 class WireType(IntEnum):
     """
     See Also:
-        - https://developers.google.com/protocol-buffers/docs/encoding#structure
+        - https://developers.google.com/protocol-buffers/docs/encoding#structure.
     """
 
     VARINT = 0

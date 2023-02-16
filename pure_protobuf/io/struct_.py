@@ -13,7 +13,7 @@ class ReadStruct(Read[RecordT_co], ReprWithInner, Generic[RecordT_co]):
     __slots__ = ("inner",)
 
     # noinspection PyProtocol
-    def __init__(self, format_: str):
+    def __init__(self, format_: str) -> None:
         self.inner = Struct(format_)
 
     def __call__(self, io: IO[bytes]) -> Iterator[RecordT_co]:
@@ -27,7 +27,7 @@ class WriteStruct(Write[RecordT_contra], ReprWithInner, Generic[RecordT_contra])
     __slots__ = ("inner",)
 
     # noinspection PyProtocol
-    def __init__(self, format_: str):
+    def __init__(self, format_: str) -> None:
         self.inner = Struct(format_)
 
     def __call__(self, value: RecordT_contra, io: IO[bytes]) -> None:

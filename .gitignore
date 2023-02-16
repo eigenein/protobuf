@@ -1,7 +1,7 @@
 .benchmarks
 
-# Created by https://www.toptal.com/developers/gitignore/api/linux,macos,python,windows,sublimetext,visualstudiocode,intellij+all
-# Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,python,windows,sublimetext,visualstudiocode,intellij+all
+# Created by https://www.toptal.com/developers/gitignore/api/linux,macos,python,windows,sublimetext,intellij+all,visualstudiocode
+# Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,python,windows,sublimetext,intellij+all,visualstudiocode
 
 ### Intellij+all ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
@@ -305,6 +305,8 @@ cython_debug/
 # Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration
 poetry.toml
 
+# ruff
+.ruff_cache/
 
 ### SublimeText ###
 # Cache files for Sublime Text
@@ -384,4 +386,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/linux,macos,python,windows,sublimetext,visualstudiocode,intellij+all
+# End of https://www.toptal.com/developers/gitignore/api/linux,macos,python,windows,sublimetext,intellij+all,visualstudiocode

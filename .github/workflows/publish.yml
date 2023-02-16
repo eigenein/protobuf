@@ -1,34 +1,45 @@
-name: publish
+name: Publish
 
 on:
   release:
     types: [published]
 
+env:
+  ANSICON: 1
+  FORCE_COLOR: 1
+
 jobs:
-  build-n-publish:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout
-        uses: actions/checkout@v3
+    - name: 📥 Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-      - name: 🔖 Get history and tags
-        run: |
-          git fetch --prune --unshallow
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+    - name: 📝 Build changelog
+      id: changelog
+      uses: Bullrich/generate-release-changelog@master
+      env:
+        REPO: ${{ github.repository }}
 
-      - name: 🐍 Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+    - name: 📤 Update release
+      uses: tubone24/update_release@v1.3.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        release_name: ${{ github.ref_name }}
+        body: ${{ steps.changelog.outputs.changelog }}
 
-      - name: ⚙️ Install
-        run: pip install build
+    - name: "✨ Install Poetry"
+      run: |
+        pipx install poetry
+        pipx inject poetry poetry-dynamic-versioning
+    - name: 📦 Build package
+      run: poetry build --ansi
 
-      - name: 🏗 Build
-        run: python -m build --sdist --wheel --outdir dist/ .
-
-      - name: 📦 Publish
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+    - name: 📤 Publish package
+      run: poetry publish --ansi
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}

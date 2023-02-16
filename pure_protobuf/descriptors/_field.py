@@ -36,8 +36,10 @@ if TYPE_CHECKING:
 class _FieldDescriptor(Generic[FieldT, RecordT]):
     """
     Describes how the field should be read and written.
-    Not a «real» Python descriptor, just didn't come up with a better name.
-    Converted from `RecordDescriptor`.
+
+    Notes:
+        - It's not a «real» Python descriptor, just didn't come up with a better name.
+        - It gets converted from `RecordDescriptor`.
     """
 
     number: int
@@ -62,11 +64,11 @@ class _FieldDescriptor(Generic[FieldT, RecordT]):
     @classmethod
     def from_attribute(
         cls,
-        message_type: Type["BaseMessage"],
+        message_type: Type[BaseMessage],
         attribute_hint: Any,
     ) -> Optional[_FieldDescriptor[Any, Any]]:
         """
-        Constructs a descriptor from the attribute's type hint.
+        Construct a descriptor from the attribute's type hint.
 
         Returns:
             Field's descriptor, or `None` if skipped.
@@ -88,7 +90,8 @@ class _FieldDescriptor(Generic[FieldT, RecordT]):
         inner_hint, is_repeated = extract_repeated(inner_hint)
 
         inner: RecordDescriptor[RecordT] = RecordDescriptor.from_inner_type_hint(
-            message_type, inner_hint
+            message_type,
+            inner_hint,
         )
         write = cast(Write[FieldT], inner.write)
         accumulate = cast(Accumulate[FieldT, RecordT], inner.accumulate)

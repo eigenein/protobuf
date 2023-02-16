@@ -17,14 +17,14 @@ class ReadStrictlyTyped(ReadTyped[RecordT], ReprWithInner):
     __slots__ = ("inner", "expected_wire_type")
 
     # noinspection PyProtocol
-    def __init__(self, inner: Read[RecordT], expected_wire_type: WireType):
+    def __init__(self, inner: Read[RecordT], expected_wire_type: WireType) -> None:
         self.inner = inner
         self.expected_wire_type = expected_wire_type
 
     def __call__(self, io: IO[bytes], actual_wire_type: WireType) -> Iterator[RecordT]:
         if actual_wire_type != self.expected_wire_type:
             raise UnexpectedWireTypeError(
-                f"expected {self.expected_wire_type!r} but received {actual_wire_type!r}"
+                f"expected {self.expected_wire_type!r} but received {actual_wire_type!r}",
             )
         yield from self.inner(io)
 
@@ -35,7 +35,7 @@ class ReadMaybePacked(ReadTyped[RecordT], ReprWithInner):
     __slots__ = ("inner", "inner_packed", "unpacked_wire_type")
 
     # noinspection PyProtocol
-    def __init__(self, inner: Read[RecordT], unpacked_wire_type: WireType):
+    def __init__(self, inner: Read[RecordT], unpacked_wire_type: WireType) -> None:
         self.inner = inner
         self.unpacked_wire_type = unpacked_wire_type
         self.inner_packed = ReadLengthDelimited[RecordT](ReadRepeated[RecordT](inner))
@@ -47,7 +47,7 @@ class ReadMaybePacked(ReadTyped[RecordT], ReprWithInner):
             yield from self.inner_packed(io)
         else:
             raise UnexpectedWireTypeError(
-                f"expected {self.unpacked_wire_type!r} or a packed record but received {actual_wire_type!r}"
+                f"expected {self.unpacked_wire_type!r} or a packed record but received {actual_wire_type!r}",
             )
 
 
@@ -57,7 +57,7 @@ class ReadLengthDelimited(Read[RecordT], ReprWithInner):
     __slots__ = ("inner",)
 
     # noinspection PyProtocol
-    def __init__(self, inner: Read[RecordT]):
+    def __init__(self, inner: Read[RecordT]) -> None:
         self.inner = inner
 
     def __call__(self, io: IO[bytes]) -> Iterator[RecordT]:
@@ -69,7 +69,7 @@ class ReadRepeated(Read[RecordT], ReprWithInner):
     __slots__ = ("inner",)
 
     # noinspection PyProtocol
-    def __init__(self, inner: Read[RecordT]):
+    def __init__(self, inner: Read[RecordT]) -> None:
         self.inner = inner
 
     def __call__(self, io: IO[bytes]) -> Iterator[RecordT]:
@@ -86,7 +86,7 @@ class WriteRepeated(Generic[RecordT, FieldT_contra], Write[FieldT_contra], ReprW
     inner: Write[RecordT]
 
     # noinspection PyProtocol
-    def __init__(self, inner: Write[RecordT]):
+    def __init__(self, inner: Write[RecordT]) -> None:
         self.inner = inner
 
     def __call__(self, values: FieldT_contra, io: IO[bytes]) -> None:
@@ -106,7 +106,7 @@ class WriteTagged(Write[RecordT], ReprWithInner):
     __slots__ = ("inner", "encoded_tag")
 
     # noinspection PyProtocol
-    def __init__(self, inner: Write[RecordT], tag: Tag):
+    def __init__(self, inner: Write[RecordT], tag: Tag) -> None:
         self.inner = inner
         self.encoded_tag = to_bytes(Tag.write_to, tag)
 
@@ -121,7 +121,7 @@ class WriteOptional(Write[RecordT], ReprWithInner):
     inner: Write[RecordT]
 
     # noinspection PyProtocol
-    def __init__(self, inner: Write[RecordT]):
+    def __init__(self, inner: Write[RecordT]) -> None:
         self.inner = inner
 
     def __call__(self, value: Optional[RecordT], io: IO[bytes]) -> None:
@@ -135,7 +135,7 @@ class WriteLengthDelimited(Write[RecordT], ReprWithInner):
     inner: Write[RecordT]
 
     # noinspection PyProtocol
-    def __init__(self, inner: Write[RecordT]):
+    def __init__(self, inner: Write[RecordT]) -> None:
         self.inner = inner
 
     def __call__(self, value: RecordT, io: IO[bytes]) -> None:

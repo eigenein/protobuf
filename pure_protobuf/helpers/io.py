@@ -1,6 +1,4 @@
-"""
-Input/output helpers.
-"""
+"""Input/output helpers."""
 
 from typing import IO
 

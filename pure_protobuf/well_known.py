@@ -1,6 +1,4 @@
-"""
-Well-known types.
-"""
+"""Well-known types."""
 
 from __future__ import annotations
 
@@ -20,9 +18,7 @@ from pure_protobuf.message import BaseMessage
 
 @dataclass(**DATACLASS_OPTIONS)
 class _TimeSpan(BaseMessage):
-    """
-    Base class to represent timespan as whole seconds plus its nanoseconds part.
-    """
+    """Base class to represent timespan as whole seconds plus its nanoseconds part."""
 
     seconds: Annotated[int, Field(1)] = 0
     nanos: Annotated[int, Field(2)] = 0
@@ -66,12 +62,13 @@ class Duration(_TimeSpan):
         return timedelta(seconds=unsplit_seconds(self.seconds, self.nanos))
 
 
-# noinspection PyPep8Naming
 @dataclass(**DATACLASS_OPTIONS)
-class Any_:
+class Any_:  # noqa: N801
     """
+    Well-known `Any` type.
+
     See Also:
-        - https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/any.proto
+        - https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/any.proto.
     """
 
     type_url: Annotated[ParseResult, Field(1)]
@@ -79,7 +76,7 @@ class Any_:
 
     @classmethod
     def from_message(cls, message: BaseMessage) -> Any_:
-        """Converts the message into its `Any_` representation."""
+        """Convert the message into its `Any_` representation."""
 
         # noinspection PyArgumentList
         return cls(

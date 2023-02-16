@@ -33,7 +33,7 @@ class ReadUnsignedVarint(ReadSingular[uint]):
             value |= (byte & 0x7F) << shift
             if not byte & 0x80:
                 return uint(value)
-        assert False, "unreachable code"  # pragma: no cover
+        raise AssertionError("unreachable code")
 
 
 class WriteUnsignedVarint(Write[uint]):
@@ -97,7 +97,7 @@ class ReadEnum(Read[EnumT]):
     __slots__ = ("enum_type",)
 
     # noinspection PyProtocol
-    def __init__(self, enum_type: Type[EnumT]):
+    def __init__(self, enum_type: Type[EnumT]) -> None:
         self.enum_type = enum_type
 
     def __call__(self, io: IO[bytes]) -> Iterator[EnumT]:
@@ -106,7 +106,7 @@ class ReadEnum(Read[EnumT]):
             yield self.enum_type(value)
         except ValueError as e:
             raise IncorrectValueError(
-                f"incorrect value {value} for enum `{self.enum_type!r}`"
+                f"incorrect value {value} for enum `{self.enum_type!r}`",
             ) from e
 
     def __repr__(self) -> str:

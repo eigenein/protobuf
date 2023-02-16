@@ -80,11 +80,11 @@ class RecordDescriptor(Generic[RecordT]):
     @classmethod
     def from_inner_type_hint(
         cls,
-        message_type: Type["BaseMessage"],
+        message_type: Type[BaseMessage],
         inner_hint: Any,
     ) -> RecordDescriptor[Any]:
         """
-        Constructs a descriptor from the inner type hint.
+        Construct a descriptor from the inner type hint.
 
         Examples:
             - For `Annotated[int, Field[1]]` the inner hint is `int`.

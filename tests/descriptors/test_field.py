@@ -13,7 +13,7 @@ from tests.definitions import ExampleEnum, RecursiveMessage
 
 
 @mark.parametrize("hint", [int, Annotated[int, ...]])
-def test_from_attribute_ignored(hint: Any):
+def test_from_attribute_ignored(hint: Any) -> None:
     """Test ignored type hints."""
     assert _FieldDescriptor.from_attribute(BaseMessage, hint) is None
 
@@ -25,13 +25,13 @@ def test_from_attribute_ignored(hint: Any):
         Annotated[int, Field(19000)],
     ],
 )
-def test_from_inner_hint_incorrect(hint: Any):
+def test_from_inner_hint_incorrect(hint: Any) -> None:
     with raises(IncorrectAnnotationError):
         _FieldDescriptor.from_attribute(BaseMessage, hint)
 
 
 @mark.parametrize(
-    "hint, value, expected",
+    ("hint", "value", "expected"),
     [
         (Annotated[uint, Field(1)], 150, b"\x08\x96\x01"),
         (Annotated[List[uint], Field(1)], [1, 150, 2], b"\x0A\x04\x01\x96\x01\x02"),
@@ -49,7 +49,7 @@ def test_from_inner_hint_incorrect(hint: Any):
     ],
     ids=pytest_test_id,
 )
-def test_field_descriptor_write(hint: Any, value: Any, expected: bytes):
+def test_field_descriptor_write(hint: Any, value: Any, expected: bytes) -> None:
     """Test writes with `Annotated` hints."""
     descriptor = _FieldDescriptor.from_attribute(BaseMessage, hint)
     assert descriptor is not None

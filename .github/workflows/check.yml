@@ -1,68 +1,86 @@
-name: check
+name: Checks
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+env:
+  ANSICON: 1
+  FORCE_COLOR: 1
 
 jobs:
   check:
+    name: Check
     runs-on: ubuntu-latest
-
     strategy:
-      max-parallel: 6
       fail-fast: false
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version:
+        - '3.8'
+        - '3.9'
+        - '3.10'
+        - '3.11'
+        - 'pypy-3.8'
+        - 'pypy-3.9'
 
     steps:
-    - uses: actions/cache@v3
-      name: Cache pip
-      with:
-        path: "~/.cache/pip"
-        key: pip-${{ runner.os }}-${{ matrix.python-version }}
-
-    - uses: actions/cache@v3
-      name: Cache mypy
-      with:
-        path: ".mypy_cache"
-        key: mypy-${{ runner.os }}-${{ matrix.python-version }}
-
-    - uses: actions/cache@v3
-      name: Cache pytest
-      with:
-        path: ".pytest_cache"
-        key: pytest-${{ runner.os }}-${{ matrix.python-version }}
-
-    - name: Checkout
+    - name: "📥 Checkout"
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: "✨ Install Poetry"
+      run: |
+        pipx install poetry
+        pipx inject poetry poetry-dynamic-versioning
+    - name: 🐍 Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        cache: poetry
 
-    - name: Install
-      run: make venv
-
-    - name: Test
-      run: make unittests
-
-    - name: Lint
-      run: make lint
-
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
+    - name: "🗃 Cache"
+      if: success() || failure()
+      uses: actions/cache@v3
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        flag-name: ${{ matrix.python-version }}
-        parallel: true
-        path-to-lcov: .coverage.lcov
+        path: |
+          .mypy_cache
+          .pytest_cache
+          .ruff_cache
+        key: ${{ runner.os }}-${{ matrix.python-version }}-check
 
-  finish:
-    needs: check
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
+    - name: "📥 Install the package"
+      run: make install
+
+    - name: "🪄 Linter: Black"
+      run: make lint/black
+
+    - name: "🪄 Linter: Ruff"
+      if: success() || failure()
+      run: make lint/ruff
+
+    - name: "🪄 Linter: mypy"
+      if: success() || failure()
+      run: make lint/mypy
+
+    - name: "🧪 Tests"
+      if: success() || failure()
+      run: poetry run pytest tests --test-redis
+
+    - name: "📤 Codecov"
+      if: success() || failure()
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        env_vars: PYTHON
+        name: Python ${{ matrix.python-version }}
+        files: coverage.xml
+        fail_ci_if_error: true
+
+    - name: "📦 Build and publish package: dry run"
+      if: success() || failure()
+      run: poetry publish --build --dry-run --ansi

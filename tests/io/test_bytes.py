@@ -11,13 +11,13 @@ BYTES_CASES = [
 ]
 
 
-@mark.parametrize("value, bytes_", BYTES_CASES)
-def test_write_bytes(value: bytes, bytes_: bytes, benchmark: BenchmarkFixture):
+@mark.parametrize(("value", "bytes_"), BYTES_CASES)
+def test_write_bytes(value: bytes, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
     assert benchmark(to_bytes, write_bytes, value) == bytes_
 
 
-@mark.parametrize("value, bytes_", BYTES_CASES)
-def test_read_bytes(value: bytes, bytes_: bytes, benchmark: BenchmarkFixture, bytes_io):
+@mark.parametrize(("value", "bytes_"), BYTES_CASES)
+def test_read_bytes(value: bytes, bytes_: bytes, benchmark: BenchmarkFixture, bytes_io) -> None:  # noqa: ANN001
     assert benchmark.pedantic(read_bytes, setup=bytes_io(bytes_)) == value
 
 
@@ -26,11 +26,11 @@ STRING_CASES = [
 ]
 
 
-@mark.parametrize("value, bytes_", STRING_CASES)
-def test_write_string(value: str, bytes_: bytes, benchmark: BenchmarkFixture):
+@mark.parametrize(("value", "bytes_"), STRING_CASES)
+def test_write_string(value: str, bytes_: bytes, benchmark: BenchmarkFixture) -> None:  # noqa: ANN001
     assert benchmark(to_bytes, write_string, value) == bytes_
 
 
-@mark.parametrize("value, bytes_", STRING_CASES)
-def test_read_string(value: str, bytes_: bytes, benchmark: BenchmarkFixture, bytes_io):
+@mark.parametrize(("value", "bytes_"), STRING_CASES)
+def test_read_string(value: str, bytes_: bytes, benchmark: BenchmarkFixture, bytes_io) -> None:  # noqa: ANN001
     assert benchmark.pedantic(read_string, setup=bytes_io(bytes_)) == value

@@ -9,10 +9,10 @@ from pure_protobuf.message import BaseMessage
 from pure_protobuf.one_of import OneOf
 
 
-def test_simple_message():
+def test_simple_message() -> None:
     """
     See Also:
-        - https://developers.google.com/protocol-buffers/docs/encoding#simple
+        - https://developers.google.com/protocol-buffers/docs/encoding#simple.
     """
 
     @dataclass
@@ -27,7 +27,7 @@ def test_simple_message():
     assert Message.read_from(BytesIO(bytes_)) == message
 
 
-def test_simple_message_unknown_field():
+def test_simple_message_unknown_field() -> None:
     @dataclass
     class Message(BaseMessage):
         a: Annotated[uint, Field(1)] = uint(0)
@@ -38,15 +38,15 @@ def test_simple_message_unknown_field():
         b"\x35\x01\x02\x03\x04"  # extra 32-bit
         b"\x42\x01\x00"  # extra bytes
         b"\x10\xFF\x01"  # extra varint
-        b"\x08\x96\x01"  # field `a`
+        b"\x08\x96\x01",  # field `a`
     )) == Message(a=uint(150))
     # fmt: on
 
 
-def test_message_with_bytestring():
+def test_message_with_bytestring() -> None:
     """
     See Also:
-        - https://developers.google.com/protocol-buffers/docs/encoding#strings
+        - https://developers.google.com/protocol-buffers/docs/encoding#strings.
     """
 
     @dataclass
@@ -61,10 +61,10 @@ def test_message_with_bytestring():
     assert Message.read_from(BytesIO(bytes_)) == message
 
 
-def test_embedded_message():
+def test_embedded_message() -> None:
     """
     See Also:
-        - https://developers.google.com/protocol-buffers/docs/encoding#embedded
+        - https://developers.google.com/protocol-buffers/docs/encoding#embedded.
     """
 
     @dataclass
@@ -83,7 +83,7 @@ def test_embedded_message():
     assert Parent.read_from(BytesIO(bytes_)) == message
 
 
-def test_merge_embedded_messages_repeated():
+def test_merge_embedded_messages_repeated() -> None:
     """
     For embedded message fields, the parser merges multiple instances of the same field,
     as if with the `Message::MergeFrom` method.
@@ -106,14 +106,14 @@ def test_merge_embedded_messages_repeated():
             b"\x0A\x00"  # foo == None
             b"\x0A\x02\x08\x00"  # foo == [0]
             b"\x0A\x03\x08\x96\x01"  # foo == [150]
-            b"\x0A\x00"  # foo == None
+            b"\x0A\x00",  # foo == None
         ))
         == Outer(inner=Inner(foo=[uint(0), uint(150)]))
         # fmt: on
     )
 
 
-def test_merge_embedded_messages_primitive():
+def test_merge_embedded_messages_primitive() -> None:
     """Message merger with primitive field."""
 
     @dataclass
@@ -128,14 +128,14 @@ def test_merge_embedded_messages_primitive():
         # fmt: off
         Outer.read_from(BytesIO(
             b"\x0A\x02\x08\x01"  # foo == 1
-            b"\x0A\x02\x08\x02"  # foo == 2
+            b"\x0A\x02\x08\x02",  # foo == 2
         ))
         == Outer(inner=Inner(foo=uint(2)))
         # fmt: on
     )
 
 
-def test_read_unpacked_repeated_as_packed():
+def test_read_unpacked_repeated_as_packed() -> None:
     """
     Protocol buffer parsers must be able to parse repeated fields that were compiled as packed as
     if they were not packed, and vice versa.
@@ -151,12 +151,13 @@ def test_read_unpacked_repeated_as_packed():
     assert Test.read_from(BytesIO(b"\x08\x01\x08\x02")) == Test(foo=[uint(1), uint(2)])
 
 
-def test_read_packed_repeated_as_unpacked():
+def test_read_packed_repeated_as_unpacked() -> None:
     """
     Protocol buffer parsers must be able to parse repeated fields that were compiled as packed as
     if they were not packed, and vice versa.
+
     See Also:
-    - https://developers.google.com/protocol-buffers/docs/encoding#packed
+    - https://developers.google.com/protocol-buffers/docs/encoding#packed.
     """
 
     @dataclass
@@ -164,11 +165,11 @@ def test_read_packed_repeated_as_unpacked():
         foo: Annotated[List[uint], Field(1, packed=False)]
 
     assert Test.read_from(BytesIO(b"\x0A\x04\x01\x96\x01\x02")) == Test(
-        foo=[uint(1), uint(150), uint(2)]
+        foo=[uint(1), uint(150), uint(2)],
     )
 
 
-def test_repeated_embedded_message():
+def test_repeated_embedded_message() -> None:
     @dataclass
     class Child(BaseMessage):
         payload: Annotated[uint, Field(2)]
@@ -183,7 +184,7 @@ def test_repeated_embedded_message():
     assert Parent.read_from(BytesIO(encoded)) == message
 
 
-def test_merge_grandchild():
+def test_merge_grandchild() -> None:
     @dataclass
     class Grandchild(BaseMessage):
         payload: Annotated[uint, Field(1)]
@@ -199,19 +200,18 @@ def test_merge_grandchild():
     assert Parent.read_from(
         BytesIO(
             bytes(Parent(child=Child(child=Grandchild(payload=uint(42)))))
-            + bytes(Parent(child=Child(child=Grandchild(payload=uint(43)))))
-        )
+            + bytes(Parent(child=Child(child=Grandchild(payload=uint(43))))),
+        ),
     ) == Parent(child=Child(child=Grandchild(payload=uint(43))))
 
     assert Parent.read_from(
         BytesIO(
-            bytes(Parent(child=Child(child=Grandchild(payload=uint(42)))))
-            + bytes(Parent(child=Child()))
-        )
+            bytes(Parent(child=Child(child=Grandchild(payload=uint(42))))) + bytes(Parent(child=Child())),
+        ),
     ) == Parent(child=Child(child=Grandchild(payload=uint(42))))
 
 
-def test_concatenated_packed_repeated():
+def test_concatenated_packed_repeated() -> None:
     """
     Note that although there's usually no reason to encode more than one key-value pair for a packed repeated field,
     parsers must be prepared to accept multiple key-value pairs.
@@ -230,7 +230,7 @@ def test_concatenated_packed_repeated():
     assert Message.read_from(BytesIO(part_1 + part_2)) == Message(field=[42, 43, 100500, 100501])
 
 
-def test_one_of_assignment_dataclass():
+def test_one_of_assignment_dataclass() -> None:
     @dataclass
     class Message(BaseMessage):
         foo_or_bar = OneOf()
@@ -247,7 +247,7 @@ def test_one_of_assignment_dataclass():
     assert message.bar == 43
 
 
-def test_one_of_read_from():
+def test_one_of_read_from() -> None:
     @dataclass
     class Message(BaseMessage):
         foo_or_bar = OneOf()
@@ -261,7 +261,7 @@ def test_one_of_read_from():
     assert message.foo is None
 
 
-def test_one_of_merged():
+def test_one_of_merged() -> None:
     @dataclass
     class Child(BaseMessage):
         foo_or_bar = OneOf()

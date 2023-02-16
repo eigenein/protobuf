@@ -13,7 +13,7 @@ class ChildMessage(BaseMessage):
     foo: Annotated[int, Field(1)]
 
 
-def test_child():
+def test_child() -> None:
     child = ChildMessage(foo=42)
     any_ = Any_.from_message(child)
     assert urlunparse(any_.type_url) == "import://tests.test_well_known/ChildMessage"

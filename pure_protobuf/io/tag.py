@@ -24,7 +24,7 @@ class Tag:
 
     @classmethod
     def read_from(cls, io: IO[bytes]) -> Self:
-        """Reads a tag from the file object."""
+        """Read a tag from the file object."""
         encoded_tag = read_unsigned_varint(io)
         encoded_wire_type = encoded_tag & 0b111
         try:
@@ -34,9 +34,9 @@ class Tag:
         return cls(field_number=(encoded_tag >> 3), wire_type=wire_type)
 
     def encode(self) -> int:
-        """Converts the tag into its encoded format."""
+        """Convert the tag into its encoded format."""
         return (self.field_number << 3) | self.wire_type.value  # type: ignore
 
     def write_to(self, io: IO[bytes]) -> None:
-        """Writes the tag into the file object."""
+        """Write the tag into the file object."""
         write_unsigned_varint(uint(self.encode()), io)

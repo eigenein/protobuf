@@ -18,7 +18,7 @@ from tests.definitions import ExampleEnum
 
 
 @mark.parametrize(
-    "object_, expected",
+    ("object_", "expected"),
     [
         (ReadEnum(ExampleEnum), "ReadEnum(ExampleEnum)"),
         (WriteEnum[ExampleEnum](), "WriteEnum[<enum 'ExampleEnum'>]()"),
@@ -44,5 +44,5 @@ from tests.definitions import ExampleEnum
         ),
     ],
 )
-def test_repr(object_: Any, expected: str):
+def test_repr(object_: Any, expected: str) -> None:
     assert repr(object_) == expected

@@ -1,67 +1,54 @@
-# Please follow the Makefile style guide.
-# http://clarkgrubb.com/makefile-style-guide
-
 BIN := venv/bin
 
-.PHONY: build
-build:
-	$(BIN)/python -m build --sdist --wheel
-
-.PHONY: publish
-publish:
-	$(BIN)/python -m twine upload dist/*
+.PHONY: all
+all: install lint test build
 
 .PHONY: clean
 clean:
-	find . -type d -name __pycache__ -delete
-	rm -rf venv .mypy_cache .pytest_cache build dist *.egg-info .coverage .benchmarks
+	rm -rf .ruff_cache .mypy_cache .pytest_cache
+	find . -name "*.pyc" -delete
+	rm -rf *.egg-info build
+	rm -rf coverage*.xml .coverage
+	rm -rf .benchmarks
 
-.PHONY: venv
-venv:
-	python3 -m venv venv
-	$(BIN)/pip install --upgrade pip wheel
-	$(BIN)/pip install -e.[dev]
-
-.PHONY: test check
-test check: unittests lint
-
-.PHONY: unittests
-unittests:
-	$(BIN)/coverage run --source=pure_protobuf -m pytest --benchmark-disable tests
-	$(BIN)/coverage lcov -o .coverage.lcov
-	$(BIN)/coverage xml -o .coverage.xml
-	$(BIN)/coverage html -d .coverage.html
-
-.PHONY: benchmark
-benchmark:
-	$(BIN)/pytest --benchmark-only --benchmark-columns=mean,stddev,median,ops --benchmark-warmup=on tests
-
-.PHONY: format
-format: format/isort format/black
-
-.PHONY: format/isort
-format/isort:
-	$(BIN)/isort pure_protobuf tests
-
-.PHONY: format/black
-format/black:
-	$(BIN)/black pure_protobuf tests
+.PHONY: install
+install:
+	poetry install --all-extras --with dev
 
 .PHONY: lint
-lint: lint/flake8 lint/isort lint/mypy lint/format
+lint: lint/ruff lint/black lint/mypy
 
-.PHONY: lint/flake8
-lint/flake8:
-	$(BIN)/flake8 pure_protobuf tests
+.PHONY: lint/black
+lint/black:
+	poetry run black --diff --check pure_protobuf tests
 
-.PHONY: lint/isort
-lint/isort:
-	$(BIN)/isort -c --diff pure_protobuf tests
+.PHONY: lint/ruff
+lint/ruff:
+	poetry run ruff pure_protobuf tests
 
 .PHONY: lint/mypy
 lint/mypy:
-	$(BIN)/mypy pure_protobuf tests
+	poetry run mypy pure_protobuf tests
 
-.PHONY: lint/format
-lint/format:
-	$(BIN)/black --check --diff pure_protobuf tests
+.PHONY: format
+format: format/ruff format/black
+
+.PHONY: format/black
+format/black:
+	poetry run black pure_protobuf tests
+
+.PHONY: format/ruff
+format/ruff:
+	poetry run ruff --fix pure_protobuf tests
+
+.PHONY: test
+test:
+	poetry run pytest tests --benchmark-disable
+
+.PHONY: benchmark
+benchmark:
+	poetry run pytest tests --benchmark-only --benchmark-columns=mean,stddev,median,ops --benchmark-warmup=on
+
+.PHONY: build
+build:
+	poetry build

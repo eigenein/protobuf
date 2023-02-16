@@ -36,12 +36,12 @@ class MergeMessages(Merge[MessageT], ReprWithInner):
     __slots__ = ("inner",)
 
     # noinspection PyProtocol
-    def __init__(self, inner: AccumulateMessages[MessageT]):
+    def __init__(self, inner: AccumulateMessages[MessageT]) -> None:
         self.inner = inner
 
     def __call__(self, lhs: Optional[MessageT], rhs: Optional[MessageT]) -> Optional[MessageT]:
         """
-        Merges the two messages.
+        Merge the two messages.
 
         Returns:
             Merged message: it'll be either possibly updated `lhs` or non-updated `rhs`.

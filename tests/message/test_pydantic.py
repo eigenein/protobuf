@@ -9,7 +9,7 @@ from pure_protobuf.message import BaseMessage
 from pure_protobuf.one_of import OneOf
 
 
-def test_simple_message():
+def test_simple_message() -> None:
     class Message(BaseMessage, BaseModel):
         a: Annotated[uint, Field(1)] = uint(0)
 
@@ -21,7 +21,7 @@ def test_simple_message():
     assert Message.read_from(BytesIO(bytes_)) == message
 
 
-def test_one_of_assignment_pydantic():
+def test_one_of_assignment_pydantic() -> None:
     class Message(BaseMessage, BaseModel):
         foo_or_bar: ClassVar[OneOf] = OneOf()
 
@@ -37,7 +37,7 @@ def test_one_of_assignment_pydantic():
     assert message.bar == 43
 
 
-def test_one_of_read_from():
+def test_one_of_read_from() -> None:
     class Message(BaseMessage, BaseModel):
         foo_or_bar: ClassVar[OneOf] = OneOf()
 
@@ -50,7 +50,7 @@ def test_one_of_read_from():
     assert message.foo is None
 
 
-def test_one_of_merged():
+def test_one_of_merged() -> None:
     class Child(BaseMessage, BaseModel):
         foo_or_bar: ClassVar[OneOf] = OneOf()
 

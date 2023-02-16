@@ -233,7 +233,7 @@ def test_concatenated_packed_repeated() -> None:
 def test_one_of_assignment_dataclass() -> None:
     @dataclass
     class Message(BaseMessage):
-        # Mypy does not understand `OneOf[int, None]`: https://github.com/python/mypy/issues/12280.
+        # FIXME: Mypy does not understand `OneOf[int, None]`: https://github.com/python/mypy/issues/12280.
         foo_or_bar = OneOf[Unpack[Tuple[int, None]]]()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None

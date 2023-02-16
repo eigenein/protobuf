@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC
+try:
+    from inspect import get_annotations
+except ImportError:
+    from get_annotations import get_annotations
 from typing import IO, Any, ClassVar, Dict, Tuple
 
-from typing_extensions import Self, get_type_hints
+from typing_extensions import Self
 
 from pure_protobuf._accumulators import AccumulateMessages
 from pure_protobuf._mergers import MergeMessages
@@ -47,7 +51,7 @@ class BaseMessage(ABC):
         cls.__PROTOBUF_FIELDS_BY_NUMBER__ = {}
         cls.__PROTOBUF_FIELDS_BY_NAME__ = {}
 
-        type_hints: Dict[str, Any] = get_type_hints(cls, include_extras=True)
+        type_hints: Dict[str, Any] = get_annotations(cls, eval_str=True)
         for name, hint in type_hints.items():
             descriptor = _FieldDescriptor.from_attribute(cls, hint)
             if descriptor is not None:

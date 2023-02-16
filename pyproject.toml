@@ -35,8 +35,9 @@ requires = ["poetry-core", "poetry-dynamic-versioning"]
 build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry.dependencies]
+get-annotations = { version = "^0.1.2", python = "<3.10" }
 python = "^3.7.0"
-"typing-extensions" = "^4.4.0"
+typing-extensions = "^4.4.0"
 
 [tool.poetry.group.dev]
 optional = true

@@ -167,6 +167,18 @@ files = [
 test = ["pytest (>=6)"]
 
 [[package]]
+name = "get-annotations"
+version = "0.1.2"
+description = "A backport of Python 3.10's inspect.get_annotation() function"
+category = "main"
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "get-annotations-0.1.2.tar.gz", hash = "sha256:da7b69b8043237cc7f7ce5919e9cc59bd18fc4e2704b43eb34e3ba4fa9374bab"},
+    {file = "get_annotations-0.1.2-py3-none-any.whl", hash = "sha256:788ba8aa2434ee34ffb985c4aea2f9e575204c884c0e0dd0f969be846470e527"},
+]
+
+[[package]]
 name = "importlib-metadata"
 version = "6.0.0"
 description = "Read metadata from Python packages"
@@ -555,4 +567,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.0"
-content-hash = "863085e0b44fda8dc878d6270451b3a1f27220d86345ee88e2b9c9e4662c5a95"
+content-hash = "08914fe8dadbda57581952adf1ef26b52f2010620677eabfa7118101de704057"

@@ -69,7 +69,7 @@ jobs:
 
     - name: "🧪 Tests"
       if: success() || failure()
-      run: poetry run pytest tests --test-redis
+      run: poetry run pytest tests
 
     - name: "📤 Codecov"
       if: success() || failure()

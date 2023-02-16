@@ -29,18 +29,20 @@ jobs:
         name: "🗃 Cache"
         with:
           key: "mkdocs"
-          path: "~/.cache"
+          path: |
+            ~/.cache
+            .venv
 
       - name: "📥 Install Material for MkDocs"
-        run: "pip install 'mkdocs-material>=9.0.12,<10.0.0'"
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade 'mkdocs-material>=9.0.12,<10.0.0'
 
-      - run: "mkdocs build --site-dir ${{ runner.temp }}/docs"
+      - run: ".venv/bin/mkdocs build --site-dir _site"
         name: "📦 Build"
 
       - name: "📤 Upload"
         uses: actions/upload-pages-artifact@v1
-        with:
-          path: "${{ runner.temp }}/docs"
 
   deploy:
     name: "Deploy"

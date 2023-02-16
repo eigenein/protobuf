@@ -1,7 +1,7 @@
 # `pure-protobuf`
 
-[![Build Status](https://github.com/eigenein/protobuf/workflows/check/badge.svg)](https://github.com/eigenein/protobuf/actions)
-[![Coverage Status](https://coveralls.io/repos/github/eigenein/protobuf/badge.svg?branch=master)](https://coveralls.io/github/eigenein/protobuf?branch=master)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/eigenein/protobuf/check.yml?label=checks)](https://github.com/eigenein/protobuf/actions/workflows/check.yml)
+[![Code coverage](https://codecov.io/gh/eigenein/protobuf/branch/master/graph/badge.svg?token=bJarwbLlY7)](https://codecov.io/gh/eigenein/protobuf)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pure-protobuf.svg)](https://pypistats.org/packages/pure-protobuf)
 [![PyPI – Version](https://img.shields.io/pypi/v/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#history)
 [![PyPI – Python](https://img.shields.io/pypi/pyversions/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#files)

@@ -34,7 +34,7 @@ jobs:
       - name: "📥 Install Material for MkDocs"
         run: "pip install 'mkdocs-material>=9.0.12,<10.0.0'"
 
-      - run: mkdocs build --site-dir docs
+      - run: mkdocs build --site-dir _site
         name: "📦 Build"
 
       - name: "📤 Upload"

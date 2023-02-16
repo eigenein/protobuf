@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from abc import ABC
+from typing import IO, Any, ClassVar, Dict, Tuple
+
+from typing_extensions import Self
 
 try:
     from inspect import get_annotations
 except ImportError:
-    from get_annotations import get_annotations
-from typing import IO, Any, ClassVar, Dict, Tuple
-
-from typing_extensions import Self
+    from get_annotations import get_annotations  # type: ignore[no-redef]
 
 from pure_protobuf._accumulators import AccumulateMessages
 from pure_protobuf._mergers import MergeMessages

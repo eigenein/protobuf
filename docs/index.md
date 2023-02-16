@@ -83,9 +83,9 @@
     class Message(BaseMessage):
         a: Annotated[uint, Field(1)] = uint(0)
 
-        def __init__(a: uint) -> None:
+        def __init__(self, a: uint) -> None:
             self.a = a
+
     
-    
-    assert Message.read_from(BytesIO(b"\x08\x96\x01")) == Message(a=uint(150))
+    assert Message.read_from(BytesIO(b"\x08\x96\x01")).a == uint(150)
     ```

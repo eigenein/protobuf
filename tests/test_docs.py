@@ -3,11 +3,12 @@
 import re
 from itertools import chain
 from pathlib import Path
+from textwrap import dedent
 from typing import Iterator, NamedTuple
 
 from pytest import mark, param
 
-CODE_BLOCK_RE = re.compile(r"""```python title="([^"]+)"$(.*?)+```""", re.MULTILINE | re.DOTALL)
+CODE_BLOCK_RE = re.compile(r"""```python title="([^"]+)"$(.+?)```""", re.MULTILINE | re.DOTALL)
 
 
 def _discover_files() -> Iterator[Path]:
@@ -26,4 +27,4 @@ def _generate_params(path: Path) -> Iterator[NamedTuple]:
     chain.from_iterable(_generate_params(path) for path in _discover_files()),
 )
 def test_documentation_snippet(snippet: str) -> None:
-    exec(snippet, {})
+    exec(dedent(snippet), {})

@@ -65,10 +65,11 @@ strict = true
 latest-tag = true
 
 [tool.mypy]
-ignore_missing_imports = true
+allow_redefinition = true
 allow_untyped_globals = true
 check_untyped_defs = true
-allow_redefinition = true
+enable_incomplete_feature = "TypeVarTuple, Unpack"
+ignore_missing_imports = true
 pretty = true
 
 [tool.pytest.ini_options]

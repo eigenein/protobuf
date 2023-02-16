@@ -9,15 +9,15 @@
 
 <small><strong>Wow! Such annotated! Very buffers!</strong></small>
 
+| ⚠️ Note                                                                                                                                   |
+|:------------------------------------------------------------------------------------------------------------------------------------------|
+| This `README` describes the upcoming **major version update**. For `2.x` please refer to: https://github.com/eigenein/protobuf/tree/2.2.3 |
+
 ## Documentation
 
 <a href="https://eigenein.github.io/protobuf/">
     <img alt="Documentation" height="30em" src="https://img.shields.io/github/actions/workflow/status/eigenein/protobuf/docs.yml?label=documentation&logo=github">
 </a>
-
-| ⚠️ Note                                                                                                                                   |
-|:------------------------------------------------------------------------------------------------------------------------------------------|
-| This `README` describes the upcoming **major version update**. For `2.x` please refer to: https://github.com/eigenein/protobuf/tree/2.2.3 |
 
 ## Quick examples
 
@@ -33,11 +33,9 @@ message SearchRequest {
 }
 ```
 
-### With [data classes](https://docs.python.org/3/library/dataclasses.html)
+### With [dataclasses](https://docs.python.org/3/library/dataclasses.html)
 
-```python
-# test_id=dataclass
-
+```python title="dataclass_example.py"
 from dataclasses import dataclass
 from io import BytesIO
 
@@ -61,9 +59,7 @@ assert SearchRequest.read_from(BytesIO(buffer))
 
 ### With [`pydantic`](https://docs.pydantic.dev/)
 
-```python
-# test_id=pydantic
-
+```python title="pydantic_example.py"
 from io import BytesIO
 
 from pure_protobuf.annotations import Field, uint

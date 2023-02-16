@@ -22,13 +22,14 @@ jobs:
 
       - uses: actions/setup-python@v4
         name: "✨ Set up Python"
+        id: "setup-python"
         with:
           python-version: 3.x
 
       - uses: actions/cache@v3
         name: "🗃 Cache"
         with:
-          key: "mkdocs"
+          key: "${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-mkdocs"
           path: |
             ~/.cache
             .venv

@@ -6,7 +6,7 @@ from typing import IO, Any, ClassVar, Dict, Tuple
 from typing_extensions import Self
 
 try:
-    from inspect import get_annotations
+    from inspect import get_annotations  # type: ignore[attr-defined]
 except ImportError:
     from get_annotations import get_annotations  # type: ignore[no-redef]
 

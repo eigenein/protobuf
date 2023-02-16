@@ -71,6 +71,10 @@ check_untyped_defs = true
 allow_redefinition = true
 pretty = true
 
+[tool.pytest.ini_options]
+addopts = "--cov=./ --cov-report=xml"
+asyncio_mode = "auto"
+
 [tool.coverage.run]
 source = ["pure_protobuf"]
 omit = ["tests/*"]

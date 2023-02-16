@@ -34,13 +34,13 @@ jobs:
       - name: "📥 Install Material for MkDocs"
         run: "pip install 'mkdocs-material>=9.0.12,<10.0.0'"
 
-      - run: "mkdocs build --site-dir $RUNNER_TEMP/docs"
+      - run: "mkdocs build --site-dir ${{ runner.temp }}/docs"
         name: "📦 Build"
 
       - name: "📤 Upload"
         uses: actions/upload-pages-artifact@v1
         with:
-          path: "${{ env.RUNNER_TEMP }}/docs"
+          path: "${{ runner.temp }}/docs"
 
   deploy:
     name: "Deploy"

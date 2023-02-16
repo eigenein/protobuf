@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
+
 try:
     from inspect import get_annotations
 except ImportError:

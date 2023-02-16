@@ -11,7 +11,7 @@
     <img alt="Documentation" height="25em" src="https://img.shields.io/github/actions/workflow/status/eigenein/protobuf/docs.yml?label=documentation&logo=github">
 </a>
 
-**Wow! Such annotated! Very buffers!**
+<small><strong>Wow! Such annotated! Very buffers!</strong></small>
 
 | ⚠️ Note                                                                                                                                   |
 |:------------------------------------------------------------------------------------------------------------------------------------------|

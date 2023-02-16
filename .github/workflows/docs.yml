@@ -24,16 +24,15 @@ jobs:
         name: "✨ Set up Python"
         with:
           python-version: 3.x
-          cache: "pip"
 
       - uses: actions/cache@v3
-        name: "🗃 Cache MkDocs"
+        name: "🗃 Cache"
         with:
           key: "mkdocs"
-          path: ".cache"
+          path: "~/.cache"
 
-      - run: pip install mkdocs-material
-        name: "📥 Install Material for MkDocs"
+      - name: "📥 Install Material for MkDocs"
+        run: "pip install mkdocs-material>=9.0.12,<10.0.0"
 
       - run: mkdocs build --site-dir docs
         name: "📦 Build"

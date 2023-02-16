@@ -1,4 +1,5 @@
 .benchmarks
+.cache
 
 # Created by https://www.toptal.com/developers/gitignore/api/linux,macos,python,windows,sublimetext,intellij+all,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,python,windows,sublimetext,intellij+all,visualstudiocode

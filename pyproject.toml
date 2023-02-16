@@ -51,6 +51,8 @@ pytest-benchmark = "^4.0.0"
 pytest-cov = "^4.0.0"
 ruff = "^0.0.247"
 mkdocs-material = "^9.0.12"
+pillow = "^9.4.0"
+cairosvg = "^2.6.0"
 
 [tool.poetry.urls]
 "Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"

@@ -4,7 +4,44 @@ site_name: pure-protobuf
 
 theme:
   name: material
+  features:
+    - navigation.footer
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 
 plugins:
   - search:
       lang: en
+  - social
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+repo_url: https://github.com/eigenein/protobuf
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/eigenein
+      name: eigenein on GitHub
+  analytics:
+    provider: google
+    property: G-CPNSYW2HX7
+
+copyright: Copyright &copy; 2011-2023 Pavel Perestoronin
+
+site_url: "https://eigenein.github.io/protobuf"

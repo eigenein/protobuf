@@ -32,12 +32,13 @@ jobs:
           key: "${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-mkdocs"
           path: |
             ~/.cache
+            .cache
             .venv
 
       - name: "📥 Install Material for MkDocs"
         run: |
           python -m venv .venv
-          .venv/bin/pip install --upgrade 'mkdocs-material>=9.0.12,<10.0.0'
+          .venv/bin/pip install --upgrade 'mkdocs-material>=9.0.12,<10.0.0' pillow cairosvg
 
       - run: ".venv/bin/mkdocs build --site-dir _site"
         name: "📦 Build"

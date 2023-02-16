@@ -279,9 +279,11 @@ from pure_protobuf.message import BaseMessage
 from pure_protobuf.one_of import OneOf
 from typing_extensions import Annotated
 
+
 class Message(BaseMessage, BaseModel):
     # `ClassVar` is needed because this is a descriptor and not a real attribute.
     foo_or_bar: ClassVar[OneOf] = OneOf()
+    which_one = foo_or_bar.which_one_of_getter()
 
     foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
     bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -294,6 +296,7 @@ message.bar = 43
 assert message.foo_or_bar == 43
 assert message.foo is None
 assert message.bar == 43
+assert message.which_one() == "bar"
 ```
 
 ### Limitations

@@ -233,8 +233,8 @@ def test_concatenated_packed_repeated() -> None:
 def test_one_of_assignment_dataclass() -> None:
     @dataclass
     class Message(BaseMessage):
-        # FIXME: Mypy does not understand `OneOf[int, None]`: https://github.com/python/mypy/issues/12280.
         foo_or_bar = OneOf[Optional[int]]()
+        which_foo_or_bar = foo_or_bar.which_one_of_getter()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -246,12 +246,14 @@ def test_one_of_assignment_dataclass() -> None:
     assert message.foo_or_bar == 43
     assert message.foo is None
     assert message.bar == 43
+    assert message.which_foo_or_bar() == "bar"
 
 
 def test_one_of_read_from() -> None:
     @dataclass
     class Message(BaseMessage):
         foo_or_bar = OneOf[Optional[int]]()
+        which_foo_or_bar = foo_or_bar.which_one_of_getter()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -260,12 +262,14 @@ def test_one_of_read_from() -> None:
     assert message.foo_or_bar == 2
     assert message.bar == 2
     assert message.foo is None
+    assert message.which_foo_or_bar() == "bar"
 
 
 def test_one_of_merged() -> None:
     @dataclass
     class Child(BaseMessage):
         foo_or_bar = OneOf[Optional[int]]()
+        which_foo_or_bar = foo_or_bar.which_one_of_getter()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -278,3 +282,4 @@ def test_one_of_merged() -> None:
     assert message.child.foo_or_bar == 2
     assert message.child.bar == 2
     assert message.child.foo is None
+    assert message.child.which_foo_or_bar() == "bar"

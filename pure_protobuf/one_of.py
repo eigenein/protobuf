@@ -1,4 +1,6 @@
-from typing import Any, Generic, List, MutableMapping, Optional, Tuple, Type, TypeVar
+from __future__ import annotations
+
+from typing import Any, Callable, Generic, List, MutableMapping, Optional, Tuple, Type, TypeVar
 
 from pure_protobuf.message import BaseMessage
 
@@ -39,13 +41,24 @@ class OneOf(Generic[OneOfT]):
             # the corresponding annotation.
             # This is not a part of the public interface, hence the «type: ignore».
             return self  # type: ignore[return-value]
-        for _, name in self._fields:
-            value = getattr(instance, name)
-            if value is not None:
-                return value
-        return None
+        name = self._which_one_of(instance)
+        return getattr(instance, name) if name else None
 
     def __set__(self, instance: BaseMessage, _value: Any) -> None:
         raise RuntimeError("attempted to set the one-of field, use a specific attribute instead")
 
-    # TODO: `which_one_of`.
+    def which_one_of_getter(self) -> Callable[[BaseMessage], Optional[str]]:
+        """Construct a getter which returns which attribute is actually set."""
+
+        def which_one_of(instance: BaseMessage) -> Optional[str]:
+            return self._which_one_of(instance)
+
+        return which_one_of
+
+    def _which_one_of(self, instance: BaseMessage) -> Optional[str]:
+        """Return which of the attributes is actually set."""
+        for _, name in self._fields:
+            value = getattr(instance, name)
+            if value is not None:
+                return name
+        return None

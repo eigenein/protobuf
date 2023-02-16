@@ -24,6 +24,7 @@ def test_simple_message() -> None:
 def test_one_of_assignment_pydantic() -> None:
     class Message(BaseMessage, BaseModel):
         foo_or_bar: ClassVar[OneOf] = OneOf()
+        which_foo_or_bar: ClassVar = foo_or_bar.which_one_of_getter()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -35,11 +36,13 @@ def test_one_of_assignment_pydantic() -> None:
     assert message.foo_or_bar == 43
     assert message.foo is None
     assert message.bar == 43
+    assert message.which_foo_or_bar() == "bar"
 
 
 def test_one_of_read_from() -> None:
     class Message(BaseMessage, BaseModel):
         foo_or_bar: ClassVar[OneOf] = OneOf()
+        which_foo_or_bar: ClassVar = foo_or_bar.which_one_of_getter()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -48,11 +51,13 @@ def test_one_of_read_from() -> None:
     assert message.foo_or_bar == 2
     assert message.bar == 2
     assert message.foo is None
+    assert message.which_foo_or_bar() == "bar"
 
 
 def test_one_of_merged() -> None:
     class Child(BaseMessage, BaseModel):
         foo_or_bar: ClassVar[OneOf] = OneOf()
+        which_foo_or_bar: ClassVar = foo_or_bar.which_one_of_getter()
 
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -64,3 +69,4 @@ def test_one_of_merged() -> None:
     assert message.child.foo_or_bar == 2
     assert message.child.bar == 2
     assert message.child.foo is None
+    assert message.child.which_foo_or_bar() == "bar"

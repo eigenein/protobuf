@@ -67,7 +67,7 @@ jobs:
 
     - name: "🧪 Tests"
       if: success() || failure()
-      run: poetry run pytest tests
+      run: make test
 
     - name: "📤 Codecov"
       if: success() || failure()

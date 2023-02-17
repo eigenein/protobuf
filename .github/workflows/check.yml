@@ -26,6 +26,17 @@ jobs:
         - '3.11'
 
     steps:
+    - name: "🗃 Cache"
+      if: success() || failure()
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache
+          .mypy_cache
+          .pytest_cache
+          .ruff_cache
+        key: ${{ runner.os }}-${{ matrix.python-version }}-check
+
     - name: "📥 Checkout"
       uses: actions/checkout@v3
       with:
@@ -40,16 +51,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: poetry
-
-    - name: "🗃 Cache"
-      if: success() || failure()
-      uses: actions/cache@v3
-      with:
-        path: |
-          .mypy_cache
-          .pytest_cache
-          .ruff_cache
-        key: ${{ runner.os }}-${{ matrix.python-version }}-check
 
     - name: "📥 Install the package"
       run: make install

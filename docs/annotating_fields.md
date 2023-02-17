@@ -4,23 +4,32 @@ Field types are specified via [`#!python Annotated`](https://docs.python.org/3/l
 
 ## Supported types
 
-| Type                                                                                        | `.proto` type                                               | Notes                                                              |
-|---------------------------------------------------------------------------------------------|-------------------------------------------------------------|--------------------------------------------------------------------|
-| `#!python bool`                                                                             | `#!protobuf bool`                                           |                                                                    |
-| `#!python bytes`, `#!python bytearray`, `#!python memoryview`, `#!python typing.ByteString` | `#!protobuf bytes`                                          | Always deserialized as `#!python bytes`                            |
-| `#!python float`                                                                            | `#!protobuf float`                                          | 32-bit floating-point number                                       |
-| `#!python int`                                                                              | `#!protobuf sint32`, `#!protobuf sint64`                    | **Signed** variable-length integer                                 |
-| `#!python enum.IntEnum`                                                                     | `#!protobuf enum`, `#!protobuf uint32`, `#!protobuf uint64` | Supported subclasses of `#!python IntEnum` (see the section below) |
-| `#!python pure_protobuf.annotations.double`                                                 | `#!protobuf double`                                         | 64-bit floating-point number                                       |
-| `#!python pure_protobuf.annotations.fixed32`                                                | `#!protobuf fixed32`                                        |                                                                    |
-| `#!python pure_protobuf.annotations.fixed64`                                                | `#!protobuf fixed64`                                        |                                                                    |
-| `#!python pure_protobuf.annotations.int32`                                                  | `#!protobuf int32`                                          | Two's compliment variable-length integer                           |
-| `#!python pure_protobuf.annotations.int64`                                                  | `#!protobuf int64`                                          | Two's compliment variable-length integer                           |
-| `#!python pure_protobuf.annotations.uint`                                                   | `#!protobuf uint32`, `#!protobuf uint64`                    | **Unsigned** variable-length integer                               |
-| `#!python pure_protobuf.annotations.sfixed32`                                               | `#!protobuf sfixed32`                                       |                                                                    |
-| `#!python pure_protobuf.annotations.sfixed64`                                               | `#!protobuf sfixed64`                                       |                                                                    |
-| `#!python str`                                                                              | `#!protobuf string`                                         |                                                                    |
-| `#!python urllib.parse.ParseResult`                                                         | `#!protobuf string`                                         | Parsed URL, represented as a string                                |
+### Built-in types
+
+| Type                                                                                                                | `.proto` type                                               | Notes                                                                                                     |
+|:--------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------|
+| `#!python bool`                                                                                                     | `#!protobuf bool`                                           |                                                                                                           |
+| `#!python bytes`, `#!python bytearray`, `#!python memoryview`, `#!python typing.ByteString`                         | `#!protobuf bytes`                                          | Always deserialized as `#!python bytes`                                                                   |
+| `#!python float`                                                                                                    | `#!protobuf float`                                          | **32-bit** floating-point number. Use the additional `#!python double` type for 64-bit number             |
+| `#!python int`                                                                                                      | `#!protobuf sint32`, `#!protobuf sint64`                    | **Signed** variable-length integer. For unsigned representation, use the additional `#!python uint` type. |
+| [`#!python enum.IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)                                 | `#!protobuf enum`, `#!protobuf uint32`, `#!protobuf uint64` | Supports subclasses of `#!python IntEnum` (see [Enumerations](#enumerations))                             |
+| `#!python str`                                                                                                      | `#!protobuf string`                                         |                                                                                                           |
+| [`#!python urllib.parse.ParseResult`](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.ParseResult) | `#!protobuf string`                                         | Parsed URL, represented as a string                                                                       |
+
+### Additional types
+
+`#!python pure_protobuf.annotations` module provides additional [`#!python NewType`](https://docs.python.org/3/library/typing.html#newtype)s to support different representations of the singular types:
+
+| `#!python pure_protobuf.annotations` type | `.proto` type                            | Notes                                    |
+|:------------------------------------------|:-----------------------------------------|:-----------------------------------------|
+| `#!python double`                         | `#!protobuf double`                      | **64-bit** floating-point number         |
+| `#!python fixed32`                        | `#!protobuf fixed32`                     |                                          |
+| `#!python fixed64`                        | `#!protobuf fixed64`                     |                                          |
+| `#!python int32`                          | `#!protobuf int32`                       | Two's compliment variable-length integer |
+| `#!python int64`                          | `#!protobuf int64`                       | Two's compliment variable-length integer |
+| `#!python uint`                           | `#!protobuf uint32`, `#!protobuf uint64` | **Unsigned** variable-length integer     |
+| `#!python sfixed32`                       | `#!protobuf sfixed32`                    |                                          |
+| `#!python sfixed64`                       | `#!protobuf sfixed64`                    |                                          |
 
 ## Repeated fields
 
@@ -66,13 +75,13 @@ assert bytes(Message(foo=[uint(1), uint(2)])) == b"\x08\x01\x08\x02"
 
 ## Required fields
 
-Required fields are [deprecated](https://developers.google.com/protocol-buffers/docs/style#things_to_avoid) in `proto2` and not supported in `proto3`, thus in `pure-protobuf` fields are always optional. `#!python Optional` annotation is accepted for type hinting, but ignored by `#!python BaseMessage`.
+Required fields are [deprecated](https://developers.google.com/protocol-buffers/docs/style#things_to_avoid) in `proto2` and not supported in `proto3`, thus in `pure-protobuf` fields are always optional. `#!python Optional` annotation is accepted for type hinting, but has no functional meaning for `#!python BaseMessage`.
 
 ## Default values
 
 In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unprovided:
 
-```python title="test_default_values.py"
+```python title="test_default_values.py" hl_lines="13"
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Optional
@@ -91,6 +100,35 @@ class Foo(BaseMessage):
 assert bytes(Foo()) == b"\x08\x2A"
 assert Foo.read_from(BytesIO()) == Foo(bar=uint(42))
 ```
+
+!!! warning "Make sure to set defaults for non-required fields"
+
+    `pure-protobuf` makes no assumptions on how a message class' `#!python __init__()` handles missing keyword arguments.
+    So, if you expect a field to be optional, you **must** specify a default value explicitly –
+    just as you normally do with **pydantic** or **dataclasses**.
+
+    Otherwise, a missing record would cause a missing argument error:
+
+    ```python title="test_missing_default.py" hl_lines="17-18"
+    from dataclasses import dataclass
+    from io import BytesIO
+    from typing import Optional
+
+    from pytest import raises
+    from typing_extensions import Annotated
+
+    from pure_protobuf.annotations import Field
+    from pure_protobuf.message import BaseMessage
+
+
+    @dataclass
+    class Foo(BaseMessage):
+        foo: Annotated[Optional[int], Field(1)]
+
+
+    with raises(TypeError):
+        Foo.read_from(BytesIO())
+    ```
 
 ## Enumerations
 
@@ -147,18 +185,27 @@ assert bytes(Test3(c=Test1(a=150))) == b"\x1A\x03\x08\x96\x01"
     Use `#!python typing.Self` (or `#!python typing_extensions.Self` in older Python) to reference
     the message class itself:
 
-    ```#!python title="test_self.py"
+    ```python title="test_self.py"
+    from dataclasses import dataclass    
+    from typing import Optional
+
+    from typing_extensions import Annotated, Self
+
+    from pure_protobuf.annotations import Field
+    from pure_protobuf.message import BaseMessage
+
+
     @dataclass
     class RecursiveMessage(BaseMessage):
-        payload: Annotated[uint, Field(1)]
+        payload: Annotated[int, Field(1)]
         inner: Annotated[Optional[Self], Field(2)] = None
     ```
 
-!!! tip "Messages with circular dependencies are not supported"
+!!! warning "Messages with circular dependencies are not supported"
 
     The following example does not work at the moment:
 
-    ```#!python
+    ```python
     class A(BaseMessage):
         b: Annotated[B, ...]
 
@@ -200,8 +247,8 @@ assert message.which_one() == "bar"
 
 1. `#!python ClassVar` is needed here because this is a descriptor and not a real attribute.
 
-### Limitations
+!!! warning "Limitations"
 
-- When assigning a one-of member, `#!python BaseMessage` resets the other fields to `#!python None`, regardless of any defaults defined by, for example, `#!python dataclasses.field`.
-- The `#!python OneOf` descriptor simply iterates over its members in order to return a `Oneof` value.
-- It's impossible to set a value via a `OneOf` descriptor, one needs to assign the value to a specific attribute.
+    - When assigning a one-of member, `#!python BaseMessage` resets the other fields to `#!python None`, **regardless** of any defaults defined by, for example, `#!python dataclasses.field`.
+    - The `#!python OneOf` descriptor simply iterates over its members in order to return an assigned `Oneof` value, so it takes [linear time](https://en.wikipedia.org/wiki/Time_complexity#Linear_time).
+    - It's impossible to set a value via a `OneOf` descriptor, one needs to assign the value to a specific attribute.

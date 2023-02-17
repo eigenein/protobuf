@@ -54,7 +54,7 @@ class SearchRequest(BaseMessage):
 request = SearchRequest(query="hello", page_number=uint(1), result_per_page=uint(10))
 buffer = bytes(request)
 assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
-assert SearchRequest.read_from(BytesIO(buffer))
+assert SearchRequest.read_from(BytesIO(buffer)) == request
 ```
 
 ### With [`pydantic`](https://docs.pydantic.dev/)
@@ -77,5 +77,5 @@ class SearchRequest(BaseMessage, BaseModel):
 request = SearchRequest(query="hello", page_number=uint(1), result_per_page=uint(10))
 buffer = bytes(request)
 assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
-assert SearchRequest.read_from(BytesIO(buffer))
+assert SearchRequest.read_from(BytesIO(buffer)) == request
 ```

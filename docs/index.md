@@ -38,7 +38,7 @@
     )
     buffer = bytes(request)
     assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
-    assert SearchRequest.read_from(BytesIO(buffer))
+    assert SearchRequest.read_from(BytesIO(buffer)) == request
     ```
 
 === "With pydantic"
@@ -65,7 +65,7 @@
     )
     buffer = bytes(request)
     assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
-    assert SearchRequest.read_from(BytesIO(buffer))
+    assert SearchRequest.read_from(BytesIO(buffer)) == request
     ```
 
 !!! info "Prerequisite"

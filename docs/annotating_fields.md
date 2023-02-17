@@ -142,6 +142,32 @@ class Test3(BaseMessage):
 assert bytes(Test3(c=Test1(a=150))) == b"\x1A\x03\x08\x96\x01"
 ```
 
+!!! tip "Self-referencing messages"
+
+    Use `#!python typing.Self` (or `#!python typing_extensions.Self` in older Python) to reference
+    the message class itself:
+
+    ```#!python title="test_self.py"
+    @dataclass
+    class RecursiveMessage(BaseMessage):
+        payload: Annotated[uint, Field(1)]
+        inner: Annotated[Optional[Self], Field(2)] = None
+    ```
+
+!!! tip "Messages with circular dependencies are not supported"
+
+    The following example does not work at the moment:
+
+    ```#!python
+    class A(BaseMessage):
+        b: Annotated[B, ...]
+
+    class B(BaseMessage):
+        a: Annotated[A, ...]
+    ```
+
+    Tracking issue: [#108](https://github.com/eigenein/protobuf/issues/108).
+
 ## [Oneof](https://developers.google.com/protocol-buffers/docs/proto3#oneof)
 
 ```python title="test_one_of.py"

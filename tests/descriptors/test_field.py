@@ -3,7 +3,7 @@ from typing import Any, ByteString, List, Optional
 from pytest import mark, raises
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field, int32, uint
 from pure_protobuf.descriptors._field import _FieldDescriptor
 from pure_protobuf.exceptions import IncorrectAnnotationError
 from pure_protobuf.io.wrappers import to_bytes
@@ -45,7 +45,8 @@ def test_from_inner_hint_incorrect(hint: Any) -> None:
             b"\xd2\x02\x06\x08\x01\x12\x02\x08\x02",
         ),
         (Annotated[List[uint], Field(1, packed=False)], [1, 2], b"\x08\x01\x08\x02"),
-        # TODO: what about messages with cyclic dependencies?
+        (Annotated[int32, Field(1)], -2, b"\x08\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"),
+        # TODO: cyclic dependencies, https://github.com/eigenein/protobuf/issues/108.
     ],
     ids=pytest_test_id,
 )

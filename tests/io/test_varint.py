@@ -7,7 +7,9 @@ from pytest_benchmark.fixture import BenchmarkFixture
 from pure_protobuf.exceptions import IncorrectValueError
 from pure_protobuf.io.varint import (
     ReadEnum,
+    ReadTwosComplimentVarint,
     WriteEnum,
+    WriteTwosComplimentVarint,
     read_signed_varint,
     read_unsigned_varint,
     write_signed_varint,
@@ -44,18 +46,39 @@ SIGNED_VARINT_TESTS = [
 
 
 @mark.parametrize(("value", "bytes_"), SIGNED_VARINT_TESTS, ids=pytest_test_id)
-def test_signed_varint_serializer_dumps(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
+def test_write_signed_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
     assert benchmark(to_bytes, write_signed_varint, value) == bytes_
 
 
 @mark.parametrize(("value", "bytes_"), SIGNED_VARINT_TESTS, ids=pytest_test_id)
-def test_signed_varint_serializer_loads(
+def test_read_signed_varint(
     value: int,
     bytes_: bytes,
     benchmark: BenchmarkFixture,
     bytes_io,  # noqa: ANN001
 ) -> None:
     assert benchmark.pedantic(read_signed_varint, setup=bytes_io(bytes_)) == value
+
+
+TWOS_COMPLIMENT_TESTS = [
+    (-2, b"\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"),
+    (1, b"\x01"),
+]
+
+
+@mark.parametrize(("value", "bytes_"), TWOS_COMPLIMENT_TESTS, ids=pytest_test_id)
+def test_write_twos_compliment_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
+    assert benchmark(to_bytes, WriteTwosComplimentVarint[int](), value) == bytes_
+
+
+@mark.parametrize(("value", "bytes_"), TWOS_COMPLIMENT_TESTS, ids=pytest_test_id)
+def test_read_twos_compliment_varint(
+    value: int,
+    bytes_: bytes,
+    benchmark: BenchmarkFixture,
+    bytes_io,  # noqa: ANN001
+) -> None:
+    assert benchmark.pedantic(ReadTwosComplimentVarint[int](), setup=bytes_io(bytes_)) == value
 
 
 ENUM_CASES = [

@@ -7,9 +7,10 @@ See Also:
 
 from enum import IntEnum
 from itertools import count
-from typing import IO, Iterator, Type, TypeVar
+from sys import byteorder
+from typing import IO, Generic, Iterator, Type, TypeVar, cast
 
-from pure_protobuf.annotations import uint
+from pure_protobuf.annotations import int32, int64, uint
 from pure_protobuf.exceptions import IncorrectValueError
 from pure_protobuf.helpers.io import read_byte_checked
 from pure_protobuf.interfaces._skip import Skip
@@ -74,6 +75,46 @@ class WriteSignedVarint(Write[int]):
 
 read_signed_varint = ReadSignedVarint()
 write_signed_varint = WriteSignedVarint()
+
+
+TwosComplimentIntegerT = TypeVar("TwosComplimentIntegerT", int32, int64, int)
+
+
+class ReadTwosComplimentVarint(Generic[TwosComplimentIntegerT], ReadSingular[TwosComplimentIntegerT]):
+    """
+    Reads a two's compliment varint.
+
+    See Also:
+        - https://protobuf.dev/programming-guides/encoding/#signed-ints
+    """
+
+    def __call__(self, io: IO[bytes]) -> TwosComplimentIntegerT:
+        varint = read_unsigned_varint(io)
+        return cast(
+            TwosComplimentIntegerT,
+            int.from_bytes(
+                varint.to_bytes(8, byteorder, signed=False),
+                byteorder,
+                signed=True,
+            ),
+        )
+
+
+class WriteTwosComplimentVarint(Generic[TwosComplimentIntegerT], Write[TwosComplimentIntegerT]):
+    """
+    Writes a two's compliment varint.
+
+    See Also:
+        - https://protobuf.dev/programming-guides/encoding/#signed-ints
+    """
+
+    def __call__(self, value: TwosComplimentIntegerT, io: IO[bytes]) -> None:
+        compliment = int.from_bytes(
+            value.to_bytes(8, byteorder, signed=True),
+            byteorder,
+            signed=False,
+        )
+        return write_unsigned_varint(uint(compliment), io)
 
 
 class ReadBool(ReadSingular[bool]):

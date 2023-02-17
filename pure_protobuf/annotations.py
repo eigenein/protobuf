@@ -94,6 +94,21 @@ See Also:
     - https://developers.google.com/protocol-buffers/docs/encoding#non-varint-nums
 """
 
-# noinspection PyTypeChecker
 uint = NewType("uint", int)
 """Unsigned variable-length integer."""
+
+int32 = NewType("int32", int)
+"""
+Two's compliment integer.
+
+See Also:
+    - https://developers.google.com/protocol-buffers/docs/encoding#signed-ints
+"""
+
+int64 = NewType("int64", int)
+"""
+Two's compliment integer.
+
+See Also:
+    - https://developers.google.com/protocol-buffers/docs/encoding#signed-ints
+"""

@@ -9,7 +9,7 @@ from typing_extensions import Self
 
 from pure_protobuf._accumulators import AccumulateLastOneWins
 from pure_protobuf._mergers import MergeLastOneWins
-from pure_protobuf.annotations import double, fixed32, fixed64, sfixed32, sfixed64, uint
+from pure_protobuf.annotations import double, fixed32, fixed64, int32, int64, sfixed32, sfixed64, uint
 from pure_protobuf.exceptions import UnsupportedAnnotationError
 from pure_protobuf.helpers._dataclasses import DATACLASS_OPTIONS
 from pure_protobuf.helpers.itertools import ReadCallback
@@ -23,7 +23,9 @@ from pure_protobuf.io.struct_ import ReadStruct, WriteStruct
 from pure_protobuf.io.url import ReadUrl, WriteUrl
 from pure_protobuf.io.varint import (
     ReadEnum,
+    ReadTwosComplimentVarint,
     WriteEnum,
+    WriteTwosComplimentVarint,
     read_bool,
     read_signed_varint,
     read_unsigned_varint,
@@ -185,6 +187,16 @@ RecordDescriptor.__PREDEFINED__ = {
         wire_type=WireType.VARINT,
         write=write_signed_varint,
         read=ReadMaybePacked[int](ReadCallback(read_signed_varint), WireType.VARINT),
+    ),
+    int32: RecordDescriptor(
+        wire_type=WireType.VARINT,
+        write=WriteTwosComplimentVarint[int32](),
+        read=ReadMaybePacked[int32](ReadCallback(ReadTwosComplimentVarint[int32]()), WireType.VARINT),
+    ),
+    int64: RecordDescriptor(
+        wire_type=WireType.VARINT,
+        write=WriteTwosComplimentVarint[int64](),
+        read=ReadMaybePacked[int64](ReadCallback(ReadTwosComplimentVarint[int64]()), WireType.VARINT),
     ),
     memoryview: BYTES_DESCRIPTOR,
     ParseResult: URL_DESCRIPTOR,

@@ -1,6 +1,6 @@
 # `pure-protobuf`
 
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/eigenein/protobuf/check.yml?label=checks)](https://github.com/eigenein/protobuf/actions/workflows/check.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/eigenein/protobuf/check.yml?label=checks&logo=github)](https://github.com/eigenein/protobuf/actions/workflows/check.yml)
 [![Code coverage](https://codecov.io/gh/eigenein/protobuf/branch/master/graph/badge.svg?token=bJarwbLlY7)](https://codecov.io/gh/eigenein/protobuf)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pure-protobuf.svg)](https://pypistats.org/packages/pure-protobuf)
 [![PyPI – Version](https://img.shields.io/pypi/v/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#history)

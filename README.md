@@ -4,7 +4,7 @@
 [![Code coverage](https://codecov.io/gh/eigenein/protobuf/branch/master/graph/badge.svg?token=bJarwbLlY7)](https://codecov.io/gh/eigenein/protobuf)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pure-protobuf.svg)](https://pypistats.org/packages/pure-protobuf)
 [![PyPI – Version](https://img.shields.io/pypi/v/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#history)
-[![PyPI – Python](https://img.shields.io/pypi/pyversions/pure-protobuf.svg)](https://pypi.org/project/pure-protobuf/#files)
+[![PyPI – Python](https://img.shields.io/pypi/pyversions/pure-protobuf.svg?logo=python&logoColor=yellow)](https://pypi.org/project/pure-protobuf/#files)
 [![License](https://img.shields.io/pypi/l/pure-protobuf.svg)](https://github.com/eigenein/protobuf/blob/master/LICENSE)
 
 <small><strong>Wow! Such annotated! Very buffers!</strong></small>

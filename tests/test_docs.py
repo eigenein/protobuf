@@ -8,7 +8,7 @@ from typing import Iterator, NamedTuple
 
 from pytest import mark, param
 
-CODE_BLOCK_RE = re.compile(r"""```python title="([^"]+)"$(.+?)```""", re.MULTILINE | re.DOTALL)
+CODE_BLOCK_RE = re.compile(r"""```python title="([^"]+)"[^\n]*(.+?)```""", re.MULTILINE | re.DOTALL)
 
 
 def _discover_files() -> Iterator[Path]:

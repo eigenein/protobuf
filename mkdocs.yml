@@ -43,6 +43,13 @@ plugins:
   - search:
       lang: en
   - social
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: false
 
 markdown_extensions:
   - admonition

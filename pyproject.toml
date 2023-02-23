@@ -54,6 +54,8 @@ mkdocs-material = "^9.0.12"
 pillow = "^9.4.0"
 cairosvg = "^2.6.0"
 mkdocs-git-revision-date-localized-plugin = "^1.1.0"
+mkdocstrings = { version = "^0.20.0", extras = ["python"] }
+mkdocs-autorefs = "^0.4.1"
 
 [tool.poetry.urls]
 "Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"

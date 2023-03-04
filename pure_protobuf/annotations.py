@@ -11,7 +11,7 @@ from pure_protobuf.helpers._dataclasses import SLOTS
 from pure_protobuf.helpers._typing import DEFAULT, Sentinel
 
 if version_info >= (3, 10):
-    from dataclasses import KW_ONLY
+    from dataclasses import KW_ONLY  # type: ignore[attr-defined]
 
 if TYPE_CHECKING:
     from pure_protobuf.one_of import OneOf

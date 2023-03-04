@@ -11,7 +11,7 @@ from pure_protobuf._accumulators import AccumulateLastOneWins
 from pure_protobuf._mergers import MergeLastOneWins
 from pure_protobuf.annotations import double, fixed32, fixed64, int32, int64, sfixed32, sfixed64, uint
 from pure_protobuf.exceptions import UnsupportedAnnotationError
-from pure_protobuf.helpers._dataclasses import SLOTS, KW_ONLY
+from pure_protobuf.helpers._dataclasses import KW_ONLY, SLOTS
 from pure_protobuf.helpers.itertools import ReadCallback
 from pure_protobuf.interfaces._vars import RecordT
 from pure_protobuf.interfaces.accumulate import Accumulate

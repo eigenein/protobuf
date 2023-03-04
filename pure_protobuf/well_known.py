@@ -27,38 +27,37 @@ class _TimeSpan(BaseMessage):
 @dataclass(**DATACLASS_OPTIONS)
 class Timestamp(_TimeSpan):
     """
-    Timestamp as a time span since the epoch time.
-
-    See Also:
-        - https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#timestamp
-        - https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/timestamp.proto
+    Implements the [`Timestamp`](https://protobuf.dev/reference/protobuf/google.protobuf/#timestamp)
+    well-known type and supports conversion from and to
+    [`datetime`](https://docs.python.org/3/library/datetime.html#datetime-objects).
     """
 
     @classmethod
     def from_datetime(cls, value: datetime) -> Timestamp:
+        """Convert the `datetime` to `Timestamp`."""
         seconds, nanos = split_seconds(value.timestamp())
         return cls(seconds=seconds, nanos=nanos)
 
     def into_datetime(self) -> datetime:
+        """Convert to `datetime`."""
         return datetime.fromtimestamp(unsplit_seconds(self.seconds, self.nanos), tz=timezone.utc)
 
 
 @dataclass(**DATACLASS_OPTIONS)
 class Duration(_TimeSpan):
     """
-    Duration as a time span.
-
-    See Also:
-        - https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#duration
-        - https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/duration.proto
+    Implements the [`#!protobuf Duration`](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#duration)
+    well-known type.
     """
 
     @classmethod
     def from_timedelta(cls, value: timedelta) -> Duration:
+        """Convert the `timedelta` into `Duration`."""
         seconds, nanos = split_seconds(value.total_seconds())
         return cls(seconds=seconds, nanos=nanos)
 
     def into_timedelta(self) -> timedelta:
+        """Convert into `timedelta`."""
         return timedelta(seconds=unsplit_seconds(self.seconds, self.nanos))
 
 

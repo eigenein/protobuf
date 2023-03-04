@@ -30,8 +30,12 @@ assert any_.into_message() == child
 
 ## `#!python Timestamp`
 
-Implements the [`#!protobuf Timestamp`](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#timestamp) well-known type and supports conversion from and to `datetime` via `from_datetime` and `into_datetime`.
+::: pure_protobuf.well_known.Timestamp
+    options:
+      heading_level: 3
 
 ## `#!python Duration`
 
-Implements the [`#!protobuf Duration`](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#duration) well-known type and supports conversion from and to `timedelta` via `from_timedelta` and `into_timedelta`.
+::: pure_protobuf.well_known.Duration
+    options:
+      heading_level: 3

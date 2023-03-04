@@ -50,6 +50,12 @@ plugins:
         python:
           options:
             show_source: false
+            show_root_toc_entry: false
+            show_signature_annotations: true
+            separate_signature: true
+            show_bases: false
+            merge_init_into_class: false
+            members_order: "source"
 
 markdown_extensions:
   - admonition
@@ -83,3 +89,6 @@ extra:
 copyright: Copyright &copy; 2011-2023 Pavel Perestoronin
 
 site_url: "https://eigenein.github.io/protobuf"
+
+watch:
+  - "pure_protobuf"

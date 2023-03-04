@@ -2,16 +2,6 @@
 
 The new release moves away from the `field(…)` definitions to [`Annotated`](https://docs.python.org/3/library/typing.html#typing.Annotated) type hints defined in [PEP 593](https://peps.python.org/pep-0593/). Most of the internals have been revamped as well.
 
-### Migration guide
-
-- Remove the `@message` decorator and inherit the class from `BaseMessage`.
-- Replace annotations like `foo: int = field(1)` with `foo: Annotated[int, Field(1)]`.
-- Replace `datetime` with `pure_protobuf.well_known.Timestamp`, and `timedelta` with `Duration`.
-- Replace `Any` with `pure_protobuf.well_known.Any_`.
-- Replace `dumps` with `bytes(…)` or `write_to()`, and `loads` with `read_from(BytesIO(…))`.
-- Replace `any_of` parameters with `AnyOf` descriptors.
-- Refer to the [`README.md`](README.md) for more details on each.
-
 ## `2.2.2`
 
 - Fix: `int32` and `int64` should use the same encoder #103

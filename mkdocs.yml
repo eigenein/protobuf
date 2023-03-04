@@ -7,6 +7,7 @@ nav:
   - base_message.md
   - annotating_fields.md
   - well_known.md
+  - migration.md
   - custom_field_types.md
 
 theme:

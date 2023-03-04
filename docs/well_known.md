@@ -1,6 +1,6 @@
 # Well-known types
 
-`#!python pure_protobuf.well_known` module provides message definitions for some of the [well-known](https://protobuf.dev/reference/protobuf/google.protobuf/) types.
+`#!python pure_protobuf.well_known` module provides message definitions for some [well-known](https://protobuf.dev/reference/protobuf/google.protobuf/) types.
 
 ## [`Any`](https://developers.google.com/protocol-buffers/docs/proto3#any)
 

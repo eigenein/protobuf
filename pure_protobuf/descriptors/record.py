@@ -42,45 +42,38 @@ if TYPE_CHECKING:
 
 @dataclass(**KW_ONLY, **SLOTS)
 class RecordDescriptor(Generic[RecordT]):
-    """
-    Describes how records should be read, written, accumulated, and merged.
-    Not a «real» Python descriptor.
-    """
+    """Describes how records should be read, written, accumulated, and merged. Not a «real» Python descriptor."""
 
     wire_type: WireType
-    """
-    Field's record wire type.
-
-    See Also:
-        - https://developers.google.com/protocol-buffers/docs/encoding#structure
-    """
+    """Field's record [wire type](https://developers.google.com/protocol-buffers/docs/encoding#structure)."""
 
     write: Write[RecordT]
-    """Writes a complete value to the stream, altogether with its tag."""
+    """Write a complete value to the stream, altogether with its tag."""
 
     read: ReadTyped[RecordT]
     """
-    Reads a value from the stream.
+    Read a record from the stream.
 
-    This behaves differently from `write`, because it's only supposed to read a single entry
-    from the stream (it may be, for example, just one item of repeated field).
-    Also, it assumes that the tag has already been read.
+    This behaves differently from the [`write`][pure_protobuf.descriptors.record.RecordDescriptor.write],
+    because it's only supposed to read a single record from the stream
+    (it may be, for example, just one item of a repeated field).
+    Also, it assumes that the tag has already been read by [`BaseMessage`][base-message].
     """
 
     accumulate: Accumulate[RecordT, RecordT] = AccumulateLastOneWins()
     """
-    Accumulates a value from the stream into an existing field value.
+    Accumulate a value from the stream into an existing field value.
     It follows the `read` to decide which value should be assigned to the attribute.
     """
 
     merge: Merge[RecordT] = MergeLastOneWins()
-    """Merges two values of the same field from different messages. Only called in a message merger."""
+    """Merge two values of the same field from different messages. Only called in a message merger."""
 
     __PREDEFINED__: ClassVar[Dict[Any, RecordDescriptor]]
     """Pre-defined descriptors for primitive types."""
 
     @classmethod
-    def from_inner_type_hint(
+    def _from_inner_type_hint(
         cls,
         message_type: Type[BaseMessage],
         inner_hint: Any,

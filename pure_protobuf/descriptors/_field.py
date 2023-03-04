@@ -89,7 +89,7 @@ class _FieldDescriptor(Generic[FieldT, RecordT]):
         inner_hint, _ = extract_optional(inner_hint)
         inner_hint, is_repeated = extract_repeated(inner_hint)
 
-        inner: RecordDescriptor[RecordT] = RecordDescriptor.from_inner_type_hint(
+        inner: RecordDescriptor[RecordT] = RecordDescriptor._from_inner_type_hint(
             message_type,
             inner_hint,
         )

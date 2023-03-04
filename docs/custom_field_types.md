@@ -1,23 +1,15 @@
 # Custom field types
 
-!!! bug ""
+!!! warning "Advanced feature"
 
-    TODO
+    This is an advanced feature for extending the library and is not intended for normal use.
+
+!!! danger "Incomplete documentation"
 
 ## Record descriptor
 
-!!! bug ""
+### API
 
-    TODO
-
-## Accumulate interface
-
-!!! bug ""
-
-    TODO
-
-## Merge interface
-
-!!! bug ""
-
-    TODO
+::: pure_protobuf.descriptors.record.RecordDescriptor
+    options:
+      heading_level: 4

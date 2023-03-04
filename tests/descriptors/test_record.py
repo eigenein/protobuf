@@ -23,7 +23,7 @@ from pure_protobuf.message import BaseMessage
 )
 def test_from_inner_hint_unsupported(inner_hint: Any) -> None:
     with raises(UnsupportedAnnotationError):
-        RecordDescriptor.from_inner_type_hint(BaseMessage, inner_hint)
+        RecordDescriptor._from_inner_type_hint(BaseMessage, inner_hint)
 
 
 @mark.parametrize(

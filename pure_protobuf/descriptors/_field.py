@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Generic, Optional, Type, cast
 
 from typing_extensions import Annotated
@@ -11,6 +10,7 @@ from pure_protobuf._accumulators import AccumulateAppend
 from pure_protobuf._mergers import MergeConcatenate
 from pure_protobuf.annotations import Field
 from pure_protobuf.descriptors.record import RecordDescriptor
+from pure_protobuf.helpers._dataclasses import dataclass
 from pure_protobuf.helpers._typing import extract_optional, extract_repeated
 from pure_protobuf.interfaces._vars import FieldT, RecordT
 from pure_protobuf.interfaces.accumulate import Accumulate

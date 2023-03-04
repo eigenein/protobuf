@@ -48,7 +48,7 @@ class BaseMessage(ABC):
     }
     """Defines how to skip a field of the given wire type."""
 
-    def __init_subclass__(cls) -> None:
+    def __init_subclass__(cls) -> None:  # noqa: D105
         cls.__PROTOBUF_FIELDS_BY_NUMBER__ = {}
         cls.__PROTOBUF_FIELDS_BY_NAME__ = {}
 
@@ -101,7 +101,7 @@ class BaseMessage(ABC):
         """Convert the message to a bytestring."""
         return to_bytes(BaseMessage.write_to, self)
 
-    def __setattr__(self, name: str, value: Any) -> None:
+    def __setattr__(self, name: str, value: Any) -> None:  # noqa: D105
         super().__setattr__(name, value)
         descriptor = self.__PROTOBUF_FIELDS_BY_NAME__[name]
         one_of = descriptor.one_of

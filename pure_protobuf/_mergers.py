@@ -52,5 +52,5 @@ class MergeMessages(Merge[MessageT], ReprWithInner):
         """
         if rhs is not None:
             # noinspection PyTypeChecker
-            return self.inner(lhs, (rhs,))  # FIXME: avoid the intermediate 1-tuple.
+            return self.inner(lhs, (rhs,))
         return lhs

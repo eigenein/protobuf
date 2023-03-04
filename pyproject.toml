@@ -132,11 +132,10 @@ ignore = [
     "D102",  # TODO
     "D103",
     "D104",
-    "D105",  # TODO
-    "D107",  # TODO
+    "D107",
     "D202",
     "D203",
-    "D205",  # TODO
+    "D205",
     "D212",  # alternative of D213
     "D406",
     "D407",

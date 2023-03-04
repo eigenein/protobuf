@@ -61,11 +61,12 @@ class ReadLengthDelimited(Read[RecordT], ReprWithInner):
         self.inner = inner
 
     def __call__(self, io: IO[bytes]) -> Iterator[RecordT]:
-        # FIXME: we could avoid the temporary buffer.
         yield from self.inner(BytesIO(read_bytes(io)))
 
 
 class ReadRepeated(Read[RecordT], ReprWithInner):
+    """Wrap an inner reader to read repeated records."""
+
     __slots__ = ("inner",)
 
     # noinspection PyProtocol
@@ -81,6 +82,8 @@ class ReadRepeated(Read[RecordT], ReprWithInner):
 
 
 class WriteRepeated(Generic[RecordT, FieldT_contra], Write[FieldT_contra], ReprWithInner):
+    """Wrap an inner writer to produce repeated records."""
+
     __slots__ = ("inner",)
 
     inner: Write[RecordT]
@@ -116,6 +119,8 @@ class WriteTagged(Write[RecordT], ReprWithInner):
 
 
 class WriteOptional(Write[RecordT], ReprWithInner):
+    """Wrap an inner writer to skip serialization of `None`."""
+
     __slots__ = ("inner",)
 
     inner: Write[RecordT]
@@ -130,6 +135,8 @@ class WriteOptional(Write[RecordT], ReprWithInner):
 
 
 class WriteLengthDelimited(Write[RecordT], ReprWithInner):
+    """Wrap an inner writer into a length-delimited record."""
+
     __slots__ = ("inner",)
 
     inner: Write[RecordT]

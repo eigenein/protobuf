@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from sys import version_info
 from typing import TYPE_CHECKING, Any, NewType, Optional, Union
 
 from pure_protobuf.exceptions import IncorrectAnnotationError
@@ -23,6 +24,11 @@ class Field:
     See also:
         - https://developers.google.com/protocol-buffers/docs/proto3#assigning_field_numbers
     """
+
+    if version_info >= (3, 10):
+        from dataclasses import KW_ONLY
+
+        _: KW_ONLY
 
     packed: Union[bool, Sentinel] = DEFAULT
     """Specifies whether the field should be packed in its serialized representation."""

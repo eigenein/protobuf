@@ -35,7 +35,7 @@ class OneOf(Generic[OneOfT]):
             if other_number != keep_number:
                 super(BaseMessage, message).__setattr__(other_name, None)
 
-    def __get__(self, instance: Any, type_: Type[Any]) -> Optional[OneOfT]:
+    def __get__(self, instance: Any, type_: Type[Any]) -> Optional[OneOfT]:  # noqa: D105
         if not isinstance(instance, BaseMessage):
             # Allows passing the descriptor by reference, and we need to move the descriptor from
             # the corresponding annotation.
@@ -44,7 +44,7 @@ class OneOf(Generic[OneOfT]):
         name = self._which_one_of(instance)
         return getattr(instance, name) if name else None
 
-    def __set__(self, instance: BaseMessage, _value: Any) -> None:
+    def __set__(self, instance: BaseMessage, _value: Any) -> None:  # noqa: D105
         raise RuntimeError("attempted to set the one-of field, use a specific attribute instead")
 
     def which_one_of_getter(self) -> Callable[[BaseMessage], Optional[str]]:

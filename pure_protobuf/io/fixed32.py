@@ -5,6 +5,8 @@ from pure_protobuf.interfaces._skip import Skip
 
 
 class SkipFixed32(Skip):
+    """Skip fixed 32-field record."""
+
     def __call__(self, io: IO[bytes]) -> None:
         io.seek(4, SEEK_CUR)
 

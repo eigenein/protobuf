@@ -14,7 +14,7 @@ class ReadCallback(ReprWithInner, Generic[P, R]):
     # noinspection PyProtocol
     inner: Callable[P, R]
 
-    def __init__(self, inner: Callable[P, R]) -> None:
+    def __init__(self, inner: Callable[P, R]) -> None:  # noqa: D107
         self.inner = inner
 
     def __call__(self, *args: P.args, **kwargs: P.kwargs) -> Iterator[R]:

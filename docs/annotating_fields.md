@@ -33,7 +33,10 @@ Field types are specified via [`#!python Annotated`](https://docs.python.org/3/l
 
 ## Repeated fields
 
-[`typing.List`](https://docs.python.org/3/library/typing.html#typing.List) annotations are automatically converted to [repeated fields](https://developers.google.com/protocol-buffers/docs/proto3#specifying-field-rules). Repeated fields of scalar numeric types use packed encoding by default:
+[`typing.List`](https://docs.python.org/3/library/typing.html#typing.List),
+[`typing.Iterable`](https://docs.python.org/3/library/typing.html#typing.Iterable),
+and [`collections.abc.Iterable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable)
+annotations are automatically converted to [repeated fields](https://developers.google.com/protocol-buffers/docs/proto3#specifying-field-rules). Repeated fields of scalar numeric types use packed encoding by default:
 
 ```python title="test_repeated.py"
 from dataclasses import dataclass, field

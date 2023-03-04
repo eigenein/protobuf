@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Union
+from typing import Any, Iterable, List, Optional, Union
 
 from pytest import mark
 
@@ -22,6 +22,7 @@ def test_extract_optional(hint: Any, expected_flag: bool, expected_inner: Any) -
     [
         (int, False, int),
         (List[int], True, int),
+        (Iterable[int], True, int),
     ],
 )
 def test_extract_repeated(hint: Any, expected_flag: bool, expected_inner: Any) -> None:

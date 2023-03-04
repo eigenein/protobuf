@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import Any, List, Tuple, Union
 
 from typing_extensions import TypeGuard, get_args, get_origin
@@ -24,8 +25,7 @@ DEFAULT = Sentinel()
 def extract_repeated(hint: Any) -> Tuple[Any, TypeGuard[List]]:
     """Extract a possible repeated flag."""
     origin = get_origin(hint)
-    # TODO: support `Iterable`.
-    if isinstance(origin, type) and issubclass(origin, list):
+    if isinstance(origin, type) and (origin is Iterable or issubclass(origin, list)):
         return get_args(hint)[0], True
     return hint, False
 

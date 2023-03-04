@@ -13,4 +13,5 @@ else:
         options_3_10 = {}
         if version_info >= (3, 10):
             options_3_10["slots"] = slots
-        return dataclasses.dataclass(frozen=frozen, kw_only=kw_only, **options_3_10)
+            options_3_10["kw_only"] = kw_only
+        return dataclasses.dataclass(frozen=frozen, **options_3_10)

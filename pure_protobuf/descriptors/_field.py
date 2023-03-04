@@ -115,7 +115,7 @@ class _FieldDescriptor(Generic[FieldT, RecordT]):
             tag = Tag(field_number=field.number, wire_type=inner.wire_type)
             write = WriteTagged(write, tag)
             if is_repeated:
-                # `read` still reads one value at a time.
+                # `read` still reads one record at a time.
                 write = WriteRepeated(write)
 
         if is_repeated:

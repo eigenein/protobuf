@@ -1,6 +1,8 @@
 ## `3.0.0`
 
-The new release moves away from the `field(…)` definitions to [`Annotated`](https://docs.python.org/3/library/typing.html#typing.Annotated) type hints defined in [PEP 593](https://peps.python.org/pep-0593/). Most of the internals have been revamped as well.
+The new release moves away from the `field(…)` definitions to [`Annotated`](https://docs.python.org/3/library/typing.html#typing.Annotated) type hints defined in [PEP 593](https://peps.python.org/pep-0593/). Most of the internal implementation details have been revamped as well.
+
+Support for Python 3.7 is dropped.
 
 ## `2.2.2`
 

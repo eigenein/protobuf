@@ -1,7 +1,5 @@
 from abc import abstractmethod
-from typing import IO
-
-from typing_extensions import Protocol
+from typing import IO, Protocol
 
 from pure_protobuf.interfaces._repr import Repr
 

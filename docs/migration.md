@@ -1,5 +1,9 @@
 # Migration from 2.x to 3.x
 
+## Upgrade Python to 3.8 or above
+
+Support for Python 3.7 is dropped.
+
 ## `#!python @message` decorator
 
 The decorator has been removed. You should inherit your message classes from `#!python BaseMessage`.

@@ -1,7 +1,5 @@
 from abc import abstractmethod
-from typing import Optional
-
-from typing_extensions import Protocol
+from typing import Optional, Protocol
 
 from pure_protobuf.interfaces._repr import Repr
 from pure_protobuf.interfaces._vars import FieldT

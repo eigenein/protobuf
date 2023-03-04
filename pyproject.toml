@@ -21,7 +21,6 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -36,7 +35,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 
 [tool.poetry.dependencies]
 get-annotations = { version = "^0.1.2", python = "<3.10" }
-python = "^3.7.0"
+python = "^3.8.0"
 typing-extensions = "^4.4.0"
 
 [tool.poetry.group.dev]
@@ -96,11 +95,11 @@ exclude_lines = [
 
 [tool.black]
 line-length = 120
-target-version = ["py37", "py38", "py39", "py310", "py311"]
+target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py37"
+target-version = "py38"
 select = [
     "A",
     "ANN",

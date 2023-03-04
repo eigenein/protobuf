@@ -9,11 +9,14 @@ from pure_protobuf.exceptions import IncorrectAnnotationError
 from pure_protobuf.helpers._dataclasses import dataclass
 from pure_protobuf.helpers._typing import DEFAULT, Sentinel
 
+if version_info >= (3, 10):
+    from dataclasses import KW_ONLY
+
 if TYPE_CHECKING:
     from pure_protobuf.one_of import OneOf
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass()
 class Field:
     """Annotates a Protocol Buffers field."""
 
@@ -26,8 +29,6 @@ class Field:
     """
 
     if version_info >= (3, 10):
-        from dataclasses import KW_ONLY
-
         _: KW_ONLY
 
     packed: Union[bool, Sentinel] = DEFAULT

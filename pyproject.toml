@@ -66,7 +66,7 @@ mkdocs-autorefs = "^0.4.1"
 enable = true
 vcs = "git"
 pattern = "default-unprefixed"
-style = "semver"
+style = "pep440"
 strict = true
 latest-tag = true
 

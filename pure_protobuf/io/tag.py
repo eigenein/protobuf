@@ -1,15 +1,16 @@
+from dataclasses import dataclass
 from typing import IO
 
 from typing_extensions import Self
 
 from pure_protobuf.annotations import uint
 from pure_protobuf.exceptions import IncorrectWireTypeError
-from pure_protobuf.helpers._dataclasses import dataclass
+from pure_protobuf.helpers._dataclasses import KW_ONLY, SLOTS
 from pure_protobuf.io.varint import read_unsigned_varint, write_unsigned_varint
 from pure_protobuf.io.wire_type import WireType
 
 
-@dataclass(kw_only=True, frozen=True, slots=True)
+@dataclass(frozen=True, **KW_ONLY, **SLOTS)
 class Tag:
     """
     Represents a field tag: a pair of key and wire type.

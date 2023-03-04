@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
 from typing import Any, Mapping, Optional, Type, cast
@@ -11,12 +10,12 @@ from urllib.parse import ParseResult
 from typing_extensions import Annotated
 
 from pure_protobuf.annotations import Field
-from pure_protobuf.helpers._dataclasses import DATACLASS_OPTIONS
+from pure_protobuf.helpers._dataclasses import dataclass
 from pure_protobuf.helpers.datetime import split_seconds, unsplit_seconds
 from pure_protobuf.message import BaseMessage
 
 
-@dataclass(**DATACLASS_OPTIONS)
+@dataclass(kw_only=True, slots=True)
 class _TimeSpan(BaseMessage):
     """Base class to represent timespan as whole seconds plus its nanoseconds part."""
 
@@ -24,7 +23,7 @@ class _TimeSpan(BaseMessage):
     nanos: Annotated[int, Field(2)] = 0
 
 
-@dataclass(**DATACLASS_OPTIONS)
+@dataclass(kw_only=True, slots=True)
 class Timestamp(_TimeSpan):
     """
     Implements the [`Timestamp`](https://protobuf.dev/reference/protobuf/google.protobuf/#timestamp)
@@ -43,7 +42,7 @@ class Timestamp(_TimeSpan):
         return datetime.fromtimestamp(unsplit_seconds(self.seconds, self.nanos), tz=timezone.utc)
 
 
-@dataclass(**DATACLASS_OPTIONS)
+@dataclass(kw_only=True, slots=True)
 class Duration(_TimeSpan):
     """
     Implements the [`#!protobuf Duration`](https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#duration)
@@ -61,7 +60,7 @@ class Duration(_TimeSpan):
         return timedelta(seconds=unsplit_seconds(self.seconds, self.nanos))
 
 
-@dataclass(**DATACLASS_OPTIONS)
+@dataclass(kw_only=True, slots=True)
 class Any_:  # noqa: N801
     """
     Well-known `Any` type.

@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, NewType, Optional, Union
 
 from pure_protobuf.exceptions import IncorrectAnnotationError
-from pure_protobuf.helpers._dataclasses import DATACLASS_OPTIONS
+from pure_protobuf.helpers._dataclasses import dataclass
 from pure_protobuf.helpers._typing import DEFAULT, Sentinel
 
 if TYPE_CHECKING:
     from pure_protobuf.one_of import OneOf
 
 
-@dataclass(**DATACLASS_OPTIONS)
+@dataclass(frozen=True, slots=True)
 class Field:
     """Annotates a Protocol Buffers field."""
 

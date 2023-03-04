@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, ByteString, ClassVar, Dict, Generic, Type
 from urllib.parse import ParseResult
@@ -11,7 +10,7 @@ from pure_protobuf._accumulators import AccumulateLastOneWins
 from pure_protobuf._mergers import MergeLastOneWins
 from pure_protobuf.annotations import double, fixed32, fixed64, int32, int64, sfixed32, sfixed64, uint
 from pure_protobuf.exceptions import UnsupportedAnnotationError
-from pure_protobuf.helpers._dataclasses import DATACLASS_OPTIONS
+from pure_protobuf.helpers._dataclasses import dataclass
 from pure_protobuf.helpers.itertools import ReadCallback
 from pure_protobuf.interfaces._vars import RecordT
 from pure_protobuf.interfaces.accumulate import Accumulate
@@ -40,7 +39,7 @@ if TYPE_CHECKING:
     from pure_protobuf.message import BaseMessage
 
 
-@dataclass(**DATACLASS_OPTIONS)
+@dataclass(kw_only=True, slots=True)
 class RecordDescriptor(Generic[RecordT]):
     """
     Describes how records should be read, written, accumulated, and merged.

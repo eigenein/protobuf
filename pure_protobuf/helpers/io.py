@@ -24,6 +24,6 @@ def read_checked(io: IO[bytes], count: int) -> bytes:
         EOFError: the stream has ended
     """
     buffer = io.read(count)
-    if len(buffer) != count:
-        raise EOFError(f"{count} bytes expected, {len(buffer)} read")
+    if len(buffer) < count:
+        raise EOFError(f"{count} bytes expected, but only {len(buffer)} read")
     return buffer

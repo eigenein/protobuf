@@ -52,7 +52,12 @@ class ReadMaybePacked(ReadTyped[RecordT], ReprWithInner):
 
 
 class ReadLengthDelimited(Read[RecordT], ReprWithInner):
-    """Wraps the inner reader on a length-delimited buffer."""
+    """
+    Make the inner reader length-delimited.
+
+    This reader wraps the inner reader so that it would first read a byte string,
+    and then call the inner reader on that byte string.
+    """
 
     __slots__ = ("inner",)
 

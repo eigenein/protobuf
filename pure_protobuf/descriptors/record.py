@@ -56,7 +56,7 @@ class RecordDescriptor(Generic[RecordT]):
 
     This behaves differently from the [`write`][pure_protobuf.descriptors.record.RecordDescriptor.write],
     because it's only supposed to read a single record from the stream
-    (it may be, for example, just one item of a repeated field).
+    (it may be, for example, just one item of a packed repeated field).
     Also, it assumes that the tag has already been read by [`BaseMessage`][base-message].
     """
 

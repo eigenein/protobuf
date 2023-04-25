@@ -9,6 +9,8 @@ R = TypeVar("R")
 
 
 class ReadCallback(ReprWithInner, Generic[P, R]):
+    """Convert a reader, which returns a singular scalar value, into an iterable reader."""
+
     __slots__ = ("inner",)
 
     # noinspection PyProtocol

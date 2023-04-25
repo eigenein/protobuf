@@ -14,7 +14,7 @@ class Repr(Protocol):
 
     def __repr__(self) -> str:
         try:
-            orig_class = self.__orig_class__  # type: ignore
+            orig_class = self.__orig_class__  # type: ignore[attr-defined]
         except AttributeError:
             args = ""
         else:
@@ -27,7 +27,7 @@ class ReprWithInner(Repr, Protocol):
 
     def __repr__(self) -> str:
         try:
-            orig_class = self.__orig_class__  # type: ignore
+            orig_class = self.__orig_class__  # type: ignore[attr-defined]
         except AttributeError:
             args = ""
         else:

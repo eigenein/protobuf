@@ -1,6 +1,7 @@
 from struct import Struct
 from typing import IO, Generic, Iterator
 
+from pure_protobuf.helpers.io import read_checked
 from pure_protobuf.interfaces._repr import ReprWithInner
 from pure_protobuf.interfaces._vars import RecordT_co, RecordT_contra
 from pure_protobuf.interfaces.read import Read
@@ -18,7 +19,7 @@ class ReadStruct(Read[RecordT_co], ReprWithInner, Generic[RecordT_co]):
 
     def __call__(self, io: IO[bytes]) -> Iterator[RecordT_co]:
         inner = self.inner
-        yield from inner.unpack(io.read(inner.size))
+        yield from inner.unpack(read_checked(io, inner.size))
 
 
 class WriteStruct(Write[RecordT_contra], ReprWithInner, Generic[RecordT_contra]):

@@ -33,9 +33,15 @@ def test_from_inner_hint_unsupported(inner_hint: Any) -> None:
         (1.0, b"\x00\x00\x80\x3F"),
     ],
 )
-def test_struct(value: float, encoded: bytes) -> None:
-    assert to_bytes(FLOAT_DESCRIPTOR.write, value) == encoded
-    assert next(FLOAT_DESCRIPTOR.read(BytesIO(encoded), WireType.I32)) == value
+class TestStruct:
+    def test_write(self, value: float, encoded: bytes) -> None:
+        assert to_bytes(FLOAT_DESCRIPTOR.write, value) == encoded
+
+    def test_read(self, value: float, encoded: bytes) -> None:
+        io = BytesIO(encoded)
+        assert next(FLOAT_DESCRIPTOR.read(io, WireType.I32)) == value
+        with raises(EOFError):
+            next(FLOAT_DESCRIPTOR.read(io, WireType.I32))
 
 
 # noinspection PyArgumentList

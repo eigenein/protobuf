@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from io import BytesIO
 from typing import List, Optional
 
 from typing_extensions import Annotated
@@ -22,9 +21,9 @@ def test_simple_message() -> None:
     message = Message(a=uint(150))
     bytes_ = b"\x08\x96\x01"
 
-    assert Message.read_from(BytesIO()) == Message()
+    assert Message.loads(b"") == Message()
     assert bytes(message) == bytes_
-    assert Message.read_from(BytesIO(bytes_)) == message
+    assert Message.loads(bytes_) == message
 
 
 def test_simple_message_unknown_field() -> None:
@@ -33,13 +32,13 @@ def test_simple_message_unknown_field() -> None:
         a: Annotated[uint, Field(1)] = uint(0)
 
     # fmt: off
-    assert Message.read_from(BytesIO(
+    assert Message.loads(
         b"\x21\x01\x02\x03\x04\x05\x06\x07\x08"  # extra 64-bit
         b"\x35\x01\x02\x03\x04"  # extra 32-bit
         b"\x42\x01\x00"  # extra bytes
         b"\x10\xFF\x01"  # extra varint
         b"\x08\x96\x01",  # field `a`
-    )) == Message(a=uint(150))
+    ) == Message(a=uint(150))
     # fmt: on
 
 
@@ -56,9 +55,9 @@ def test_message_with_bytestring() -> None:
     message = Message(b="testing")
     bytes_ = b"\x12\x07\x74\x65\x73\x74\x69\x6e\x67"
 
-    assert Message.read_from(BytesIO()) == Message()
+    assert Message.loads(b"") == Message()
     assert bytes(message) == bytes_
-    assert Message.read_from(BytesIO(bytes_)) == message
+    assert Message.loads(bytes_) == message
 
 
 def test_embedded_message() -> None:
@@ -78,9 +77,9 @@ def test_embedded_message() -> None:
     message = Parent(c=Child(a=uint(150)))
     bytes_ = b"\x1A\x03\x08\x96\x01"
 
-    assert Parent.read_from(BytesIO()) == Parent()
+    assert Parent.loads(b"") == Parent()
     assert bytes(message) == bytes_
-    assert Parent.read_from(BytesIO(bytes_)) == message
+    assert Parent.loads(bytes_) == message
 
 
 def test_merge_embedded_messages_repeated() -> None:
@@ -102,12 +101,12 @@ def test_merge_embedded_messages_repeated() -> None:
 
     assert (
         # fmt: off
-        Outer.read_from(BytesIO(
+        Outer.loads(
             b"\x0A\x00"  # foo == None
             b"\x0A\x02\x08\x00"  # foo == [0]
             b"\x0A\x03\x08\x96\x01"  # foo == [150]
             b"\x0A\x00",  # foo == None
-        ))
+        )
         == Outer(inner=Inner(foo=[uint(0), uint(150)]))
         # fmt: on
     )
@@ -126,10 +125,10 @@ def test_merge_embedded_messages_primitive() -> None:
 
     assert (
         # fmt: off
-        Outer.read_from(BytesIO(
+        Outer.loads(
             b"\x0A\x02\x08\x01"  # foo == 1
             b"\x0A\x02\x08\x02",  # foo == 2
-        ))
+        )
         == Outer(inner=Inner(foo=uint(2)))
         # fmt: on
     )
@@ -148,7 +147,7 @@ def test_read_unpacked_repeated_as_packed() -> None:
     class Test(BaseMessage):
         foo: Annotated[List[uint], Field(1, packed=True)]
 
-    assert Test.read_from(BytesIO(b"\x08\x01\x08\x02")) == Test(foo=[uint(1), uint(2)])
+    assert Test.loads(b"\x08\x01\x08\x02") == Test(foo=[uint(1), uint(2)])
 
 
 def test_read_packed_repeated_as_unpacked() -> None:
@@ -164,7 +163,7 @@ def test_read_packed_repeated_as_unpacked() -> None:
     class Test(BaseMessage):
         foo: Annotated[List[uint], Field(1, packed=False)]
 
-    assert Test.read_from(BytesIO(b"\x0A\x04\x01\x96\x01\x02")) == Test(
+    assert Test.loads(b"\x0A\x04\x01\x96\x01\x02") == Test(
         foo=[uint(1), uint(150), uint(2)],
     )
 
@@ -181,7 +180,7 @@ def test_repeated_embedded_message() -> None:
     message = Parent(children=[Child(payload=uint(42)), Child(payload=uint(43))])
     encoded = bytes(message)
     assert encoded == bytes.fromhex("0a02102a 0a02102b")
-    assert Parent.read_from(BytesIO(encoded)) == message
+    assert Parent.loads(encoded) == message
 
 
 def test_merge_grandchild() -> None:
@@ -197,17 +196,13 @@ def test_merge_grandchild() -> None:
     class Parent(BaseMessage):
         child: Annotated[Child, Field(1)]
 
-    assert Parent.read_from(
-        BytesIO(
-            bytes(Parent(child=Child(child=Grandchild(payload=uint(42)))))
-            + bytes(Parent(child=Child(child=Grandchild(payload=uint(43))))),
-        ),
+    assert Parent.loads(
+        bytes(Parent(child=Child(child=Grandchild(payload=uint(42)))))
+        + bytes(Parent(child=Child(child=Grandchild(payload=uint(43))))),
     ) == Parent(child=Child(child=Grandchild(payload=uint(43))))
 
-    assert Parent.read_from(
-        BytesIO(
-            bytes(Parent(child=Child(child=Grandchild(payload=uint(42))))) + bytes(Parent(child=Child())),
-        ),
+    assert Parent.loads(
+        bytes(Parent(child=Child(child=Grandchild(payload=uint(42))))) + bytes(Parent(child=Child())),
     ) == Parent(child=Child(child=Grandchild(payload=uint(42))))
 
 
@@ -227,7 +222,7 @@ def test_concatenated_packed_repeated() -> None:
 
     part_1 = bytes(Message(field=[42, 43]))
     part_2 = bytes(Message(field=[100500, 100501]))
-    assert Message.read_from(BytesIO(part_1 + part_2)) == Message(field=[42, 43, 100500, 100501])
+    assert Message.loads(part_1 + part_2) == Message(field=[42, 43, 100500, 100501])
 
 
 def test_one_of_assignment_dataclass() -> None:
@@ -258,7 +253,7 @@ def test_one_of_read_from() -> None:
         foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
         bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
 
-    message = Message.read_from(BytesIO(b"\x08\x02\x10\x04"))
+    message = Message.loads(b"\x08\x02\x10\x04")
     assert message.foo_or_bar == 2
     assert message.bar == 2
     assert message.foo is None
@@ -278,7 +273,7 @@ def test_one_of_merged() -> None:
     class Parent(BaseMessage):
         child: Annotated[Child, Field(1)]
 
-    message = Parent.read_from(BytesIO(bytes.fromhex("0a020802 0a021004")))
+    message = Parent.loads(bytes.fromhex("0a020802 0a021004"))
     assert message.child.foo_or_bar == 2
     assert message.child.bar == 2
     assert message.child.foo is None

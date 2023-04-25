@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
+from io import BytesIO
 from typing import IO, Any, ClassVar, Dict, Tuple
 
 from typing_extensions import Self
@@ -92,14 +93,35 @@ class BaseMessage(ABC):
 
         return cls(**values)
 
+    @classmethod
+    def loads(cls, buffer: bytes) -> Self:
+        """
+        Read a message from the buffer.
+
+        This is functionally the same as calling `read_from(BytesIO(buffer))`.
+        """
+        return cls.read_from(BytesIO(buffer))
+
     def write_to(self, io: IO[bytes]) -> None:
         """Write the message to the file."""
         for _, (name, descriptor) in self.__PROTOBUF_FIELDS_BY_NUMBER__.items():
             descriptor.write(getattr(self, name), io)
 
     def __bytes__(self) -> bytes:
-        """Convert the message to a bytestring."""
+        """
+        Convert the message to a bytestring.
+
+        This is functionally the same as calling `dumps()` or `write_to(BytesIO(…))`.
+        """
         return to_bytes(BaseMessage.write_to, self)
+
+    def dumps(self) -> bytes:
+        """
+        Convert the message to a bytestring.
+
+        This is functionally the same as calling `bytes(message)` or `write_to(BytesIO(…))`.
+        """
+        return bytes(self)
 
     def __setattr__(self, name: str, value: Any) -> None:  # noqa: D105
         super().__setattr__(name, value)

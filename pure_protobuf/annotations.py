@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from sys import version_info
-from typing import TYPE_CHECKING, Any, NewType, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, NewType, Optional, Union
 
 from pure_protobuf.exceptions import IncorrectAnnotationError
 from pure_protobuf.helpers._dataclasses import SLOTS
@@ -30,7 +30,7 @@ class Field:
     """
 
     if version_info >= (3, 10):
-        _: KW_ONLY
+        _: ClassVar[KW_ONLY]
 
     packed: Union[bool, Sentinel] = DEFAULT
     """Specifies whether the field should be packed in its serialized representation."""

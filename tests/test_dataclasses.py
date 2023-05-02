@@ -77,3 +77,9 @@ Box = message(Box)  # type: ignore
 
 def test_recursive_dataclass():
     assert cast(Message, Box(value=1, box=Box(value=2))).dumps() == b"\x08\x02\x12\x02\x08\x04"
+
+
+def test_other_metadata():
+    dataclass_field = field(1, packed=False, metadata={"foo": True})
+
+    assert set(["number", "packed", "isoneof", "foo"]) == set(dataclass_field.metadata.keys())

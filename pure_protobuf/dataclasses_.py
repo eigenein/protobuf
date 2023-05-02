@@ -116,9 +116,13 @@ def _field(number: int, *args, packed=True, isoneof=False, **kwargs) -> Any:
     Convenience function to assign field numbers.
     Calls the standard ``dataclasses.field`` function with the metadata assigned.
     """
-    metadata = {"number": number, "packed": packed, "isoneof": isoneof}
+    proto_metadata = {"number": number, "packed": packed, "isoneof": isoneof}
 
-    return dataclasses.field(*args, metadata=metadata, **kwargs)
+    metadata = kwargs.pop("metadata", None)
+    if metadata is not None:
+        proto_metadata.update(metadata)
+
+    return dataclasses.field(*args, metadata=proto_metadata, **kwargs)
 
 
 def field(number: int, *args, packed=True, **kwargs) -> Any:

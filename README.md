@@ -23,6 +23,8 @@
 
 ### `.proto` definition
 
+It's not needed for `pure-protobuf`, but for the sake of an example, let's consider the following definition:
+
 ```protobuf
 syntax = "proto3";
 
@@ -32,6 +34,8 @@ message SearchRequest {
   int32 result_per_page = 3;
 }
 ```
+
+And here's the same via `pure-protobuf`:
 
 ### With [dataclasses](https://docs.python.org/3/library/dataclasses.html)
 

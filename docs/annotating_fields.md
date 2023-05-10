@@ -6,15 +6,15 @@ Field types are specified via [`#!python Annotated`](https://docs.python.org/3/l
 
 ### Built-in types
 
-| Type                                                                                                                | `.proto` type                                               | Notes                                                                                                     |
-|:--------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------|
-| `#!python bool`                                                                                                     | `#!protobuf bool`                                           |                                                                                                           |
-| `#!python bytes`, `#!python bytearray`, `#!python memoryview`, `#!python typing.ByteString`                         | `#!protobuf bytes`                                          | Always deserialized as `#!python bytes`                                                                   |
-| `#!python float`                                                                                                    | `#!protobuf float`                                          | **32-bit** floating-point number. Use the additional `#!python double` type for 64-bit number             |
-| `#!python int`                                                                                                      | `#!protobuf sint32`, `#!protobuf sint64`                    | **Signed** variable-length integer. For unsigned representation, use the additional `#!python uint` type. |
-| [`#!python enum.IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)                                 | `#!protobuf enum`, `#!protobuf uint32`, `#!protobuf uint64` | Supports subclasses of `#!python IntEnum` (see [Enumerations](#enumerations))                             |
-| `#!python str`                                                                                                      | `#!protobuf string`                                         |                                                                                                           |
-| [`#!python urllib.parse.ParseResult`](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.ParseResult) | `#!protobuf string`                                         | Parsed URL, represented as a string                                                                       |
+| Type                                                                                                                | `.proto` type                                               | Notes                                                                                                                                                    |
+|:--------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `#!python bool`                                                                                                     | `#!protobuf bool`                                           |                                                                                                                                                          |
+| `#!python bytes`, `#!python bytearray`, `#!python memoryview`, `#!python typing.ByteString`                         | `#!protobuf bytes`                                          | Always deserialized as `#!python bytes`                                                                                                                  |
+| `#!python float`                                                                                                    | `#!protobuf float`                                          | **32-bit** floating-point number. Use the additional `#!python double` type for 64-bit number                                                            |
+| `#!python int`                                                                                                      | `#!protobuf sint32`, `#!protobuf sint64`                    | **Signed** variable-length integer, which uses the «ZigZag» encoding. For **unsigned** variable-length integer, use the additional `#!python uint` type. |
+| [`#!python enum.IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)                                 | `#!protobuf enum`, `#!protobuf uint32`, `#!protobuf uint64` | Supports subclasses of `#!python IntEnum` (see [Enumerations](#enumerations))                                                                            |
+| `#!python str`                                                                                                      | `#!protobuf string`                                         |                                                                                                                                                          |
+| [`#!python urllib.parse.ParseResult`](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.ParseResult) | `#!protobuf string`                                         | Parsed URL, represented as a string                                                                                                                      |
 
 ### Additional types
 
@@ -23,13 +23,13 @@ Field types are specified via [`#!python Annotated`](https://docs.python.org/3/l
 | `#!python pure_protobuf.annotations` type | `.proto` type                            | Notes                                    |
 |:------------------------------------------|:-----------------------------------------|:-----------------------------------------|
 | `#!python double`                         | `#!protobuf double`                      | **64-bit** floating-point number         |
-| `#!python fixed32`                        | `#!protobuf fixed32`                     |                                          |
-| `#!python fixed64`                        | `#!protobuf fixed64`                     |                                          |
+| `#!python fixed32`                        | `#!protobuf fixed32`                     | 32-bit **unsigned** integer              |
+| `#!python fixed64`                        | `#!protobuf fixed64`                     | 64-bit **unsigned** integer              |
 | `#!python int32`                          | `#!protobuf int32`                       | Two's compliment variable-length integer |
 | `#!python int64`                          | `#!protobuf int64`                       | Two's compliment variable-length integer |
 | `#!python uint`                           | `#!protobuf uint32`, `#!protobuf uint64` | **Unsigned** variable-length integer     |
-| `#!python sfixed32`                       | `#!protobuf sfixed32`                    |                                          |
-| `#!python sfixed64`                       | `#!protobuf sfixed64`                    |                                          |
+| `#!python sfixed32`                       | `#!protobuf sfixed32`                    | 32-bit **signed** integer                |
+| `#!python sfixed64`                       | `#!protobuf sfixed64`                    | 64-bit **signed** integer                |
 
 ## Repeated fields
 

@@ -119,3 +119,5 @@ Two's compliment integer.
 See Also:
     - https://developers.google.com/protocol-buffers/docs/encoding#signed-ints
 """
+
+# TODO: may replace these with `sint = NewType("sint", int)` for signed two's compliment integers.

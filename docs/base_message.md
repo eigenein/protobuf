@@ -6,21 +6,18 @@
 
 ```python title="test_write_to.py"
 from dataclasses import dataclass
-from io import BytesIO
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 from typing_extensions import Annotated
 
 
 @dataclass
 class Message(BaseMessage):
-    a: Annotated[uint, Field(1)] = uint(0)
+    a: Annotated[int, Field(1)] = int(0)
 
 
-io = BytesIO()
-Message(a=uint(150)).write_to(io)
-assert io.getvalue() == b"\x08\x96\x01"
+assert Message(a=150).dumps() == b"\x08\x96\x01"
 ```
 
 ### Serialization into a [byte string](https://docs.python.org/3/library/stdtypes.html#bytes)
@@ -28,17 +25,17 @@ assert io.getvalue() == b"\x08\x96\x01"
 ```python title="test_bytes.py"
 from dataclasses import dataclass
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 from typing_extensions import Annotated
 
 
 @dataclass
 class Message(BaseMessage):
-    a: Annotated[uint, Field(1)] = uint(0)
+    a: Annotated[int, Field(1)] = 0
 
 
-message = Message(a=uint(150))
+message = Message(a=150)
 assert bytes(message) == b"\x08\x96\x01"
 ```
 
@@ -46,17 +43,16 @@ assert bytes(message) == b"\x08\x96\x01"
 
 ```python title="test_read_from.py"
 from dataclasses import dataclass
-from io import BytesIO
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 from typing_extensions import Annotated
 
 
 @dataclass
 class Message(BaseMessage):
-    a: Annotated[uint, Field(1)] = uint(0)
+    a: Annotated[int, Field(1)] = 0
 
 
-assert Message.read_from(BytesIO(b"\x08\x96\x01")) == Message(a=uint(150))
+assert Message.loads(b"\x08\x96\x01") == Message(a=150)
 ```

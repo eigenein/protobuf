@@ -101,23 +101,10 @@ See Also:
     - https://developers.google.com/protocol-buffers/docs/encoding#non-varint-nums
 """
 
-uint = NewType("uint", int)
-"""Unsigned variable-length integer."""
-
-int32 = NewType("int32", int)
+ZigZagInt = NewType("ZigZagInt", int)
 """
-Two's compliment integer.
+ZigZag-encoded integer.
 
 See Also:
     - https://developers.google.com/protocol-buffers/docs/encoding#signed-ints
 """
-
-int64 = NewType("int64", int)
-"""
-Two's compliment integer.
-
-See Also:
-    - https://developers.google.com/protocol-buffers/docs/encoding#signed-ints
-"""
-
-# TODO: may replace these with `sint = NewType("sint", int)` for signed two's compliment integers.

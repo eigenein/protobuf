@@ -10,7 +10,7 @@ from pure_protobuf.io.varint import (
     ReadEnum,
     WriteEnum,
     read_unsigned_varint,
-    write_signed_varint,
+    write_zigzag_varint,
 )
 from pure_protobuf.io.wrappers import ReadRepeated, WriteOptional
 from pure_protobuf.message import BaseMessage
@@ -23,8 +23,8 @@ from tests.definitions import ExampleEnum
         (ReadEnum(ExampleEnum), "ReadEnum(ExampleEnum)"),
         (WriteEnum[ExampleEnum](), "WriteEnum[<enum 'ExampleEnum'>]()"),
         (
-            WriteOptional[int](write_signed_varint),
-            "WriteOptional[<class 'int'>](WriteSignedVarint())",
+            WriteOptional[int](write_zigzag_varint),
+            "WriteOptional[<class 'int'>](WriteZigZagVarint())",
         ),
         (
             MergeMessages(AccumulateMessages(BaseMessage)),

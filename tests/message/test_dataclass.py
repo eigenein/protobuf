@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field, ZigZagInt
 from pure_protobuf.message import BaseMessage
 from pure_protobuf.one_of import OneOf
 
@@ -16,9 +16,9 @@ def test_simple_message() -> None:
 
     @dataclass
     class Message(BaseMessage):
-        a: Annotated[uint, Field(1)] = uint(0)
+        a: Annotated[int, Field(1)] = 0
 
-    message = Message(a=uint(150))
+    message = Message(a=150)
     bytes_ = b"\x08\x96\x01"
 
     assert Message.loads(b"") == Message()
@@ -29,7 +29,7 @@ def test_simple_message() -> None:
 def test_simple_message_unknown_field() -> None:
     @dataclass
     class Message(BaseMessage):
-        a: Annotated[uint, Field(1)] = uint(0)
+        a: Annotated[int, Field(1)] = 0
 
     # fmt: off
     assert Message.loads(
@@ -38,7 +38,7 @@ def test_simple_message_unknown_field() -> None:
         b"\x42\x01\x00"  # extra bytes
         b"\x10\xFF\x01"  # extra varint
         b"\x08\x96\x01",  # field `a`
-    ) == Message(a=uint(150))
+    ) == Message(a=150)
     # fmt: on
 
 
@@ -68,13 +68,13 @@ def test_embedded_message() -> None:
 
     @dataclass
     class Child(BaseMessage):
-        a: Annotated[uint, Field(1)] = uint(0)
+        a: Annotated[int, Field(1)] = 0
 
     @dataclass
     class Parent(BaseMessage):
         c: Annotated[Child, Field(3)] = field(default_factory=Child)
 
-    message = Parent(c=Child(a=uint(150)))
+    message = Parent(c=Child(a=150))
     bytes_ = b"\x1A\x03\x08\x96\x01"
 
     assert Parent.loads(b"") == Parent()
@@ -93,7 +93,7 @@ def test_merge_embedded_messages_repeated() -> None:
 
     @dataclass
     class Inner(BaseMessage):
-        foo: Annotated[Optional[List[uint]], Field(1, packed=False)] = field(default=None)
+        foo: Annotated[Optional[List[int]], Field(1, packed=False)] = field(default=None)
 
     @dataclass
     class Outer(BaseMessage):
@@ -107,7 +107,7 @@ def test_merge_embedded_messages_repeated() -> None:
             b"\x0A\x03\x08\x96\x01"  # foo == [150]
             b"\x0A\x00",  # foo == None
         )
-        == Outer(inner=Inner(foo=[uint(0), uint(150)]))
+        == Outer(inner=Inner(foo=[0, 150]))
         # fmt: on
     )
 
@@ -117,7 +117,7 @@ def test_merge_embedded_messages_primitive() -> None:
 
     @dataclass
     class Inner(BaseMessage):
-        foo: Annotated[uint, Field(1, packed=False)] = uint(0)
+        foo: Annotated[int, Field(1, packed=False)] = 0
 
     @dataclass
     class Outer(BaseMessage):
@@ -129,7 +129,7 @@ def test_merge_embedded_messages_primitive() -> None:
             b"\x0A\x02\x08\x01"  # foo == 1
             b"\x0A\x02\x08\x02",  # foo == 2
         )
-        == Outer(inner=Inner(foo=uint(2)))
+        == Outer(inner=Inner(foo=2))
         # fmt: on
     )
 
@@ -145,9 +145,9 @@ def test_read_unpacked_repeated_as_packed() -> None:
 
     @dataclass
     class Test(BaseMessage):
-        foo: Annotated[List[uint], Field(1, packed=True)]
+        foo: Annotated[List[int], Field(1, packed=True)]
 
-    assert Test.loads(b"\x08\x01\x08\x02") == Test(foo=[uint(1), uint(2)])
+    assert Test.loads(b"\x08\x01\x08\x02") == Test(foo=[1, 2])
 
 
 def test_read_packed_repeated_as_unpacked() -> None:
@@ -161,23 +161,23 @@ def test_read_packed_repeated_as_unpacked() -> None:
 
     @dataclass
     class Test(BaseMessage):
-        foo: Annotated[List[uint], Field(1, packed=False)]
+        foo: Annotated[List[int], Field(1, packed=False)]
 
     assert Test.loads(b"\x0A\x04\x01\x96\x01\x02") == Test(
-        foo=[uint(1), uint(150), uint(2)],
+        foo=[1, 150, 2],
     )
 
 
 def test_repeated_embedded_message() -> None:
     @dataclass
     class Child(BaseMessage):
-        payload: Annotated[uint, Field(2)]
+        payload: Annotated[int, Field(2)]
 
     @dataclass
     class Parent(BaseMessage):
         children: Annotated[List[Child], Field(1)]
 
-    message = Parent(children=[Child(payload=uint(42)), Child(payload=uint(43))])
+    message = Parent(children=[Child(payload=42), Child(payload=43)])
     encoded = bytes(message)
     assert encoded == bytes.fromhex("0a02102a 0a02102b")
     assert Parent.loads(encoded) == message
@@ -186,7 +186,7 @@ def test_repeated_embedded_message() -> None:
 def test_merge_grandchild() -> None:
     @dataclass
     class Grandchild(BaseMessage):
-        payload: Annotated[uint, Field(1)]
+        payload: Annotated[int, Field(1)]
 
     @dataclass
     class Child(BaseMessage):
@@ -197,13 +197,13 @@ def test_merge_grandchild() -> None:
         child: Annotated[Child, Field(1)]
 
     assert Parent.loads(
-        bytes(Parent(child=Child(child=Grandchild(payload=uint(42)))))
-        + bytes(Parent(child=Child(child=Grandchild(payload=uint(43))))),
-    ) == Parent(child=Child(child=Grandchild(payload=uint(43))))
+        bytes(Parent(child=Child(child=Grandchild(payload=42))))
+        + bytes(Parent(child=Child(child=Grandchild(payload=43)))),
+    ) == Parent(child=Child(child=Grandchild(payload=43)))
 
     assert Parent.loads(
-        bytes(Parent(child=Child(child=Grandchild(payload=uint(42))))) + bytes(Parent(child=Child())),
-    ) == Parent(child=Child(child=Grandchild(payload=uint(42))))
+        bytes(Parent(child=Child(child=Grandchild(payload=42)))) + bytes(Parent(child=Child())),
+    ) == Parent(child=Child(child=Grandchild(payload=42)))
 
 
 def test_concatenated_packed_repeated() -> None:
@@ -247,11 +247,11 @@ def test_one_of_assignment_dataclass() -> None:
 def test_one_of_read_from() -> None:
     @dataclass
     class Message(BaseMessage):
-        foo_or_bar = OneOf[Optional[int]]()
+        foo_or_bar = OneOf[Optional[ZigZagInt]]()
         which_foo_or_bar = foo_or_bar.which_one_of_getter()
 
-        foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
-        bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
+        foo: Annotated[Optional[ZigZagInt], Field(1, one_of=foo_or_bar)] = None
+        bar: Annotated[Optional[ZigZagInt], Field(2, one_of=foo_or_bar)] = None
 
     message = Message.loads(b"\x08\x02\x10\x04")
     assert message.foo_or_bar == 2
@@ -263,11 +263,11 @@ def test_one_of_read_from() -> None:
 def test_one_of_merged() -> None:
     @dataclass
     class Child(BaseMessage):
-        foo_or_bar = OneOf[Optional[int]]()
+        foo_or_bar = OneOf[Optional[ZigZagInt]]()
         which_foo_or_bar = foo_or_bar.which_one_of_getter()
 
-        foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
-        bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
+        foo: Annotated[Optional[ZigZagInt], Field(1, one_of=foo_or_bar)] = None
+        bar: Annotated[Optional[ZigZagInt], Field(2, one_of=foo_or_bar)] = None
 
     @dataclass
     class Parent(BaseMessage):

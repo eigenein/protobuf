@@ -9,7 +9,7 @@ from typing_extensions import Self
 
 from pure_protobuf._accumulators import AccumulateLastOneWins
 from pure_protobuf._mergers import MergeLastOneWins
-from pure_protobuf.annotations import double, fixed32, fixed64, int32, int64, sfixed32, sfixed64, uint
+from pure_protobuf.annotations import ZigZagInt, double, fixed32, fixed64, sfixed32, sfixed64
 from pure_protobuf.exceptions import UnsupportedAnnotationError
 from pure_protobuf.helpers._dataclasses import KW_ONLY, SLOTS
 from pure_protobuf.helpers.itertools import ReadCallback
@@ -27,11 +27,9 @@ from pure_protobuf.io.varint import (
     WriteEnum,
     WriteTwosComplimentVarint,
     read_bool,
-    read_signed_varint,
-    read_unsigned_varint,
+    read_zigzag_varint,
     write_bool,
-    write_signed_varint,
-    write_unsigned_varint,
+    write_zigzag_varint,
 )
 from pure_protobuf.io.wire_type import WireType
 from pure_protobuf.io.wrappers import ReadMaybePacked, ReadStrictlyTyped
@@ -178,18 +176,8 @@ RecordDescriptor.__PREDEFINED__ = {
     double: DOUBLE_DESCRIPTOR,
     int: RecordDescriptor(
         wire_type=WireType.VARINT,
-        write=write_signed_varint,
-        read=ReadMaybePacked[int](ReadCallback(read_signed_varint), WireType.VARINT),
-    ),
-    int32: RecordDescriptor(
-        wire_type=WireType.VARINT,
-        write=WriteTwosComplimentVarint[int32](),
-        read=ReadMaybePacked[int32](ReadCallback(ReadTwosComplimentVarint[int32]()), WireType.VARINT),
-    ),
-    int64: RecordDescriptor(
-        wire_type=WireType.VARINT,
-        write=WriteTwosComplimentVarint[int64](),
-        read=ReadMaybePacked[int64](ReadCallback(ReadTwosComplimentVarint[int64]()), WireType.VARINT),
+        write=WriteTwosComplimentVarint(),
+        read=ReadMaybePacked[int](ReadCallback(ReadTwosComplimentVarint()), WireType.VARINT),
     ),
     memoryview: BYTES_DESCRIPTOR,
     ParseResult: URL_DESCRIPTOR,
@@ -200,9 +188,9 @@ RecordDescriptor.__PREDEFINED__ = {
         write=write_string,
         read=ReadStrictlyTyped(ReadCallback(read_string), WireType.LEN),
     ),
-    uint: RecordDescriptor(
+    ZigZagInt: RecordDescriptor(
         wire_type=WireType.VARINT,
-        write=write_unsigned_varint,
-        read=ReadMaybePacked[uint](ReadCallback(read_unsigned_varint), WireType.VARINT),
+        write=write_zigzag_varint,
+        read=ReadMaybePacked[int](ReadCallback(read_zigzag_varint), WireType.VARINT),
     ),
 }

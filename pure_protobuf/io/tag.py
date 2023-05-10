@@ -3,7 +3,6 @@ from typing import IO
 
 from typing_extensions import Self
 
-from pure_protobuf.annotations import uint
 from pure_protobuf.exceptions import IncorrectWireTypeError
 from pure_protobuf.helpers._dataclasses import KW_ONLY, SLOTS
 from pure_protobuf.io.varint import read_unsigned_varint, write_unsigned_varint
@@ -39,4 +38,4 @@ class Tag:
 
     def write_to(self, io: IO[bytes]) -> None:
         """Write the tag into the file object."""
-        write_unsigned_varint(uint(self.encode()), io)
+        write_unsigned_varint(self.encode(), io)

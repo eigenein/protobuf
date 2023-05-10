@@ -3,14 +3,14 @@ Reading and writing varints and the derivative types.
 
 See Also:
     - https://developers.google.com/protocol-buffers/docs/encoding#varints
+
 """
 
 from enum import IntEnum
 from itertools import count
 from sys import byteorder
-from typing import IO, Generic, Iterator, Type, TypeVar, cast
+from typing import IO, Iterator, Type, TypeVar
 
-from pure_protobuf.annotations import int32, int64, uint
 from pure_protobuf.exceptions import IncorrectValueError
 from pure_protobuf.helpers.io import read_byte_checked
 from pure_protobuf.interfaces._skip import Skip
@@ -24,24 +24,23 @@ class SkipVarint(Skip):
             pass
 
 
-class ReadUnsignedVarint(ReadSingular[uint]):
+class ReadUnsignedVarint(ReadSingular[int]):
     """Reads unsigned varint from the stream."""
 
-    def __call__(self, io: IO[bytes]) -> uint:
+    def __call__(self, io: IO[bytes]) -> int:
         value = 0
         for shift in count(0, 7):
             byte = read_byte_checked(io)
             value |= (byte & 0x7F) << shift
             if not byte & 0x80:
-                return uint(value)
+                return value
         raise AssertionError("unreachable code")
 
 
-class WriteUnsignedVarint(Write[uint]):
+class WriteUnsignedVarint(Write[int]):
     """Writes unsigned varint to the stream."""
 
-    def __call__(self, value: uint, io: IO[bytes]) -> None:
-        value = int(value)
+    def __call__(self, value: int, io: IO[bytes]) -> None:
         while value > 0x7F:
             io.write(bytes((value & 0x7F | 0x80,)))
             value >>= 7
@@ -53,9 +52,9 @@ read_unsigned_varint = ReadUnsignedVarint()
 write_unsigned_varint = WriteUnsignedVarint()
 
 
-class ReadSignedVarint(ReadSingular[int]):
+class ReadZigZagVarint(ReadSingular[int]):
     """
-    Reads a **signed** varint.
+    Reads a ZigZag-encoded varint.
 
     See Also:
         - https://stackoverflow.com/a/2211086/359730.
@@ -66,21 +65,18 @@ class ReadSignedVarint(ReadSingular[int]):
         return (value >> 1) ^ (-(value & 1))
 
 
-class WriteSignedVarint(Write[int]):
-    """Writes a **signed** varint."""
+class WriteZigZagVarint(Write[int]):
+    """Writes a ZigZag-encoded varint."""
 
     def __call__(self, value: int, io: IO[bytes]) -> None:
-        write_unsigned_varint(uint(abs(value) * 2 - (value < 0)), io)
+        write_unsigned_varint(abs(value) * 2 - (value < 0), io)
 
 
-read_signed_varint = ReadSignedVarint()
-write_signed_varint = WriteSignedVarint()
+read_zigzag_varint = ReadZigZagVarint()
+write_zigzag_varint = WriteZigZagVarint()
 
 
-TwosComplimentIntegerT = TypeVar("TwosComplimentIntegerT", int32, int64, int)
-
-
-class ReadTwosComplimentVarint(Generic[TwosComplimentIntegerT], ReadSingular[TwosComplimentIntegerT]):
+class ReadTwosComplimentVarint(ReadSingular[int]):
     """
     Reads a two's compliment varint.
 
@@ -88,19 +84,16 @@ class ReadTwosComplimentVarint(Generic[TwosComplimentIntegerT], ReadSingular[Two
         - https://protobuf.dev/programming-guides/encoding/#signed-ints
     """
 
-    def __call__(self, io: IO[bytes]) -> TwosComplimentIntegerT:
+    def __call__(self, io: IO[bytes]) -> int:
         varint = read_unsigned_varint(io)
-        return cast(
-            TwosComplimentIntegerT,
-            int.from_bytes(
-                varint.to_bytes(8, byteorder, signed=False),
-                byteorder,
-                signed=True,
-            ),
+        return int.from_bytes(
+            varint.to_bytes(8, byteorder, signed=False),
+            byteorder,
+            signed=True,
         )
 
 
-class WriteTwosComplimentVarint(Generic[TwosComplimentIntegerT], Write[TwosComplimentIntegerT]):
+class WriteTwosComplimentVarint(Write[int]):
     """
     Writes a two's compliment varint.
 
@@ -108,13 +101,13 @@ class WriteTwosComplimentVarint(Generic[TwosComplimentIntegerT], Write[TwosCompl
         - https://protobuf.dev/programming-guides/encoding/#signed-ints
     """
 
-    def __call__(self, value: TwosComplimentIntegerT, io: IO[bytes]) -> None:
+    def __call__(self, value: int, io: IO[bytes]) -> None:
         compliment = int.from_bytes(
             value.to_bytes(8, byteorder, signed=True),
             byteorder,
             signed=False,
         )
-        return write_unsigned_varint(uint(compliment), io)
+        return write_unsigned_varint(compliment, io)
 
 
 class ReadBool(ReadSingular[bool]):
@@ -124,7 +117,7 @@ class ReadBool(ReadSingular[bool]):
 
 class WriteBool(Write[bool]):
     def __call__(self, value: bool, io: IO[bytes]) -> None:
-        write_unsigned_varint(uint(value), io)
+        write_unsigned_varint(int(value), io)
 
 
 read_bool = ReadBool()
@@ -159,4 +152,4 @@ class WriteEnum(Write[EnumT]):
 
     def __call__(self, value: EnumT, io: IO[bytes]) -> None:
         # noinspection PyTypeChecker
-        write_unsigned_varint(uint(value.value), io)
+        write_unsigned_varint(value.value, io)

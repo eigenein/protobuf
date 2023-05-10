@@ -10,10 +10,10 @@ from pure_protobuf.io.varint import (
     ReadTwosComplimentVarint,
     WriteEnum,
     WriteTwosComplimentVarint,
-    read_signed_varint,
     read_unsigned_varint,
-    write_signed_varint,
+    read_zigzag_varint,
     write_unsigned_varint,
+    write_zigzag_varint,
 )
 from pure_protobuf.io.wrappers import to_bytes
 from tests import pytest_test_id
@@ -47,7 +47,7 @@ SIGNED_VARINT_TESTS = [
 
 @mark.parametrize(("value", "bytes_"), SIGNED_VARINT_TESTS, ids=pytest_test_id)
 def test_write_signed_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
-    assert benchmark(to_bytes, write_signed_varint, value) == bytes_
+    assert benchmark(to_bytes, write_zigzag_varint, value) == bytes_
 
 
 @mark.parametrize(("value", "bytes_"), SIGNED_VARINT_TESTS, ids=pytest_test_id)
@@ -57,7 +57,7 @@ def test_read_signed_varint(
     benchmark: BenchmarkFixture,
     bytes_io,  # noqa: ANN001
 ) -> None:
-    assert benchmark.pedantic(read_signed_varint, setup=bytes_io(bytes_)) == value
+    assert benchmark.pedantic(read_zigzag_varint, setup=bytes_io(bytes_)) == value
 
 
 TWOS_COMPLIMENT_TESTS = [
@@ -68,7 +68,7 @@ TWOS_COMPLIMENT_TESTS = [
 
 @mark.parametrize(("value", "bytes_"), TWOS_COMPLIMENT_TESTS, ids=pytest_test_id)
 def test_write_twos_compliment_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
-    assert benchmark(to_bytes, WriteTwosComplimentVarint[int](), value) == bytes_
+    assert benchmark(to_bytes, WriteTwosComplimentVarint(), value) == bytes_
 
 
 @mark.parametrize(("value", "bytes_"), TWOS_COMPLIMENT_TESTS, ids=pytest_test_id)
@@ -78,7 +78,7 @@ def test_read_twos_compliment_varint(
     benchmark: BenchmarkFixture,
     bytes_io,  # noqa: ANN001
 ) -> None:
-    assert benchmark.pedantic(ReadTwosComplimentVarint[int](), setup=bytes_io(bytes_)) == value
+    assert benchmark.pedantic(ReadTwosComplimentVarint(), setup=bytes_io(bytes_)) == value
 
 
 ENUM_CASES = [

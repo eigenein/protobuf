@@ -6,30 +6,28 @@ Field types are specified via [`#!python Annotated`](https://docs.python.org/3/l
 
 ### Built-in types
 
-| Type                                                                                                                | `.proto` type                                               | Notes                                                                                                                                                    |
-|:--------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `#!python bool`                                                                                                     | `#!protobuf bool`                                           |                                                                                                                                                          |
-| `#!python bytes`, `#!python bytearray`, `#!python memoryview`, `#!python typing.ByteString`                         | `#!protobuf bytes`                                          | Always deserialized as `#!python bytes`                                                                                                                  |
-| `#!python float`                                                                                                    | `#!protobuf float`                                          | **32-bit** floating-point number. Use the additional `#!python double` type for 64-bit number                                                            |
-| `#!python int`                                                                                                      | `#!protobuf sint32`, `#!protobuf sint64`                    | **Signed** variable-length integer, which uses the «ZigZag» encoding. For **unsigned** variable-length integer, use the additional `#!python uint` type. |
-| [`#!python enum.IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)                                 | `#!protobuf enum`, `#!protobuf uint32`, `#!protobuf uint64` | Supports subclasses of `#!python IntEnum` (see [Enumerations](#enumerations))                                                                            |
-| `#!python str`                                                                                                      | `#!protobuf string`                                         |                                                                                                                                                          |
-| [`#!python urllib.parse.ParseResult`](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.ParseResult) | `#!protobuf string`                                         | Parsed URL, represented as a string                                                                                                                      |
+| Type                                                                                                                                                                                                                                                                                                                                        | `.proto` type                                                                  | Notes                                                                                                                                                                                               |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `#!python bool`                                                                                                                                                                                                                                                                                                                             | `#!protobuf bool`                                                              | Encoded normally as `#!python int`                                                                                                                                                                  |
+| [`#!python bytes`](https://docs.python.org/3/library/stdtypes.html#bytes), [`#!python bytearray`](https://docs.python.org/3/library/stdtypes.html#bytearray), [`#!python memoryview`](https://docs.python.org/3/library/stdtypes.html#memoryview), [`#!python ByteString`](https://docs.python.org/3/library/typing.html#typing.ByteString) | `#!protobuf bytes`                                                             | Always deserialized as `#!python bytes`                                                                                                                                                             |
+| `#!python float`                                                                                                                                                                                                                                                                                                                            | `#!protobuf float`                                                             | **32-bit** floating-point number. Use the [additional](#additional-types) `#!python double` type for 64-bit number                                                                                  |
+| `#!python int`                                                                                                                                                                                                                                                                                                                              | `#!protobuf int32` `#!protobuf int64` `#!protobuf uint32` `#!protobuf uint64`  | [Variable-length integer](https://en.wikipedia.org/wiki/LEB128). For negative values, [two's compliments](https://en.wikipedia.org/wiki/Two%27s_complement) are used. See also `#!python ZigZagInt` |
+| [`#!python enum.IntEnum`](https://docs.python.org/3/library/enum.html#enum.IntEnum)                                                                                                                                                                                                                                                         | `#!protobuf enum` `#!protobuf int32` `#!protobuf int64`                        | Supports subclasses of `#!python IntEnum` (see [enumerations](#enumerations))                                                                                                                       |
+| `#!python str`                                                                                                                                                                                                                                                                                                                              | `#!protobuf string`                                                            |                                                                                                                                                                                                     |
+| [`#!python urllib.parse.ParseResult`](https://docs.python.org/3/library/urllib.parse.html#urllib.parse.ParseResult)                                                                                                                                                                                                                         | `#!protobuf string`                                                            | Parsed URL, represented as a string                                                                                                                                                                 |
 
 ### Additional types
 
 `#!python pure_protobuf.annotations` module provides additional [`#!python NewType`](https://docs.python.org/3/library/typing.html#newtype)s to support different representations of the singular types:
 
-| `#!python pure_protobuf.annotations` type | `.proto` type                            | Notes                                    |
-|:------------------------------------------|:-----------------------------------------|:-----------------------------------------|
-| `#!python double`                         | `#!protobuf double`                      | **64-bit** floating-point number         |
-| `#!python fixed32`                        | `#!protobuf fixed32`                     | 32-bit **unsigned** integer              |
-| `#!python fixed64`                        | `#!protobuf fixed64`                     | 64-bit **unsigned** integer              |
-| `#!python int32`                          | `#!protobuf int32`                       | Two's compliment variable-length integer |
-| `#!python int64`                          | `#!protobuf int64`                       | Two's compliment variable-length integer |
-| `#!python uint`                           | `#!protobuf uint32`, `#!protobuf uint64` | **Unsigned** variable-length integer     |
-| `#!python sfixed32`                       | `#!protobuf sfixed32`                    | 32-bit **signed** integer                |
-| `#!python sfixed64`                       | `#!protobuf sfixed64`                    | 64-bit **signed** integer                |
+| `#!python pure_protobuf.annotations` type | `.proto` type                           | Python value type | Notes                                                                                            |
+|:------------------------------------------|:----------------------------------------|:------------------|:-------------------------------------------------------------------------------------------------|
+| `#!python double`                         | `#!protobuf double`                     | `#!python float`  | **64-bit** floating-point number                                                                 |
+| `#!python fixed32`                        | `#!protobuf fixed32`                    | `#!python int`    | 32-bit **unsigned** integer                                                                      |
+| `#!python fixed64`                        | `#!protobuf fixed64`                    | `#!python int`    | 64-bit **unsigned** integer                                                                      |
+| `#!python sfixed32`                       | `#!protobuf sfixed32`                   | `#!python int`    | 32-bit **signed** integer                                                                        |
+| `#!python sfixed64`                       | `#!protobuf sfixed64`                   | `#!python int`    | 64-bit **signed** integer                                                                        |
+| `#!python ZigZagInt`                      | `#!protobuf sint32` `#!protobuf sint64` | `#!python int`    | [ZigZag-encoded](https://en.wikipedia.org/wiki/Variable-length_quantity#Zigzag_encoding) integer |
 
 ## Repeated fields
 
@@ -43,16 +41,16 @@ from dataclasses import dataclass, field
 from typing import List
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 
 
 @dataclass
 class Message(BaseMessage):
-    foo: Annotated[List[uint], Field(1)] = field(default_factory=list)
+    foo: Annotated[List[int], Field(1)] = field(default_factory=list)
 
 
-assert bytes(Message(foo=[uint(1), uint(2)])) == b"\x0A\x02\x01\x02"
+assert bytes(Message(foo=[1, 2])) == b"\x0A\x02\x01\x02"
 ```
 
 In case, unpacked encoding is explicitly wanted, you can specify `#!python packed=False`:
@@ -62,18 +60,18 @@ from dataclasses import dataclass, field
 from typing import List
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 
 
 @dataclass
 class Message(BaseMessage):
-    foo: Annotated[List[uint], Field(1, packed=False)] = field(
+    foo: Annotated[List[int], Field(1, packed=False)] = field(
         default_factory=list,
     )
 
 
-assert bytes(Message(foo=[uint(1), uint(2)])) == b"\x08\x01\x08\x02"
+assert bytes(Message(foo=[1, 2])) == b"\x08\x01\x08\x02"
 ```
 
 ## Required fields
@@ -90,18 +88,18 @@ from io import BytesIO
 from typing import Optional
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 
 
 @dataclass
 class Foo(BaseMessage):
-    bar: Annotated[uint, Field(1)] = 42
-    qux: Annotated[Optional[uint], Field(2)] = None
+    bar: Annotated[int, Field(1)] = 42
+    qux: Annotated[Optional[int], Field(2)] = None
 
 
 assert bytes(Foo()) == b"\x08\x2A"
-assert Foo.read_from(BytesIO()) == Foo(bar=uint(42))
+assert Foo.read_from(BytesIO()) == Foo(bar=42)
 ```
 
 !!! warning "Make sure to set defaults for non-required fields"
@@ -135,9 +133,9 @@ assert Foo.read_from(BytesIO()) == Foo(bar=uint(42))
 
 ## Enumerations
 
-Subclasses of the standard [`#!python IntEnum`](https://docs.python.org/3/library/enum.html#intenum) class are supported:
+Subclasses of the standard [`#!python IntEnum`](https://docs.python.org/3/library/enum.html#intenum) class are supported, their values are encoded as normal `#!python int`-s:
 
-```python title="test_enum.py"
+```python title="test_enum.py" hl_lines="10-11 19-20"
 from dataclasses import dataclass
 from enum import IntEnum
 from io import BytesIO
@@ -162,17 +160,17 @@ assert Test.read_from(BytesIO(b"\x08\x01")) == Test(foo=TestEnum.BAR)
 
 ## Embedded messages
 
-```python title="test_embedded_message.py"
+```python title="test_embedded_message.py" hl_lines="15 18"
 from dataclasses import dataclass, field
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 
 
 @dataclass
 class Test1(BaseMessage):
-    a: Annotated[uint, Field(1)] = 0
+    a: Annotated[int, Field(1)] = 0
 
 
 @dataclass
@@ -188,7 +186,7 @@ assert bytes(Test3(c=Test1(a=150))) == b"\x1A\x03\x08\x96\x01"
     Use `#!python typing.Self` (or `#!python typing_extensions.Self` in older Python) to reference
     the message class itself:
 
-    ```python title="test_self.py"
+    ```python title="test_self.py" hl_lines="13"
     from dataclasses import dataclass    
     from typing import Optional
 
@@ -220,7 +218,7 @@ assert bytes(Test3(c=Test1(a=150))) == b"\x1A\x03\x08\x96\x01"
 
 ## [Oneof](https://developers.google.com/protocol-buffers/docs/proto3#oneof)
 
-```python title="test_one_of.py"
+```python title="test_one_of.py" hl_lines="11 12 14 15"
 from typing import ClassVar, Optional
 
 from pydantic import BaseModel
@@ -232,7 +230,7 @@ from typing_extensions import Annotated
 
 class Message(BaseMessage, BaseModel):
     foo_or_bar: ClassVar[OneOf] = OneOf()  # (1)
-    which_one = foo_or_bar.which_one_of_getter()
+    which_one = foo_or_bar.which_one_of_getter()  # (2)
 
     foo: Annotated[Optional[int], Field(1, one_of=foo_or_bar)] = None
     bar: Annotated[Optional[int], Field(2, one_of=foo_or_bar)] = None
@@ -249,6 +247,7 @@ assert message.which_one() == "bar"
 ```
 
 1. `#!python ClassVar` is needed here because this is a descriptor and not a real attribute.
+2. Since the `#!python foo_or_bar` returns the value itself, we need an extra attribute for the `#!python which_one()` getter.
 
 !!! warning "Limitations"
 

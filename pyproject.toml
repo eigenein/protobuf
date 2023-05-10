@@ -43,18 +43,18 @@ optional = true
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
+cairosvg = "^2.6.0"
+mkdocs-autorefs = "^0.4.1"
+mkdocs-git-revision-date-localized-plugin = "^1.1.0"
+mkdocs-material = "^9.1.11"
+mkdocstrings = { version = "^0.21.2", extras = ["python"] }
 mypy = "^1.2.0"
+pillow = "^9.4.0"
 pydantic = "^1.10.4"
 pytest = "^7.2.0"
 pytest-benchmark = "^4.0.0"
 pytest-cov = "^4.0.0"
-ruff = "^0.0.247"
-mkdocs-material = "^9.0.12"
-pillow = "^9.4.0"
-cairosvg = "^2.6.0"
-mkdocs-git-revision-date-localized-plugin = "^1.1.0"
-mkdocstrings = { version = "^0.20.0", extras = ["python"] }
-mkdocs-autorefs = "^0.4.1"
+ruff = "^0.0.265"
 
 [tool.poetry.urls]
 "Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"

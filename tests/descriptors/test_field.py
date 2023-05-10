@@ -3,7 +3,7 @@ from typing import Any, ByteString, List, Optional
 from pytest import mark, raises
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field, int32, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.descriptors._field import _FieldDescriptor
 from pure_protobuf.exceptions import IncorrectAnnotationError
 from pure_protobuf.io.wrappers import to_bytes
@@ -33,19 +33,19 @@ def test_from_inner_hint_incorrect(hint: Any) -> None:
 @mark.parametrize(
     ("hint", "value", "expected"),
     [
-        (Annotated[uint, Field(1)], 150, b"\x08\x96\x01"),
-        (Annotated[List[uint], Field(1)], [1, 150, 2], b"\x0A\x04\x01\x96\x01\x02"),
+        (Annotated[int, Field(1)], 150, b"\x08\x96\x01"),
+        (Annotated[List[int], Field(1)], [1, 150, 2], b"\x0A\x04\x01\x96\x01\x02"),
         (Annotated[List[bytes], Field(1)], [b"B", b"C"], b"\x0A\x01B\x0A\x01C"),
         (Annotated[Optional[bytes], Field(1)], None, b""),
         (Annotated[ByteString, Field(1)], b"Testing", b"\x0A\x07Testing"),
         (Annotated[ExampleEnum, Field(1)], ExampleEnum.BAR, b"\x08\x02"),
         (
             Annotated[RecursiveMessage, Field(42)],
-            RecursiveMessage(payload=uint(1), inner=RecursiveMessage(payload=uint(2))),
+            RecursiveMessage(payload=1, inner=RecursiveMessage(payload=2)),
             b"\xd2\x02\x06\x08\x01\x12\x02\x08\x02",
         ),
-        (Annotated[List[uint], Field(1, packed=False)], [1, 2], b"\x08\x01\x08\x02"),
-        (Annotated[int32, Field(1)], -2, b"\x08\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"),
+        (Annotated[List[int], Field(1, packed=False)], [1, 2], b"\x08\x01\x08\x02"),
+        (Annotated[int, Field(1)], -2, b"\x08\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"),
         # TODO: cyclic dependencies, https://github.com/eigenein/protobuf/issues/108.
     ],
     ids=pytest_test_id,

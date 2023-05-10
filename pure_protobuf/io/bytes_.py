@@ -3,12 +3,12 @@ Reading and writing scalar length-delimited values.
 
 See Also:
     - https://developers.google.com/protocol-buffers/docs/encoding#length-types
+
 """
 
 from io import SEEK_CUR
 from typing import IO
 
-from pure_protobuf.annotations import uint
 from pure_protobuf.helpers.io import read_checked
 from pure_protobuf.interfaces._skip import Skip
 from pure_protobuf.interfaces.read import ReadSingular
@@ -24,7 +24,7 @@ class SkipBytes(Skip):
 
 class WriteBytes(Write[bytes]):
     def __call__(self, value: bytes, io: IO[bytes]) -> None:
-        write_unsigned_varint(uint(len(value)), io)
+        write_unsigned_varint(len(value), io)
         io.write(value)
 
 

@@ -43,7 +43,7 @@ And here's the same via `pure-protobuf`:
 from dataclasses import dataclass
 from io import BytesIO
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 from typing_extensions import Annotated
 
@@ -51,11 +51,11 @@ from typing_extensions import Annotated
 @dataclass
 class SearchRequest(BaseMessage):
     query: Annotated[str, Field(1)] = ""
-    page_number: Annotated[uint, Field(2)] = 0
-    result_per_page: Annotated[uint, Field(3)] = 0
+    page_number: Annotated[int, Field(2)] = 0
+    result_per_page: Annotated[int, Field(3)] = 0
 
 
-request = SearchRequest(query="hello", page_number=uint(1), result_per_page=uint(10))
+request = SearchRequest(query="hello", page_number=1, result_per_page=10)
 buffer = bytes(request)
 assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
 assert SearchRequest.read_from(BytesIO(buffer)) == request
@@ -66,7 +66,7 @@ assert SearchRequest.read_from(BytesIO(buffer)) == request
 ```python title="pydantic_example.py"
 from io import BytesIO
 
-from pure_protobuf.annotations import Field, uint
+from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
 from pydantic import BaseModel
 from typing_extensions import Annotated
@@ -74,11 +74,11 @@ from typing_extensions import Annotated
 
 class SearchRequest(BaseMessage, BaseModel):
     query: Annotated[str, Field(1)] = ""
-    page_number: Annotated[uint, Field(2)] = 0
-    result_per_page: Annotated[uint, Field(3)] = 0
+    page_number: Annotated[int, Field(2)] = 0
+    result_per_page: Annotated[int, Field(3)] = 0
 
 
-request = SearchRequest(query="hello", page_number=uint(1), result_per_page=uint(10))
+request = SearchRequest(query="hello", page_number=1, result_per_page=10)
 buffer = bytes(request)
 assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
 assert SearchRequest.read_from(BytesIO(buffer)) == request

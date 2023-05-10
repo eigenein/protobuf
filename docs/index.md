@@ -19,7 +19,7 @@
     from dataclasses import dataclass
     from io import BytesIO
     
-    from pure_protobuf.annotations import Field, uint
+    from pure_protobuf.annotations import Field
     from pure_protobuf.message import BaseMessage
     from typing_extensions import Annotated
     
@@ -27,14 +27,14 @@
     @dataclass
     class SearchRequest(BaseMessage):
         query: Annotated[str, Field(1)] = ""
-        page_number: Annotated[uint, Field(2)] = 0
-        result_per_page: Annotated[uint, Field(3)] = 0
+        page_number: Annotated[int, Field(2)] = 0
+        result_per_page: Annotated[int, Field(3)] = 0
     
     
     request = SearchRequest(
         query="hello",
-        page_number=uint(1),
-        result_per_page=uint(10),
+        page_number=1,
+        result_per_page=10,
     )
     buffer = bytes(request)
     assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
@@ -46,7 +46,7 @@
     ```python title="pydantic_example.py"
     from io import BytesIO
     
-    from pure_protobuf.annotations import Field, uint
+    from pure_protobuf.annotations import Field
     from pure_protobuf.message import BaseMessage
     from pydantic import BaseModel
     from typing_extensions import Annotated
@@ -54,14 +54,14 @@
     
     class SearchRequest(BaseMessage, BaseModel):
         query: Annotated[str, Field(1)] = ""
-        page_number: Annotated[uint, Field(2)] = 0
-        result_per_page: Annotated[uint, Field(3)] = 0
+        page_number: Annotated[int, Field(2)] = 0
+        result_per_page: Annotated[int, Field(3)] = 0
     
     
     request = SearchRequest(
         query="hello",
-        page_number=uint(1),
-        result_per_page=uint(10),
+        page_number=1,
+        result_per_page=10,
     )
     buffer = bytes(request)
     assert buffer == b"\x0A\x05hello\x10\x01\x18\x0A"
@@ -75,17 +75,17 @@
     ```python title="test_vanilla.py"
     from io import BytesIO
     
-    from pure_protobuf.annotations import Field, uint
+    from pure_protobuf.annotations import Field
     from pure_protobuf.message import BaseMessage
     from typing_extensions import Annotated
     
 
     class Message(BaseMessage):
-        a: Annotated[uint, Field(1)] = uint(0)
+        a: Annotated[int, Field(1)] = 0
 
-        def __init__(self, a: uint) -> None:
+        def __init__(self, a: int) -> None:
             self.a = a
 
     
-    assert Message.read_from(BytesIO(b"\x08\x96\x01")).a == uint(150)
+    assert Message.read_from(BytesIO(b"\x08\x96\x01")).a == 150
     ```

@@ -8,12 +8,12 @@ from pure_protobuf.exceptions import IncorrectValueError
 from pure_protobuf.io.varint import (
     ReadEnum,
     ReadTwosComplimentVarint,
+    ReadZigZagVarint,
     WriteEnum,
     WriteTwosComplimentVarint,
+    WriteZigZagVarint,
     read_unsigned_varint,
-    read_zigzag_varint,
     write_unsigned_varint,
-    write_zigzag_varint,
 )
 from pure_protobuf.io.wrappers import to_bytes
 from tests import pytest_test_id
@@ -46,18 +46,18 @@ SIGNED_VARINT_TESTS = [
 
 
 @mark.parametrize(("value", "bytes_"), SIGNED_VARINT_TESTS, ids=pytest_test_id)
-def test_write_signed_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
-    assert benchmark(to_bytes, write_zigzag_varint, value) == bytes_
+def test_write_zigzag_varint(value: int, bytes_: bytes, benchmark: BenchmarkFixture) -> None:
+    assert benchmark(to_bytes, WriteZigZagVarint(), value) == bytes_
 
 
 @mark.parametrize(("value", "bytes_"), SIGNED_VARINT_TESTS, ids=pytest_test_id)
-def test_read_signed_varint(
+def test_read_zigzag_varint(
     value: int,
     bytes_: bytes,
     benchmark: BenchmarkFixture,
     bytes_io,  # noqa: ANN001
 ) -> None:
-    assert benchmark.pedantic(read_zigzag_varint, setup=bytes_io(bytes_)) == value
+    assert benchmark.pedantic(ReadZigZagVarint(), setup=bytes_io(bytes_)) == value
 
 
 TWOS_COMPLIMENT_TESTS = [

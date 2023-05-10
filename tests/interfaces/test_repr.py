@@ -6,12 +6,7 @@ from pure_protobuf._accumulators import AccumulateMessages
 from pure_protobuf._mergers import MergeMessages
 from pure_protobuf.descriptors.record import BOOL_DESCRIPTOR
 from pure_protobuf.helpers.itertools import ReadCallback
-from pure_protobuf.io.varint import (
-    ReadEnum,
-    WriteEnum,
-    read_unsigned_varint,
-    write_zigzag_varint,
-)
+from pure_protobuf.io.varint import ReadEnum, WriteEnum, WriteZigZagVarint, read_unsigned_varint
 from pure_protobuf.io.wrappers import ReadRepeated, WriteOptional
 from pure_protobuf.message import BaseMessage
 from tests.definitions import ExampleEnum
@@ -23,7 +18,7 @@ from tests.definitions import ExampleEnum
         (ReadEnum(ExampleEnum), "ReadEnum(ExampleEnum)"),
         (WriteEnum[ExampleEnum](), "WriteEnum[<enum 'ExampleEnum'>]()"),
         (
-            WriteOptional[int](write_zigzag_varint),
+            WriteOptional[int](WriteZigZagVarint()),
             "WriteOptional[<class 'int'>](WriteZigZagVarint())",
         ),
         (

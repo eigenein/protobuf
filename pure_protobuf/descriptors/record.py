@@ -24,12 +24,12 @@ from pure_protobuf.io.url import ReadUrl, WriteUrl
 from pure_protobuf.io.varint import (
     ReadEnum,
     ReadTwosComplimentVarint,
+    ReadZigZagVarint,
     WriteEnum,
     WriteTwosComplimentVarint,
+    WriteZigZagVarint,
     read_bool,
-    read_zigzag_varint,
     write_bool,
-    write_zigzag_varint,
 )
 from pure_protobuf.io.wire_type import WireType
 from pure_protobuf.io.wrappers import ReadMaybePacked, ReadStrictlyTyped
@@ -190,7 +190,7 @@ RecordDescriptor.__PREDEFINED__ = {
     ),
     ZigZagInt: RecordDescriptor(
         wire_type=WireType.VARINT,
-        write=write_zigzag_varint,
-        read=ReadMaybePacked[int](ReadCallback(read_zigzag_varint), WireType.VARINT),
+        write=WriteZigZagVarint(),
+        read=ReadMaybePacked[int](ReadCallback(ReadZigZagVarint()), WireType.VARINT),
     ),
 }

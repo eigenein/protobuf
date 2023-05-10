@@ -72,10 +72,6 @@ class WriteZigZagVarint(Write[int]):
         write_unsigned_varint(abs(value) * 2 - (value < 0), io)
 
 
-read_zigzag_varint = ReadZigZagVarint()
-write_zigzag_varint = WriteZigZagVarint()
-
-
 class ReadTwosComplimentVarint(ReadSingular[int]):
     """
     Reads a two's compliment varint.

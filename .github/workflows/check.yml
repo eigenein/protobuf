@@ -61,6 +61,8 @@ jobs:
     - name: "🪄 Linter: Ruff"
       if: success() || failure()
       run: make lint/ruff
+      env:
+        RUFF_FORMAT: "github"
 
     - name: "🪄 Linter: mypy"
       if: success() || failure()

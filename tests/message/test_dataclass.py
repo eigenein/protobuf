@@ -17,7 +17,7 @@ def test_simple_message() -> None:
     @dataclass
     class Message(BaseMessage):
         a: Annotated[int, Field(1)] = 0
-        b: Annotated[uint, Field(2)] = 0
+        b: Annotated[uint, Field(2)] = uint(0)
 
     message = Message(a=150, b=uint(42))
     bytes_ = b"\x08\x96\x01\x10\x2A"

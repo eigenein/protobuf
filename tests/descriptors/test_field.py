@@ -3,7 +3,7 @@ from typing import Any, ByteString, List, Optional
 from pytest import mark, raises
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field
+from pure_protobuf.annotations import Field, uint
 from pure_protobuf.descriptors._field import _FieldDescriptor
 from pure_protobuf.exceptions import IncorrectAnnotationError
 from pure_protobuf.io.wrappers import to_bytes
@@ -34,6 +34,7 @@ def test_from_inner_hint_incorrect(hint: Any) -> None:
     ("hint", "value", "expected"),
     [
         (Annotated[int, Field(1)], 150, b"\x08\x96\x01"),
+        (Annotated[uint, Field(1)], 150, b"\x08\x96\x01"),
         (Annotated[List[int], Field(1)], [1, 150, 2], b"\x0A\x04\x01\x96\x01\x02"),
         (Annotated[List[bytes], Field(1)], [b"B", b"C"], b"\x0A\x01B\x0A\x01C"),
         (Annotated[Optional[bytes], Field(1)], None, b""),

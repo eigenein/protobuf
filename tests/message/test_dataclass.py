@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from typing_extensions import Annotated
 
-from pure_protobuf.annotations import Field, ZigZagInt
+from pure_protobuf.annotations import Field, ZigZagInt, uint
 from pure_protobuf.message import BaseMessage
 from pure_protobuf.one_of import OneOf
 
@@ -17,9 +17,10 @@ def test_simple_message() -> None:
     @dataclass
     class Message(BaseMessage):
         a: Annotated[int, Field(1)] = 0
+        b: Annotated[uint, Field(2)] = 0
 
-    message = Message(a=150)
-    bytes_ = b"\x08\x96\x01"
+    message = Message(a=150, b=uint(42))
+    bytes_ = b"\x08\x96\x01\x10\x2A"
 
     assert Message.loads(b"") == Message()
     assert bytes(message) == bytes_

@@ -9,7 +9,7 @@ from typing_extensions import Self
 
 from pure_protobuf._accumulators import AccumulateLastOneWins
 from pure_protobuf._mergers import MergeLastOneWins
-from pure_protobuf.annotations import ZigZagInt, double, fixed32, fixed64, sfixed32, sfixed64
+from pure_protobuf.annotations import ZigZagInt, double, fixed32, fixed64, sfixed32, sfixed64, uint
 from pure_protobuf.exceptions import UnsupportedAnnotationError
 from pure_protobuf.helpers._dataclasses import KW_ONLY, SLOTS
 from pure_protobuf.helpers.itertools import ReadCallback
@@ -29,7 +29,9 @@ from pure_protobuf.io.varint import (
     WriteTwosComplimentVarint,
     WriteZigZagVarint,
     read_bool,
+    read_unsigned_varint,
     write_bool,
+    write_unsigned_varint,
 )
 from pure_protobuf.io.wire_type import WireType
 from pure_protobuf.io.wrappers import ReadMaybePacked, ReadStrictlyTyped
@@ -187,6 +189,11 @@ RecordDescriptor.__PREDEFINED__ = {
         wire_type=WireType.LEN,
         write=write_string,
         read=ReadStrictlyTyped(ReadCallback(read_string), WireType.LEN),
+    ),
+    uint: RecordDescriptor(
+        wire_type=WireType.VARINT,
+        write=write_unsigned_varint,
+        read=ReadMaybePacked[int](ReadCallback(read_unsigned_varint), WireType.VARINT),
     ),
     ZigZagInt: RecordDescriptor(
         wire_type=WireType.VARINT,

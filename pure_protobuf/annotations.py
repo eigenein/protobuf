@@ -101,9 +101,14 @@ See Also:
     - https://developers.google.com/protocol-buffers/docs/encoding#non-varint-nums
 """
 
+uint = NewType("uint", int)
+"""
+Unsigned variable-length integer.
+"""
+
 ZigZagInt = NewType("ZigZagInt", int)
 """
-ZigZag-encoded integer.
+ZigZag-encoded variable-length integer.
 
 See Also:
     - https://developers.google.com/protocol-buffers/docs/encoding#signed-ints

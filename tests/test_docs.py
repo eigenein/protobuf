@@ -18,7 +18,7 @@ def _discover_files() -> Iterator[Path]:
 
 
 def _generate_params(path: Path) -> Iterator[NamedTuple]:
-    for (test_id, snippet) in CODE_BLOCK_RE.findall(path.read_text()):
+    for test_id, snippet in CODE_BLOCK_RE.findall(path.read_text()):
         yield param(snippet, id=f"{path}#{test_id}")
 
 

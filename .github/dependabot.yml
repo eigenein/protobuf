@@ -5,3 +5,4 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "⬆️ "
+    open-pull-requests-limit: 0

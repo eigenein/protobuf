@@ -20,7 +20,7 @@ lint: lint/ruff lint/mypy
 
 .PHONY: lint/ruff
 lint/ruff:
-	poetry run ruff pure_protobuf tests
+	poetry run ruff check pure_protobuf tests
 
 .PHONY: lint/mypy
 lint/mypy:
@@ -31,7 +31,8 @@ format: format/ruff
 
 .PHONY: format/ruff
 format/ruff:
-	poetry run ruff --fix pure_protobuf tests
+	poetry run ruff check --fix pure_protobuf tests
+	poetry run ruff format pure_protobuf tests
 
 .PHONY: test
 test:

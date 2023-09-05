@@ -13,14 +13,10 @@ clean:
 
 .PHONY: install
 install:
-	poetry install --all-extras --with dev
+	poetry install --all-extras --with=dev
 
 .PHONY: lint
-lint: lint/ruff lint/black lint/mypy
-
-.PHONY: lint/black
-lint/black:
-	poetry run black --diff --check pure_protobuf tests
+lint: lint/ruff lint/mypy
 
 .PHONY: lint/ruff
 lint/ruff:
@@ -31,11 +27,7 @@ lint/mypy:
 	poetry run mypy pure_protobuf tests
 
 .PHONY: format
-format: format/ruff format/black
-
-.PHONY: format/black
-format/black:
-	poetry run black pure_protobuf tests
+format: format/ruff
 
 .PHONY: format/ruff
 format/ruff:

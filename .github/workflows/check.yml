@@ -55,9 +55,6 @@ jobs:
     - name: "📥 Install the package"
       run: make install
 
-    - name: "🪄 Linter: Black"
-      run: make lint/black
-
     - name: "🪄 Linter: Ruff"
       if: success() || failure()
       run: make lint/ruff

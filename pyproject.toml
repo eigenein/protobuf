@@ -46,15 +46,15 @@ black = "23.9.1"
 cairosvg = "2.7.1"
 mkdocs-autorefs = "0.5.0"
 mkdocs-git-revision-date-localized-plugin = "1.2.0"
-mkdocs-material = "9.3.2"
+mkdocs-material = "9.4.2"
 mkdocstrings = { version = "0.23.0", extras = ["python"] }
 mypy = "1.5.1"
 pillow = "10.0.1"
-pydantic = "1.10.12"
+pydantic = "1.10.13"
 pytest = "7.4.2"
 pytest-benchmark = "4.0.0"
 pytest-cov = "4.1.0"
-ruff = "0.0.290"
+ruff = "0.0.291"
 
 [tool.poetry.urls]
 "Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"

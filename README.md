@@ -9,10 +9,6 @@
 
 <small><strong>Wow! Such annotated! Very buffers!</strong></small>
 
-| ⚠️ Note                                                                                                                                   |
-|:------------------------------------------------------------------------------------------------------------------------------------------|
-| This `README` describes the upcoming **major version update**. For `2.x` please refer to: https://github.com/eigenein/protobuf/tree/2.2.3 |
-
 ## Documentation
 
 <a href="https://eigenein.github.io/protobuf/">

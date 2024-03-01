@@ -138,6 +138,7 @@ ignore = [
     "D212",  # alternative of D213
     "D406",
     "D407",
+    "D413",
     "E501",  # prevents black from running
     "PT001",
     "PT011",

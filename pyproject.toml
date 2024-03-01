@@ -51,7 +51,7 @@ mkdocstrings = { version = "0.24.1", extras = ["python"] }
 mypy = "1.8.0"
 pillow = "10.2.0"
 pydantic = "1.10.14"
-pytest = "7.4.4"
+pytest = "8.0.2"
 pytest-benchmark = "4.0.0"
 pytest-cov = "4.1.0"
 ruff = "0.3.0"

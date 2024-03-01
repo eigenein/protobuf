@@ -1,6 +1,9 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
+    schedule:
+      interval: "monthly"
+      timezone: "Europe/Amsterdam"
     labels:
       - "dependencies"
     commit-message:

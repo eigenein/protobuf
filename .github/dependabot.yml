@@ -4,5 +4,5 @@ updates:
     labels:
       - "dependencies"
     commit-message:
-      prefix: "⬆️ "
+      prefix: "⬆️"
     open-pull-requests-limit: 0

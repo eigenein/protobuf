@@ -43,7 +43,7 @@ typing-extensions = "^4.4.0"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-black = "24.2.0"
+black = "24.3.0"
 cairosvg = "2.7.1"
 mkdocs-autorefs = "1.0.1"
 mkdocs-git-revision-date-localized-plugin = "1.2.4"

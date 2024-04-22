@@ -4,7 +4,9 @@ on:
   push:
     branches:
       - master
-      - main
+  pull_request:
+    branches:
+      - master
 
 permissions:
   contents: read
@@ -17,15 +19,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-        name: "📥 Checkout"
-
-      - uses: actions/setup-python@v5
-        name: "✨ Set up Python"
-        id: "setup-python"
-        with:
-          python-version: 3.x
-
       - uses: actions/cache@v4
         name: "🗃 Cache"
         with:
@@ -35,12 +28,26 @@ jobs:
             .cache
             .venv
 
-      - name: "📥 Install Material for MkDocs"
-        run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade 'mkdocs-material~=9.0' 'mkdocs-autorefs~=0.4' 'mkdocstrings[python]~=0.20' 'mkdocs-git-revision-date-localized-plugin~=1.1' pillow cairosvg
+      - uses: actions/checkout@v4
+        name: "📥 Checkout"
+        with:
+          fetch-depth: 0
 
-      - run: ".venv/bin/mkdocs build --site-dir _site"
+      - name: "✨ Install Poetry"
+        run: |
+          pipx install poetry
+          pipx inject poetry poetry-dynamic-versioning
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+          cache: poetry
+
+      - name: "📥 Install dependencies"
+        run: poetry install --no-root --with=dev
+
+      - run: "make docs"
         name: "📦 Build"
 
       - name: "📤 Upload"
@@ -50,6 +57,7 @@ jobs:
     name: "Deploy"
     runs-on: ubuntu-latest
     needs: "build"
+    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

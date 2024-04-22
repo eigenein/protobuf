@@ -1,7 +1,7 @@
 BIN := venv/bin
 
 .PHONY: all
-all: install lint test build
+all: install lint test build docs
 
 .PHONY: clean
 clean:
@@ -45,3 +45,7 @@ benchmark:
 .PHONY: build
 build:
 	poetry build
+
+.PHONY: docs
+docs:
+	poetry run mkdocs build --site-dir _site

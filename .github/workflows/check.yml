@@ -24,6 +24,7 @@ jobs:
         - '3.9'
         - '3.10'
         - '3.11'
+        - '3.12'
 
     steps:
     - name: "🗃 Cache"
@@ -46,6 +47,7 @@ jobs:
       run: |
         pipx install poetry
         pipx inject poetry poetry-dynamic-versioning
+
     - name: 🐍 Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
@@ -77,7 +79,6 @@ jobs:
         env_vars: PYTHON
         name: Python ${{ matrix.python-version }}
         files: coverage.xml
-        fail_ci_if_error: false # FIXME: https://github.com/codecov/codecov-action/issues/720
 
     - name: "📦 Build and publish package: dry run"
       if: success() || failure()

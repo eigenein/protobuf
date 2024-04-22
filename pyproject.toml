@@ -25,6 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Typing :: Typed",
 ]
@@ -73,7 +74,6 @@ latest-tag = true
 allow_redefinition = true
 allow_untyped_globals = true
 check_untyped_defs = true
-enable_incomplete_feature = "TypeVarTuple, Unpack"
 ignore_missing_imports = true
 pretty = true
 
@@ -95,11 +95,13 @@ exclude_lines = [
 
 [tool.black]
 line-length = 120
-target-version = ["py38", "py39", "py310", "py311"]
+target-version = ["py38", "py39", "py310", "py311", "py312"]
 
 [tool.ruff]
 line-length = 120
 target-version = "py38"
+
+[tool.ruff.lint]
 select = [
     "A",
     "ANN",
@@ -122,6 +124,7 @@ select = [
     "W",
     "YTT",
 ]
+unfixable = ["B"]
 ignore = [
     "ANN101",
     "ANN102",
@@ -149,10 +152,9 @@ ignore = [
     "UP007",  # 3.10
     "UP033",  # 3.9
 ]
-unfixable = ["B"]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D101", "D102", "D106", "D205"]
 
-[tool.ruff.flake8-quotes]
+[tool.ruff.lint.flake8-quotes]
 docstring-quotes = "double"

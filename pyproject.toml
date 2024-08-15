@@ -43,19 +43,19 @@ typing-extensions = "^4.4.0"
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-black = "24.4.2"
+black = "24.8.0"
 cairosvg = "2.7.1"
 mkdocs-autorefs = "1.0.1"
 mkdocs-git-revision-date-localized-plugin = "1.2.6"
-mkdocs-material = "9.5.29"
-mkdocstrings = { version = "0.25.1", extras = ["python"] }
-mypy = "1.11.0"
+mkdocs-material = "9.5.31"
+mkdocstrings = { version = "0.25.2", extras = ["python"] }
+mypy = "1.11.1"
 pillow = "10.4.0"
 pydantic = "2.8.2"
-pytest = "8.3.1"
+pytest = "8.3.2"
 pytest-benchmark = "4.0.0"
 pytest-cov = "5.0.0"
-ruff = "0.5.4"
+ruff = "0.6.0"
 
 [tool.poetry.urls]
 "Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"

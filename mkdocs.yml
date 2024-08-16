@@ -21,22 +21,28 @@ theme:
     - navigation.footer
     - navigation.indexes
     - navigation.instant
+    - navigation.instant.progress
     - navigation.sections
     # - navigation.tabs
     - navigation.top
     - navigation.tracking
     - search.suggest
+    - search.highlight
   palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: System theme
     - media: "(prefers-color-scheme: light)"
       scheme: default
       toggle:
         icon: material/brightness-7
-        name: Switch to dark mode
+        name: Dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: Light mode
 
 plugins:
   - git-revision-date-localized:
@@ -87,7 +93,7 @@ extra:
     provider: google
     property: G-CPNSYW2HX7
 
-copyright: Copyright &copy; 2011-2023 Pavel Perestoronin
+copyright: Copyright &copy; 2011-2024 Pavel Perestoronin
 
 site_url: "https://eigenein.github.io/protobuf"
 

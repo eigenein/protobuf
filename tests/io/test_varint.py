@@ -22,8 +22,8 @@ from tests.definitions import ExampleEnum
 UVARINT_CASES = [
     (0, b"\x00"),
     (3, b"\x03"),
-    (270, b"\x8E\x02"),
-    (86942, b"\x9E\xA7\x05"),
+    (270, b"\x8e\x02"),
+    (86942, b"\x9e\xa7\x05"),
 ]
 
 
@@ -61,7 +61,7 @@ def test_read_zigzag_varint(
 
 
 TWOS_COMPLIMENT_TESTS = [
-    (-2, b"\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"),
+    (-2, b"\xfe\xff\xff\xff\xff\xff\xff\xff\xff\x01"),
     (1, b"\x01"),
 ]
 

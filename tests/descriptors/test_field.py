@@ -35,10 +35,10 @@ def test_from_inner_hint_incorrect(hint: Any) -> None:
     [
         (Annotated[int, Field(1)], 150, b"\x08\x96\x01"),
         (Annotated[uint, Field(1)], 150, b"\x08\x96\x01"),
-        (Annotated[List[int], Field(1)], [1, 150, 2], b"\x0A\x04\x01\x96\x01\x02"),
-        (Annotated[List[bytes], Field(1)], [b"B", b"C"], b"\x0A\x01B\x0A\x01C"),
+        (Annotated[List[int], Field(1)], [1, 150, 2], b"\x0a\x04\x01\x96\x01\x02"),
+        (Annotated[List[bytes], Field(1)], [b"B", b"C"], b"\x0a\x01B\x0a\x01C"),
         (Annotated[Optional[bytes], Field(1)], None, b""),
-        (Annotated[ByteString, Field(1)], b"Testing", b"\x0A\x07Testing"),
+        (Annotated[ByteString, Field(1)], b"Testing", b"\x0a\x07Testing"),
         (Annotated[ExampleEnum, Field(1)], ExampleEnum.BAR, b"\x08\x02"),
         (
             Annotated[RecursiveMessage, Field(42)],
@@ -46,7 +46,7 @@ def test_from_inner_hint_incorrect(hint: Any) -> None:
             b"\xd2\x02\x06\x08\x01\x12\x02\x08\x02",
         ),
         (Annotated[List[int], Field(1, packed=False)], [1, 2], b"\x08\x01\x08\x02"),
-        (Annotated[int, Field(1)], -2, b"\x08\xFE\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x01"),
+        (Annotated[int, Field(1)], -2, b"\x08\xfe\xff\xff\xff\xff\xff\xff\xff\xff\x01"),
         # TODO: cyclic dependencies, https://github.com/eigenein/protobuf/issues/108.
     ],
     ids=pytest_test_id,

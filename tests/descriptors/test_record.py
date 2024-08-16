@@ -30,7 +30,7 @@ def test_from_inner_hint_unsupported(inner_hint: Any) -> None:
     ("value", "encoded"),
     [
         (0.0, b"\x00\x00\x00\x00"),
-        (1.0, b"\x00\x00\x80\x3F"),
+        (1.0, b"\x00\x00\x80\x3f"),
     ],
 )
 class TestStruct:

@@ -20,7 +20,7 @@ def test_simple_message() -> None:
         b: Annotated[uint, Field(2)] = uint(0)
 
     message = Message(a=150, b=uint(42))
-    bytes_ = b"\x08\x96\x01\x10\x2A"
+    bytes_ = b"\x08\x96\x01\x10\x2a"
 
     assert Message.loads(b"") == Message()
     assert bytes(message) == bytes_
@@ -76,7 +76,7 @@ def test_embedded_message() -> None:
         c: Annotated[Child, Field(3)] = field(default_factory=Child)
 
     message = Parent(c=Child(a=150))
-    bytes_ = b"\x1A\x03\x08\x96\x01"
+    bytes_ = b"\x1a\x03\x08\x96\x01"
 
     assert Parent.loads(b"") == Parent()
     assert bytes(message) == bytes_
@@ -103,10 +103,10 @@ def test_merge_embedded_messages_repeated() -> None:
     assert (
         # fmt: off
         Outer.loads(
-            b"\x0A\x00"  # foo == None
-            b"\x0A\x02\x08\x00"  # foo == [0]
-            b"\x0A\x03\x08\x96\x01"  # foo == [150]
-            b"\x0A\x00",  # foo == None
+            b"\x0a\x00"  # foo == None
+            b"\x0a\x02\x08\x00"  # foo == [0]
+            b"\x0a\x03\x08\x96\x01"  # foo == [150]
+            b"\x0a\x00",  # foo == None
         )
         == Outer(inner=Inner(foo=[0, 150]))
         # fmt: on
@@ -127,8 +127,8 @@ def test_merge_embedded_messages_primitive() -> None:
     assert (
         # fmt: off
         Outer.loads(
-            b"\x0A\x02\x08\x01"  # foo == 1
-            b"\x0A\x02\x08\x02",  # foo == 2
+            b"\x0a\x02\x08\x01"  # foo == 1
+            b"\x0a\x02\x08\x02",  # foo == 2
         )
         == Outer(inner=Inner(foo=2))
         # fmt: on
@@ -164,7 +164,7 @@ def test_read_packed_repeated_as_unpacked() -> None:
     class Test(BaseMessage):
         foo: Annotated[List[int], Field(1, packed=False)]
 
-    assert Test.loads(b"\x0A\x04\x01\x96\x01\x02") == Test(
+    assert Test.loads(b"\x0a\x04\x01\x96\x01\x02") == Test(
         foo=[1, 150, 2],
     )
 

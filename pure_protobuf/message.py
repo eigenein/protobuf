@@ -125,11 +125,10 @@ class BaseMessage(ABC):
 
     def __setattr__(self, name: str, value: Any) -> None:  # noqa: D105
         super().__setattr__(name, value)
-        if value is not None:
-            if descriptor := self.__PROTOBUF_FIELDS_BY_NAME__.get(name):
-                one_of = descriptor.one_of
-                if one_of is not None:
-                    one_of._keep_attribute(self, descriptor.number)
+        if descriptor := (value is not None and self.__PROTOBUF_FIELDS_BY_NAME__.get(name)):
+            one_of = descriptor.one_of
+            if one_of is not None:
+                one_of._keep_attribute(self, descriptor.number)
 
     @classmethod
     def _init_embedded_descriptor(cls) -> RecordDescriptor[Self]:

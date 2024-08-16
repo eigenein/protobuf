@@ -16,6 +16,12 @@ class OneOf(Generic[OneOfT]):
     __slots__ = ("_fields",)
 
     def __init__(self) -> None:
+        """
+        Define a one-of group of fields.
+
+        A [`Field`][pure_protobuf.annotations.Field] then should be assigned to the group
+        via the [`one_of`][pure_protobuf.annotations.Field.one_of] parameter.
+        """
         self._fields: List[Tuple[int, str]] = []
 
     def _add_field(self, number: int, name: str) -> None:

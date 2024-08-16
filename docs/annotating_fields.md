@@ -1,6 +1,11 @@
 # Annotating fields
 
-Field types are specified via [`#!python Annotated`](https://docs.python.org/3/library/typing.html#typing.Annotated) [type hints](https://www.python.org/dev/peps/pep-0484/). Each field may include a `#!python pure_protobuf.annotations.Field` annotation, otherwise it gets ignored by `#!python BaseMessage`. For older Python versions one can use `#!python typing_extensions.Annotated`.
+Field types are specified via [`#!python Annotated`](https://docs.python.org/3/library/typing.html#typing.Annotated) [type hints](https://www.python.org/dev/peps/pep-0484/). Each field may include a [`#!python Field`][pure_protobuf.annotations.Field] annotation, otherwise it gets ignored by `#!python BaseMessage`. For older Python versions one can use `#!python typing_extensions.Annotated`.
+
+::: pure_protobuf.annotations.Field
+    options:
+      show_root_heading: true
+      heading_level: 2
 
 ## Supported types
 
@@ -255,3 +260,7 @@ assert message.which_one() == "bar"
     - When assigning a one-of member, `#!python BaseMessage` resets the other fields to `#!python None`, **regardless** of any defaults defined by, for example, `#!python dataclasses.field`.
     - The `#!python OneOf` descriptor simply iterates over its members in order to return an assigned `Oneof` value, so it takes [linear time](https://en.wikipedia.org/wiki/Time_complexity#Linear_time).
     - It's impossible to set a value via a `OneOf` descriptor, one needs to assign the value to a specific attribute.
+
+::: pure_protobuf.one_of.OneOf
+    options:
+      heading_level: 3

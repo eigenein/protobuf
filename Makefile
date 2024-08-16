@@ -49,3 +49,7 @@ build:
 .PHONY: docs
 docs:
 	poetry run mkdocs build --site-dir _site
+
+.PHONY: docs/serve
+docs/serve:
+	poetry run mkdocs serve

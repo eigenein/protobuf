@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from typing import Any, List, Tuple, Union
+from typing import Any, Union
 
 from typing_extensions import TypeGuard, get_args, get_origin
 
@@ -22,7 +22,7 @@ class Sentinel:  # pragma: no cover
 DEFAULT = Sentinel()
 
 
-def extract_repeated(hint: Any) -> Tuple[Any, TypeGuard[List]]:
+def extract_repeated(hint: Any) -> tuple[Any, TypeGuard[list]]:
     """Extract a possible repeated flag."""
     origin = get_origin(hint)
     if isinstance(origin, type) and (origin is Iterable or issubclass(origin, list)):
@@ -30,7 +30,7 @@ def extract_repeated(hint: Any) -> Tuple[Any, TypeGuard[List]]:
     return hint, False
 
 
-def extract_optional(hint: Any) -> Tuple[Any, bool]:
+def extract_optional(hint: Any) -> tuple[Any, bool]:
     """Extract a possible optional flag."""
     if get_origin(hint) is Union:
         cleaned_args = tuple(arg for arg in get_args(hint) if arg is not NoneType)

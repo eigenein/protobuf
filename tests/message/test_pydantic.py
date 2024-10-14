@@ -1,8 +1,7 @@
 from io import BytesIO
-from typing import ClassVar, Optional
+from typing import Annotated, ClassVar, Optional
 
 from pydantic import BaseModel
-from typing_extensions import Annotated
 
 from pure_protobuf.annotations import Field, ZigZagInt
 from pure_protobuf.message import BaseMessage

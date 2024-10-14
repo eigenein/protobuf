@@ -1,4 +1,5 @@
-from typing import Generic, Iterable, List, Optional, Type
+from collections.abc import Iterable
+from typing import Generic, Optional
 
 from pure_protobuf.interfaces._repr import ReprWithInner
 from pure_protobuf.interfaces._vars import MessageT, RecordT
@@ -21,12 +22,12 @@ class AccumulateLastOneWins(Accumulate[RecordT, RecordT], Generic[RecordT]):
         return accumulator
 
 
-class AccumulateAppend(Accumulate[List[RecordT], RecordT]):
+class AccumulateAppend(Accumulate[list[RecordT], RecordT]):
     def __call__(
         self,
-        accumulator: Optional[List[RecordT]],
+        accumulator: Optional[list[RecordT]],
         other: Iterable[RecordT],
-    ) -> List[RecordT]:
+    ) -> list[RecordT]:
         """Append all items from the `other` into the accumulator."""
         if accumulator is None:
             accumulator = []
@@ -35,12 +36,12 @@ class AccumulateAppend(Accumulate[List[RecordT], RecordT]):
 
 
 class AccumulateMessages(Accumulate[MessageT, MessageT], ReprWithInner):
-    inner: Type[MessageT]
+    inner: type[MessageT]
 
     __slots__ = ("inner",)
 
     # noinspection PyProtocol
-    def __init__(self, inner: Type[MessageT]) -> None:
+    def __init__(self, inner: type[MessageT]) -> None:
         self.inner = inner
 
     def __call__(self, lhs: Optional[MessageT], rhs: Iterable[MessageT]) -> MessageT:

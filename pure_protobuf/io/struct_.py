@@ -1,5 +1,6 @@
+from collections.abc import Iterator
 from struct import Struct
-from typing import IO, Generic, Iterator
+from typing import IO, Generic
 
 from pure_protobuf.helpers.io import read_checked
 from pure_protobuf.interfaces._repr import ReprWithInner

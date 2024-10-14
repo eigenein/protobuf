@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Generic, List, MutableMapping, Optional, Tuple, Type, TypeVar
+from collections.abc import MutableMapping
+from typing import Any, Callable, Generic, Optional, TypeVar
 
 from pure_protobuf.message import BaseMessage
 
@@ -22,7 +23,7 @@ class OneOf(Generic[OneOfT]):
         A [`Field`][pure_protobuf.annotations.Field] then should be assigned to the group
         via the [`one_of`][pure_protobuf.annotations.Field.one_of] parameter.
         """
-        self._fields: List[Tuple[int, str]] = []
+        self._fields: list[tuple[int, str]] = []
 
     def _add_field(self, number: int, name: str) -> None:
         self._fields.append((number, name))
@@ -41,7 +42,7 @@ class OneOf(Generic[OneOfT]):
             if other_number != keep_number:
                 super(BaseMessage, message).__setattr__(other_name, None)
 
-    def __get__(self, instance: Any, type_: Type[Any]) -> Optional[OneOfT]:  # noqa: D105
+    def __get__(self, instance: Any, type_: type[Any]) -> Optional[OneOfT]:  # noqa: D105
         if not isinstance(instance, BaseMessage):
             # Allows passing the descriptor by reference, and we need to move the descriptor from
             # the corresponding annotation.

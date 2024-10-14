@@ -1,5 +1,6 @@
 from abc import abstractmethod
-from typing import IO, Iterator, Protocol
+from collections.abc import Iterator
+from typing import IO, Protocol
 
 from pure_protobuf.interfaces._repr import Repr
 from pure_protobuf.interfaces._vars import RecordT_co

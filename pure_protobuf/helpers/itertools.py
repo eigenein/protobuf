@@ -1,4 +1,5 @@
-from typing import Callable, Generic, Iterator, TypeVar
+from collections.abc import Iterator
+from typing import Callable, Generic, TypeVar
 
 from typing_extensions import ParamSpec
 

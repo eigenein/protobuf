@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Any, Tuple
+from typing import Any
 from urllib.parse import ParseResult
 
 from pytest import mark, raises
@@ -18,7 +18,7 @@ from pure_protobuf.message import BaseMessage
 @mark.parametrize(
     "inner_hint",
     [
-        Tuple[int, str],
+        tuple[int, str],
     ],
 )
 def test_from_inner_hint_unsupported(inner_hint: Any) -> None:

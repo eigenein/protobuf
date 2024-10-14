@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from abc import ABC
+from collections.abc import Mapping
 from io import BytesIO
-from typing import IO, Any, ClassVar, Dict, Tuple
+from typing import IO, Any, ClassVar
 
 from typing_extensions import Self
 
@@ -36,10 +37,10 @@ class BaseMessage(ABC):
 
     __slots__ = ()
 
-    __PROTOBUF_FIELDS_BY_NUMBER__: ClassVar[Dict[int, Tuple[str, _FieldDescriptor]]]
-    __PROTOBUF_FIELDS_BY_NAME__: ClassVar[Dict[str, _FieldDescriptor]]
+    __PROTOBUF_FIELDS_BY_NUMBER__: ClassVar[dict[int, tuple[str, _FieldDescriptor]]]
+    __PROTOBUF_FIELDS_BY_NAME__: ClassVar[dict[str, _FieldDescriptor]]
 
-    __PROTOBUF_SKIP__: ClassVar[Dict[WireType, Skip]] = {
+    __PROTOBUF_SKIP__: ClassVar[Mapping[WireType, Skip]] = {
         WireType.VARINT: skip_varint,
         WireType.I64: skip_fixed_64,
         WireType.LEN: skip_bytes,
@@ -53,7 +54,7 @@ class BaseMessage(ABC):
         cls.__PROTOBUF_FIELDS_BY_NUMBER__ = {}
         cls.__PROTOBUF_FIELDS_BY_NAME__ = {}
 
-        type_hints: Dict[str, Any] = get_annotations(cls, eval_str=True)
+        type_hints: dict[str, Any] = get_annotations(cls, eval_str=True)
         for name, hint in type_hints.items():
             descriptor = _FieldDescriptor.from_attribute(cls, hint)
             if descriptor is not None:
@@ -67,7 +68,7 @@ class BaseMessage(ABC):
     def read_from(cls, io: IO[bytes]) -> Self:
         """Read a message from the file."""
 
-        values: Dict[str, Any] = {}
+        values: dict[str, Any] = {}
         while True:
             try:
                 tag = Tag.read_from(io)

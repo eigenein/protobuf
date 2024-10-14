@@ -1,5 +1,6 @@
+from collections.abc import Iterable, Iterator
 from io import BytesIO
-from typing import IO, Generic, Iterable, Iterator, Optional, cast
+from typing import IO, Generic, Optional, cast
 
 from pure_protobuf.exceptions import UnexpectedWireTypeError
 from pure_protobuf.interfaces._repr import ReprWithInner

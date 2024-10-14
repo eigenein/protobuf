@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Generic, Optional, Type, cast
+from typing import TYPE_CHECKING, Annotated, Any, Generic, Optional, cast
 
-from typing_extensions import Annotated
 from typing_extensions import get_args as get_type_args
 from typing_extensions import get_origin as get_type_origin
 
@@ -64,7 +63,7 @@ class _FieldDescriptor(Generic[FieldT, RecordT]):
     @classmethod
     def from_attribute(
         cls,
-        message_type: Type[BaseMessage],
+        message_type: type[BaseMessage],
         attribute_hint: Any,
     ) -> Optional[_FieldDescriptor[Any, Any]]:
         """

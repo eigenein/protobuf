@@ -1,4 +1,5 @@
-from typing import Any, Iterable, List, Optional, Union
+from collections.abc import Iterable
+from typing import Any, Optional, Union
 
 from pytest import mark
 
@@ -21,7 +22,7 @@ def test_extract_optional(hint: Any, expected_flag: bool, expected_inner: Any) -
     ("hint", "expected_flag", "expected_inner"),
     [
         (int, False, int),
-        (List[int], True, int),
+        (list[int], True, int),
         (Iterable[int], True, int),
     ],
 )

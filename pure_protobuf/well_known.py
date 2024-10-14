@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from io import BytesIO
-from typing import Any, Mapping, Optional, Type, cast
+from typing import Annotated, Any, Optional, cast
 from urllib.parse import ParseResult
-
-from typing_extensions import Annotated
 
 from pure_protobuf.annotations import Field
 from pure_protobuf.helpers._dataclasses import KW_ONLY, SLOTS
@@ -112,5 +111,5 @@ class Any_:  # noqa: N801
             locals=locals_,
             globals=globals_,
         )
-        class_ = cast(Type[BaseMessage], getattr(module, self.type_url.path))
+        class_ = cast(type[BaseMessage], getattr(module, self.type_url.path))
         return class_.read_from(BytesIO(self.value))

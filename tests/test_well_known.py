@@ -1,7 +1,6 @@
 from dataclasses import dataclass
+from typing import Annotated
 from urllib.parse import urlunparse
-
-from typing_extensions import Annotated
 
 from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage

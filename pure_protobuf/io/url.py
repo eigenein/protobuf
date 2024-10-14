@@ -1,6 +1,7 @@
 """Reading and writing parsed URLs."""
 
-from typing import IO, Iterator
+from collections.abc import Iterator
+from typing import IO
 from urllib.parse import ParseResult, urlparse, urlunparse
 
 from pure_protobuf.interfaces.read import Read

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import ByteString, Mapping
 from dataclasses import dataclass
 from enum import IntEnum
 from types import GenericAlias
@@ -71,7 +70,7 @@ class RecordDescriptor(Generic[RecordT]):
     merge: Merge[RecordT] = MergeLastOneWins()
     """Merge two values of the same field from different messages. Only called in a message merger."""
 
-    __PREDEFINED__: ClassVar[Mapping[Any, RecordDescriptor]]
+    __PREDEFINED__: ClassVar[dict[Any, RecordDescriptor]]
     """Pre-defined descriptors for primitive types."""
 
     @classmethod
@@ -176,7 +175,6 @@ RecordDescriptor.__PREDEFINED__ = {
     bool: BOOL_DESCRIPTOR,
     bytes: BYTES_DESCRIPTOR,
     bytearray: BYTES_DESCRIPTOR,
-    ByteString: BYTES_DESCRIPTOR,
     fixed32: UNSIGNED_INT32_DESCRIPTOR,
     fixed64: UNSIGNED_INT64_DESCRIPTOR,
     float: FLOAT_DESCRIPTOR,
@@ -206,3 +204,10 @@ RecordDescriptor.__PREDEFINED__ = {
         read=ReadMaybePacked[int](ReadCallback(ReadZigZagVarint()), WireType.VARINT),
     ),
 }
+
+try:
+    from collections.abc import ByteString
+except ImportError:
+    pass
+else:
+    RecordDescriptor.__PREDEFINED__[ByteString] = BYTES_DESCRIPTOR

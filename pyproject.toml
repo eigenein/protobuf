@@ -95,7 +95,7 @@ exclude_lines = [
 
 [tool.black]
 line-length = 120
-target-version = ["py39", "py310", "py311", "py312", "py313"]
+target-version = ["py39", "py310", "py311", "py312", "py313", "py314"]
 
 [tool.ruff]
 line-length = 120
@@ -148,9 +148,7 @@ ignore = [
     "PT013",
     "RET505",
     "TRY003",
-    "UP006",  # 3.9
     "UP007",  # 3.10
-    "UP033",  # 3.9
 ]
 
 [tool.ruff.lint.per-file-ignores]

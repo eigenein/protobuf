@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from typing import ClassVar, Optional
-
-from typing_extensions import Annotated
+from typing import Annotated, ClassVar, Optional
 
 from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Optional
+from typing import Annotated, Optional
 
-from typing_extensions import Annotated, Self
+from typing_extensions import Self
 
 from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage

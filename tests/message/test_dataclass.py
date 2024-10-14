@@ -1,7 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
-
-from typing_extensions import Annotated
+from typing import Annotated, Optional
 
 from pure_protobuf.annotations import Field, ZigZagInt, uint
 from pure_protobuf.message import BaseMessage
@@ -94,7 +92,7 @@ def test_merge_embedded_messages_repeated() -> None:
 
     @dataclass
     class Inner(BaseMessage):
-        foo: Annotated[Optional[List[int]], Field(1, packed=False)] = field(default=None)
+        foo: Annotated[Optional[list[int]], Field(1, packed=False)] = field(default=None)
 
     @dataclass
     class Outer(BaseMessage):
@@ -146,7 +144,7 @@ def test_read_unpacked_repeated_as_packed() -> None:
 
     @dataclass
     class Test(BaseMessage):
-        foo: Annotated[List[int], Field(1, packed=True)]
+        foo: Annotated[list[int], Field(1, packed=True)]
 
     assert Test.loads(b"\x08\x01\x08\x02") == Test(foo=[1, 2])
 
@@ -162,7 +160,7 @@ def test_read_packed_repeated_as_unpacked() -> None:
 
     @dataclass
     class Test(BaseMessage):
-        foo: Annotated[List[int], Field(1, packed=False)]
+        foo: Annotated[list[int], Field(1, packed=False)]
 
     assert Test.loads(b"\x0a\x04\x01\x96\x01\x02") == Test(
         foo=[1, 150, 2],
@@ -176,7 +174,7 @@ def test_repeated_embedded_message() -> None:
 
     @dataclass
     class Parent(BaseMessage):
-        children: Annotated[List[Child], Field(1)]
+        children: Annotated[list[Child], Field(1)]
 
     message = Parent(children=[Child(payload=42), Child(payload=43)])
     encoded = bytes(message)
@@ -219,7 +217,7 @@ def test_concatenated_packed_repeated() -> None:
 
     @dataclass
     class Message(BaseMessage):
-        field: Annotated[List[int], Field(1, packed=True)]
+        field: Annotated[list[int], Field(1, packed=True)]
 
     part_1 = bytes(Message(field=[42, 43]))
     part_2 = bytes(Message(field=[100500, 100501]))

@@ -6,10 +6,11 @@ See Also:
 
 """
 
+from collections.abc import Iterator
 from enum import IntEnum
 from itertools import count
 from sys import byteorder
-from typing import IO, Iterator, Type, TypeVar
+from typing import IO, TypeVar
 
 from pure_protobuf.exceptions import IncorrectValueError
 from pure_protobuf.helpers.io import read_byte_checked
@@ -127,7 +128,7 @@ class ReadEnum(Read[EnumT]):
     __slots__ = ("enum_type",)
 
     # noinspection PyProtocol
-    def __init__(self, enum_type: Type[EnumT]) -> None:
+    def __init__(self, enum_type: type[EnumT]) -> None:
         self.enum_type = enum_type
 
     def __call__(self, io: IO[bytes]) -> Iterator[EnumT]:

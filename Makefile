@@ -13,7 +13,7 @@ clean:
 
 .PHONY: install
 install:
-	poetry install --all-extras --with=dev
+	poetry install --sync --all-extras --with=dev
 
 .PHONY: lint
 lint: lint/ruff lint/mypy

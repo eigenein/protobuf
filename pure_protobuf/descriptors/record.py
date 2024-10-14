@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import ByteString, Mapping
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, ByteString, ClassVar, Dict, Generic, Type
+from types import GenericAlias
+from typing import TYPE_CHECKING, Any, ClassVar, Generic
 from urllib.parse import ParseResult
 
 from typing_extensions import Self
@@ -69,13 +71,13 @@ class RecordDescriptor(Generic[RecordT]):
     merge: Merge[RecordT] = MergeLastOneWins()
     """Merge two values of the same field from different messages. Only called in a message merger."""
 
-    __PREDEFINED__: ClassVar[Dict[Any, RecordDescriptor]]
+    __PREDEFINED__: ClassVar[Mapping[Any, RecordDescriptor]]
     """Pre-defined descriptors for primitive types."""
 
     @classmethod
     def _from_inner_type_hint(
         cls,
-        message_type: Type[BaseMessage],
+        message_type: type[BaseMessage],
         inner_hint: Any,
     ) -> RecordDescriptor[Any]:
         """
@@ -115,7 +117,10 @@ class RecordDescriptor(Generic[RecordT]):
                     write=WriteEnum[inner_hint](),
                     read=ReadMaybePacked[inner_hint](ReadEnum(inner_hint), WireType.VARINT),
                 )
-            if issubclass(inner_hint, BaseMessage):
+            if (
+                not isinstance(inner_hint, GenericAlias)  # TODO: remove with Python 3.9 end-of-life.
+                and issubclass(inner_hint, BaseMessage)
+            ):
                 return inner_hint._init_embedded_descriptor()
 
         raise UnsupportedAnnotationError(f"type annotation `{inner_hint!r}` is not supported")

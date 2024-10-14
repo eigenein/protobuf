@@ -1,8 +1,7 @@
 from math import modf
-from typing import Tuple
 
 
-def split_seconds(seconds: float) -> Tuple[int, int]:
+def split_seconds(seconds: float) -> tuple[int, int]:
     """Split seconds into whole seconds and nanoseconds."""
     fraction, whole = modf(seconds)
     return int(whole), int(fraction * 1_000_000_000.0)

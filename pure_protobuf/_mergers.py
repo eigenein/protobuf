@@ -1,4 +1,4 @@
-from typing import Generic, List, Optional
+from typing import Generic, Optional
 
 from pure_protobuf._accumulators import AccumulateMessages
 from pure_protobuf.interfaces._repr import ReprWithInner
@@ -18,12 +18,12 @@ class MergeLastOneWins(Merge[FieldT], Generic[FieldT]):
         return rhs
 
 
-class MergeConcatenate(Merge[List[RecordT]], Generic[RecordT]):
+class MergeConcatenate(Merge[list[RecordT]], Generic[RecordT]):
     def __call__(
         self,
-        lhs: Optional[List[RecordT]],
-        rhs: Optional[List[RecordT]],
-    ) -> Optional[List[RecordT]]:
+        lhs: Optional[list[RecordT]],
+        rhs: Optional[list[RecordT]],
+    ) -> Optional[list[RecordT]]:
         if lhs is None:
             return rhs
         if rhs is None:

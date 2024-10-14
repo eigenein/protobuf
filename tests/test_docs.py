@@ -1,10 +1,11 @@
 """Tests code snippets in the `README.md` and `docs`."""
 
 import re
+from collections.abc import Iterator
 from itertools import chain
 from pathlib import Path
 from textwrap import dedent
-from typing import Iterator, NamedTuple
+from typing import NamedTuple
 
 from pytest import mark, param
 

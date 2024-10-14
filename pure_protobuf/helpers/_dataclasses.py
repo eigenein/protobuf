@@ -1,4 +1,4 @@
-"""Backwards compatibility for Python 3.8 and 3.9."""
+"""Backwards compatibility with Python 3.9."""
 
 from sys import version_info
 

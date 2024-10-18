@@ -55,7 +55,7 @@ pydantic = "2.9.2"
 pytest = "8.3.3"
 pytest-benchmark = "4.0.0"
 pytest-cov = "5.0.0"
-ruff = "0.6.9"
+ruff = "0.7.0"
 
 [tool.poetry.urls]
 "Changelog" = "https://github.com/eigenein/protobuf/blob/master/CHANGELOG.md"

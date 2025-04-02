@@ -2,7 +2,7 @@
 
 from collections.abc import Iterator
 from typing import IO
-from urllib.parse import ParseResult, urlparse, urlunparse
+from urllib.parse import ParseResult, urlparse
 
 from pure_protobuf.interfaces.read import Read
 from pure_protobuf.interfaces.write import Write
@@ -20,4 +20,4 @@ class WriteUrl(Write[ParseResult]):
     __slots__ = ()
 
     def __call__(self, value: ParseResult, io: IO[bytes]) -> None:
-        write_string(urlunparse(value), io)
+        write_string(value.geturl(), io)

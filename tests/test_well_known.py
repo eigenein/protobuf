@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Annotated
-from urllib.parse import urlunparse
 
 from pure_protobuf.annotations import Field
 from pure_protobuf.message import BaseMessage
@@ -15,5 +14,7 @@ class ChildMessage(BaseMessage):
 def test_child() -> None:
     child = ChildMessage(foo=42)
     any_ = Any_.from_message(child)
-    assert urlunparse(any_.type_url) == "import://tests.test_well_known/ChildMessage"
+    assert any_.type_url.scheme == "import"
+    assert any_.type_url.hostname == "tests.test_well_known"
+    assert any_.type_url.path == "/ChildMessage"
     assert any_.into_message() == child

@@ -61,7 +61,7 @@ class Duration(_TimeSpan):
 
 
 @dataclass(**KW_ONLY, **SLOTS)
-class Any_:  # noqa: N801
+class Any_(BaseMessage):  # noqa: N801
     """
     Well-known `Any` type.
 
@@ -81,7 +81,7 @@ class Any_:  # noqa: N801
             type_url=ParseResult(
                 scheme="import",
                 netloc=message.__module__,
-                path=type(message).__qualname__,
+                path=f"/{type(message).__qualname__}",
                 params="",
                 query="",
                 fragment="",
@@ -111,5 +111,6 @@ class Any_:  # noqa: N801
             locals=locals_,
             globals=globals_,
         )
-        class_ = cast(type[BaseMessage], getattr(module, self.type_url.path))
+        _, name = self.type_url.path.rsplit("/", maxsplit=1)
+        class_ = cast(type[BaseMessage], getattr(module, name))
         return class_.read_from(BytesIO(self.value))

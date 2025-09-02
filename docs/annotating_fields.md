@@ -84,6 +84,8 @@ assert bytes(Message(foo=[1, 2])) == b"\x08\x01\x08\x02"
 
 Required fields are [deprecated](https://developers.google.com/protocol-buffers/docs/style#things_to_avoid) in `proto2` and not supported in `proto3`, thus in `pure-protobuf` fields are always optional. `#!python Optional` annotation is accepted for type hinting, but has no functional meaning for `#!python BaseMessage`.
 
+Both traditional `#!python Optional[T]` and modern Python 3.10+ union syntax `#!python T | None` are supported and work identically.
+
 ## Default values
 
 In `pure-protobuf` it's developer's responsibility to take care of default values. If encoded message does not contain a particular element, the corresponding field stays unprovided:

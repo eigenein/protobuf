@@ -8,6 +8,13 @@ try:
 except ImportError:
     NoneType = type(None)  # type: ignore
 
+try:
+    from types import UnionType  # type: ignore
+
+    UNION_TYPES = (Union, UnionType)
+except ImportError:
+    UNION_TYPES = (Union,)  # type: ignore
+
 
 class Sentinel:  # pragma: no cover
     """Sentinel object used for defaults."""
@@ -32,7 +39,7 @@ def extract_repeated(hint: Any) -> tuple[Any, TypeGuard[list]]:
 
 def extract_optional(hint: Any) -> tuple[Any, bool]:
     """Extract a possible optional flag."""
-    if get_origin(hint) is Union:
+    if get_origin(hint) in UNION_TYPES:
         cleaned_args = tuple(arg for arg in get_args(hint) if arg is not NoneType)
         return Union[cleaned_args], True
     return hint, False

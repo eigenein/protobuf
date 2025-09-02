@@ -1,3 +1,4 @@
+import sys
 from collections.abc import Iterable
 from typing import Any, Optional, Union
 
@@ -28,3 +29,9 @@ def test_extract_optional(hint: Any, expected_flag: bool, expected_inner: Any) -
 )
 def test_extract_repeated(hint: Any, expected_flag: bool, expected_inner: Any) -> None:
     assert extract_repeated(hint) == (expected_inner, expected_flag)
+
+
+@mark.skipif(sys.version_info < (3, 10), reason="Union syntax requires Python 3.10+")
+def test_extract_optional_union_syntax() -> None:
+    assert extract_optional(int | None) == (int, True)  # type: ignore
+    assert extract_optional(str | None) == (str, True)  # type: ignore

@@ -28,7 +28,7 @@ jobs:
             .cache
             .venv
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         name: "📥 Checkout"
         with:
           fetch-depth: 0
